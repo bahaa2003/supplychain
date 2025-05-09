@@ -3,13 +3,16 @@ import bcrypt from "bcrypt";
 import { userModel } from "../models/User.js";
 import { catchError } from "../middleware/catchError.js";
 import { AppError } from "../utils/AppError.js";
+import { sendEmail } from './../emails/user.email.js';
 
 export const signUp = catchError(async (req, res, next) => {
+  let { email } = req.body;
   let isFound = await userModel.findOne({ email: req.body.email });
   if (isFound) return next(new AppError("email already in use", 409));
 
   let user = new userModel(req.body);
   await user.save();
+  sendEmail({ email });
   res.json({ message: "success", user });
 });
 
@@ -17,6 +20,7 @@ export const signIn = catchError(async (req, res, next) => {
   const { password, email } = req.body;
   const isFound = await userModel.findOne({ email });
   const match = await bcrypt.compare(password, isFound.password);
+  if(!isFound.isVerified) return next(new AppError("Please verify your email first", 401));
   if (isFound && match) {
     let token = jwt.sign(
       { name: isFound.name, userId: isFound._id, role: isFound.role },
@@ -26,6 +30,17 @@ export const signIn = catchError(async (req, res, next) => {
   }
   next(new AppError("email or password not found", 401));
 });
+
+export const verify = async (req, res) => {
+  const { token } = req.params;
+
+  jwt.verify(token, process.env.JWT_KEY2, async (err, decoded) => {
+    if (err) return res.status(400).json({ message: "Invalid or expired token" });
+
+    await userModel.findOneAndUpdate({ email: decoded.email }, { isVerified: true });
+    res.redirect("http://localhost:3000/");
+  });
+};
 
 export const protectedRouts = catchError(async (req, res, next) => {
   const { token } = req.headers;
