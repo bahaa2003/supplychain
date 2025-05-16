@@ -1,24 +1,26 @@
-import express from 'express';
-import morgan from 'morgan';
-import { AppError } from './utils/AppError.js';
-import { globalErrorHandler } from './middleware/errorMiddleware.js';
-import authRouter from './routes/auth.router.js';
+import express from "express";
+import dotenv from "dotenv";
+import authRoutes from "./routes/auth.routes.js";
+import teamRoutes from "./routes/team.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+import { securityMiddleware } from "./middleware/security.middleware.js";
+import { globalErrorHandler } from "./middleware/globalErrorHandler.js";
+
+dotenv.config();
 
 const app = express();
 
 app.use(express.json());
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
+// Security middlewares (helmet, cors, rate limiting, etc)
+securityMiddleware(app);
 
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
-app.use("/api/v1/auth", authRouter);
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/team", teamRoutes);
+app.use("/api/admin", adminRoutes);
+
+// Global error handler
 app.use(globalErrorHandler);
-
-app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
-
 
 export default app;
