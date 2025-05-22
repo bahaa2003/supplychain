@@ -8,16 +8,22 @@ import { confirm2FALogin } from "../controllers/auth/confirm2faLogin.controller.
 import { forgotPassword } from "../controllers/auth/forgotPassword.controller.js";
 import { resetPassword } from "../controllers/auth/resetPassword.controller.js";
 import { catchError } from "../utils/catchError.js";
+import { protectedRoute } from "../middleware/auth.middleware.js";
+import { completeRegistration } from "../controllers/auth/completeRegistration.controller.js";
 
 const router = express.Router();
 
 router.post("/register", catchError(register));
 router.post("/login", catchError(login));
-router.post("/logout", logout);
-router.post("/enable-2fa", catchError(enable2FA));
-router.post("/verify-2fa", catchError(verify2FA));
+router.post("/logout", protectedRoute, catchError(logout));
+
+router.post("/enable-2fa", protectedRoute, catchError(enable2FA));
+router.post("/verify-2fa", protectedRoute, catchError(verify2FA));
 router.post("/confirm-2fa-login", catchError(confirm2FALogin));
+
 router.post("/forgot-password", catchError(forgotPassword));
 router.post("/reset-password", catchError(resetPassword));
+
+router.patch("/complete-registration", catchError(completeRegistration));
 
 export default router;
