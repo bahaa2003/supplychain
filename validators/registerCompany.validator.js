@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export function registerCompanyValidator() {
+export const registerCompanyValidator = () => {
   return [
     body("name")
       .notEmpty()
@@ -19,4 +19,4 @@ export function registerCompanyValidator() {
     body("email").isEmail().withMessage("Enter a valid email"),
     // body("mobile").isMobilePhone("ar-EG").withMessage("Not a phone number"),
   ];
-}
+};
