@@ -1,5 +1,7 @@
 import express from "express";
 import { register } from "../controllers/auth/register.controller.js";
+import { verifyEmail } from "../controllers/auth/verifyEmail.controller.js";
+import { resendVerificationEmail } from "../controllers/auth/resendVerificationEmail.controller.js";
 import { login } from "../controllers/auth/login.controller.js";
 import { logout } from "../controllers/auth/logout.controller.js";
 import { enable2FA } from "../controllers/auth/enable2fa.controller.js";
@@ -32,5 +34,11 @@ router.post("/forgot-password", catchError(forgotPassword));
 router.post("/reset-password", catchError(resetPassword));
 
 router.patch("/complete-registration", catchError(completeRegistration));
+router.get("/verify/:token", catchError(verifyEmail));
+router.get(
+  "/resend-verification",
+  protectedRoute,
+  catchError(resendVerificationEmail)
+);
 
 export default router;

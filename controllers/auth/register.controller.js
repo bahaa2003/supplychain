@@ -1,7 +1,7 @@
 import User from "../../models/User.js";
 import Company from "../../models/Company.js";
 import { AppError } from "../../utils/AppError.js";
-
+import { sendValidEmail } from "../../utils/email.js";
 import { generateToken } from "../../utils/generateToken.js";
 
 export const register = async (req, res, next) => {
@@ -33,7 +33,9 @@ export const register = async (req, res, next) => {
   });
 
   company.createdBy = user._id;
+  await sendValidEmail(email);
   await company.save();
+  await user.save();
 
   const token = generateToken(user);
 

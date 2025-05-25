@@ -23,8 +23,8 @@ export const protectedRoute = catchError(async (req, res, next) => {
       );
   }
 
-  if (user.company && !user.company.isApproved)
-    return next(new AppError("Your company is awaiting admin approval", 403));
+  // if (user.company && !user.company.isApproved)
+  //   return next(new AppError("Your company is awaiting admin approval", 403));
 
   req.user = user;
   req.decoded = decoded;
