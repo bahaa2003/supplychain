@@ -1,20 +1,23 @@
-import Company from '../../models/Company.js';
-import User from '../../models/User.js';
+import Company from "../../models/Company.js";
 
 export const getPendingCompanies = async (req, res, next) => {
-  // Get all pending companies
-  const companies = await Company.find({ isApproved: false }).lean();
-  // Filter companies by checking for an admin user with verified email
-  const filteredCompanies = [];
-  for (const company of companies) {
-    const hasVerifiedAdmin = await User.exists({ company: company._id, role: 'admin', isEmailVerified: true });
-    if (hasVerifiedAdmin) {
-      filteredCompanies.push(company);
-    }
+  const companies = await Company.find(
+    { isApproved: false },
+    { __v: false }
+  ).populate("createdBy", "name email isEmailVerified");
+  console.log("Pending companies:", companies);
+  const activeuser = companies.filter(
+    (company) => company.createdBy && company.createdBy.isEmailVerified
+  );
+  if (activeuser.length === 0) {
+    return res.status(404).json({
+      status: "fail",
+      message: "No pending companies found.",
+    });
   }
   res.status(200).json({
-    status: 'success',
-    results: filteredCompanies.length,
-    data: filteredCompanies
+    status: "success",
+    results: companies.length,
+    data: activeuser,
   });
 };
