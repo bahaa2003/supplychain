@@ -5,7 +5,6 @@ export const getPendingCompanies = async (req, res, next) => {
     { isApproved: false },
     { __v: false }
   ).populate("createdBy", "name email isEmailVerified");
-  console.log("Pending companies:", companies);
   const activeuser = companies.filter(
     (company) => company.createdBy && company.createdBy.isEmailVerified
   );
@@ -17,7 +16,6 @@ export const getPendingCompanies = async (req, res, next) => {
   }
   res.status(200).json({
     status: "success",
-    results: companies.length,
     data: activeuser,
   });
 };

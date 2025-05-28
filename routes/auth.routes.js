@@ -12,14 +12,15 @@ import { resetPassword } from "../controllers/auth/resetPassword.controller.js";
 import { catchError } from "../utils/catchError.js";
 import { protectedRoute } from "../middleware/auth.middleware.js";
 import { completeRegistration } from "../controllers/auth/completeRegistration.controller.js";
-import { registerCompanyValidator } from "../validators/registerCompany.validator.js";
-
+import { companyValidator } from "../validators/company.validator.js";
+import { userValidator } from "../validators/user.validator.js";
 import { validationExecution } from "../middleware/validation.middleware.js";
 const router = express.Router();
 
 router.post(
   "/register",
-  registerCompanyValidator(),
+  userValidator(),
+  companyValidator(),
   validationExecution,
   catchError(register)
 );
