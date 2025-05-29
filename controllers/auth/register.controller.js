@@ -1,24 +1,18 @@
-import User from '../../models/User.js';
-import Company from '../../models/Company.js';
-import jwt from 'jsonwebtoken';
-import { AppError } from '../../utils/AppError.js';
-
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, role: user.role, companyId: user.company },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-};
+import User from "../../models/User.js";
+import Company from "../../models/Company.js";
+import { AppError } from "../../utils/AppError.js";
+import { sendValidEmail } from "../../utils/email.js";
+import { generateToken } from "../../utils/generateToken.js";
 
 export const register = async (req, res, next) => {
-  const { name, email, password, companyName, industry, size, location } = req.body;
+  const { name, email, password, companyName, industry, size, location } =
+    req.body;
 
   const existingUser = await User.findOne({ email });
-  if (existingUser) throw new AppError('Email already registered', 400);
+  if (existingUser) throw new AppError("Email already registered", 400);
 
   const existingCompany = await Company.findOne({ name: companyName });
-  if (existingCompany) throw new AppError('Company name already taken', 400);
+  if (existingCompany) throw new AppError("Company name already taken", 400);
 
   const company = await Company.create({
     name: companyName,
@@ -33,19 +27,21 @@ export const register = async (req, res, next) => {
     name,
     email,
     password,
-    role: 'admin',
+    role: "admin",
     company: company._id,
     isEmailVerified: false,
   });
 
   company.createdBy = user._id;
+  await sendValidEmail(email);
   await company.save();
+  await user.save();
 
   const token = generateToken(user);
 
   res.status(201).json({
-    status: 'success',
-    message: 'Company registered. Waiting for approval.',
+    status: "success",
+    message: "Company registered. Waiting for approval.",
     token,
   });
 };
