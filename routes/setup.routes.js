@@ -4,6 +4,6 @@ import { catchError } from "../utils/catchError.js";
 
 const router = express.Router();
 
-// router.post('/create-platform-admin', catchError(createPlatformAdmin));
+router.post('/create-platform-admin', catchError(createPlatformAdmin));
 
 export default router;
