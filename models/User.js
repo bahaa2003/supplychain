@@ -1,35 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-<<<<<<< HEAD
-const userSchema = new mongoose.Schema({
-  name: {
-  type: String,
-  required: function () {
-    return this.status !== 'invited';
-  }
-},
-  email: { type: String, required: true, unique: true },
-  password: {
-  type: String,
-  required: function () {
-    return this.status !== 'invited';
-  }
-},
-  role: { type: String, enum: ['admin', 'manager', 'staff', 'platform_admin'], default: 'staff' },
-  company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: function() {
-    return this.role !== 'platform_admin';
-  }},
-  isEmailVerified: { type: Boolean, default: false },
-  twoFactorEnabled: { type: Boolean, default: false },
-  twoFactorSecret: { type: String },
-  status: { type: String, enum: ['active', 'invited'], default: 'active' },
-  inviteToken: { type: String },
-  passwordResetToken: { type: String },
-  passwordResetExpires: { type: Date },
-  passwordChangeAt: { type: Date },
-}, { timestamps: true });
-=======
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -77,7 +48,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
->>>>>>> 369a731a8212c2c1c052fedf30514a882eb23c14
 
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
