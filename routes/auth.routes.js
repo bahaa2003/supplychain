@@ -8,14 +8,12 @@ import { confirm2FALogin } from "../controllers/auth/confirm2faLogin.controller.
 import { forgotPassword } from "../controllers/auth/forgotPassword.controller.js";
 import { resetPassword } from "../controllers/auth/resetPassword.controller.js";
 import { catchError } from "../utils/catchError.js";
-<<<<<<< HEAD
+
 import { protectedRoute } from "../middleware/auth.middleware.js";
 import { completeRegistration } from "../controllers/auth/completeRegistration.controller.js";
 
-=======
 import { registerCompanyValidator } from "../validator/registerCompanyValidator.js";
 import { validationExecution } from "../middleware/validationExecution.js";
->>>>>>> f441723f2ad2bdd576148cc80a3b23ff8fffe10a
 const router = express.Router();
 
 router.post(
