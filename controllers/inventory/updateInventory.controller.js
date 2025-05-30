@@ -1,5 +1,5 @@
-import Inventory from "../../models/Inventory";
-import { AppError } from "../../utils/AppError";
+import Inventory from "../../models/Inventory.js";
+import { AppError } from "../../utils/AppError.js";
 
 // Update inventory item (only if it belongs to the user's company)
 

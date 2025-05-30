@@ -1,5 +1,5 @@
-import Inventory from "../../models/Inventory";
-import { AppError } from "../../utils/AppError";
+import Inventory from "../../models/Inventory.js";
+import { AppError } from "../../utils/AppError.js";
 
 // Get inventory by ID (only if it belongs to the user's company)
 

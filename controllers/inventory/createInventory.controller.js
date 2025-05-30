@@ -1,4 +1,4 @@
-import Inventory from "../../models/Inventory";
+import Inventory from "../../models/Inventory.js";
 
 // Create new inventory item (for the user's company only)
 

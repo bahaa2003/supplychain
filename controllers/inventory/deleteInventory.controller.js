@@ -1,6 +1,5 @@
-import Inventory from "../../models/Inventory";
-import { AppError } from "../../utils/AppError";
-
+import Inventory from "../../models/Inventory.js";
+import { AppError } from "../../utils/AppError.js";
 // Delete inventory item (only if it belongs to the user's company)
 
 export const deleteInventory = async (req, res, next) => {
