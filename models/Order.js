@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { orderStatusEnum } from "../enums/orderStatus.enum.js";
+import { paymentStatusEnum } from "../enums/paymentStatus.enum.js";
 const { Schema } = mongoose;
 
 const orderSchema = new Schema(
@@ -102,7 +103,7 @@ const orderSchema = new Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["Pending", "Partial", "Paid", "Overdue"],
+      enum: paymentStatusEnum,
       default: "Pending",
     },
     tags: [

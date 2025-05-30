@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
+import { inventoryStatusEnum } from "../enums/inventoryStatus.enum.js";
 // Inventory model for managing product stock levels across different locations
-
 const inventorySchema = new Schema(
   {
     product: {
@@ -56,7 +56,8 @@ const inventorySchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["In Stock", "Low Stock", "Out of Stock", "Discontinued"],
+      enum: inventoryStatusEnum,
+      required: true,
       default: "In Stock",
     },
   },
