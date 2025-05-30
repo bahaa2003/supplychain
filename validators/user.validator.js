@@ -1,5 +1,6 @@
 import { body } from "express-validator";
 import mongoose from "mongoose";
+import { roleEnum } from "../enums/role.enum.js";
 
 export const userValidator = () => [
   body("name")
@@ -13,10 +14,7 @@ export const userValidator = () => [
   body("password")
     .isLength({ min: 8, max: 100 })
     .withMessage("Password must be between 8 and 100 characters"),
-  body("role")
-    .optional()
-    .isIn(["admin", "manager", "staff", "platform_admin"])
-    .withMessage("Invalid role"),
+  body("role").optional().isIn(roleEnum).withMessage("Invalid role"),
   body("company")
     .optional()
     .custom((value) => {

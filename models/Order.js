@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { orderStatusEnum } from "../enums/orderStatus.enum.js";
 const { Schema } = mongoose;
 
 const orderSchema = new Schema(
@@ -29,17 +30,7 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: [
-        "Draft",
-        "Submitted",
-        "Approved",
-        "In Production",
-        "Ready for Shipment",
-        "Shipped",
-        "Delivered",
-        "Cancelled",
-        "Rejected",
-      ],
+      enum: orderStatusEnum,
       default: "Draft",
     },
     items: [

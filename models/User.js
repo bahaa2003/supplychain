@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import { roleEnum } from "../enums/role.enum.js";
+import { userStatusEnum } from "../enums/userStatus.enum.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -18,7 +20,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "manager", "staff", "platform_admin"],
+      enum: roleEnum,
       default: "staff",
     },
     company: {
@@ -31,7 +33,7 @@ const userSchema = new mongoose.Schema(
     isEmailVerified: { type: Boolean, default: false },
     twoFactorEnabled: { type: Boolean, default: false },
     twoFactorSecret: { type: String },
-    status: { type: String, enum: ["active", "invited"], default: "active" },
+    status: { type: String, enum: userStatusEnum, default: "active" },
     inviteToken: { type: String },
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },

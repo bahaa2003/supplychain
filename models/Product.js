@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { currencyEnum } from "../enums/currency.enum.js";
+import { unitEnum } from "../enums/unit.enum.js";
 const { Schema } = mongoose;
 const productSchema = new Schema(
   {
@@ -28,10 +30,12 @@ const productSchema = new Schema(
     },
     currency: {
       type: String,
+      enum: currencyEnum,
       default: "USD",
     },
     unit: {
       type: String,
+      enum: unitEnum,
       default: "piece",
     },
     weight: {

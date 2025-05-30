@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { locationTypeEnum } from "../enums/locationType.enum.js";
 const { Schema } = mongoose;
 // Inventory model for managing product stock levels across different locations
 const locationSchema = new Schema(
@@ -15,13 +16,7 @@ const locationSchema = new Schema(
     },
     type: {
       type: String,
-      enum: [
-        "Warehouse",
-        "Store",
-        "Manufacturing",
-        "Distribution Center",
-        "Other",
-      ],
+      enum: locationTypeEnum,
       required: true,
     },
     address: {

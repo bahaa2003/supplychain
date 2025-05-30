@@ -1,5 +1,7 @@
 import { body } from "express-validator";
 import mongoose from "mongoose";
+import { currencyEnum } from "../enums/currency.enum.js";
+import { unitEnum } from "../enums/unit.enum.js";
 
 export const productValidator = () => [
   body("name")
@@ -25,6 +27,14 @@ export const productValidator = () => [
     .withMessage("SKU must be a string")
     .isLength({ min: 2, max: 30 })
     .withMessage("SKU must be between 2 and 30 characters"),
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Description must be a string"),
+  body("category")
+    .optional()
+    .isString()
+    .withMessage("Category must be a string"),
   body("unitPrice")
     .notEmpty()
     .withMessage("Unit price is required")
@@ -34,22 +44,17 @@ export const productValidator = () => [
     .withMessage("Unit price must be 0 or greater"),
   body("currency")
     .optional()
-    .isString()
-    .withMessage("Currency must be a string")
-    .isLength({ min: 2, max: 10 })
-    .withMessage("Currency must be between 2 and 10 characters"),
+    .isIn(currencyEnum)
+    .withMessage(`Currency must be one of: ${currencyEnum.join(", ")}`),
   body("unit")
     .optional()
-    .isString()
-    .withMessage("Unit must be a string")
-    .isLength({ min: 1, max: 10 })
-    .withMessage("Unit must be between 1 and 10 characters"),
+    .isIn(unitEnum)
+    .withMessage(`Unit must be one of: ${unitEnum.join(", ")}`),
   body("weight.value")
     .optional()
     .isNumeric()
     .withMessage("Weight value must be a number")
-    .isFloat({ min: 0 })
-    .withMessage("Weight value must be 0 or greater"),
+    .isFloat({ min: 0 }),
   body("weight.unit")
     .optional()
     .isIn(["kg", "lb", "g", "oz"])
@@ -58,26 +63,36 @@ export const productValidator = () => [
     .optional()
     .isNumeric()
     .withMessage("Length must be a number")
-    .isFloat({ min: 0 })
-    .withMessage("Length must be 0 or greater"),
+    .isFloat({ min: 0 }),
   body("dimensions.width")
     .optional()
     .isNumeric()
     .withMessage("Width must be a number")
-    .isFloat({ min: 0 })
-    .withMessage("Width must be 0 or greater"),
+    .isFloat({ min: 0 }),
   body("dimensions.height")
     .optional()
     .isNumeric()
     .withMessage("Height must be a number")
-    .isFloat({ min: 0 })
-    .withMessage("Height must be 0 or greater"),
+    .isFloat({ min: 0 }),
   body("dimensions.unit")
     .optional()
     .isIn(["cm", "in", "m", "ft"])
     .withMessage("Invalid dimension unit"),
+  body("images")
+    .optional()
+    .isArray()
+    .withMessage("Images must be an array of strings"),
+  body("images.*")
+    .optional()
+    .isString()
+    .withMessage("Each image must be a string (URL)"),
   body("isActive")
     .optional()
     .isBoolean()
     .withMessage("isActive must be boolean"),
+  body("tags")
+    .optional()
+    .isArray()
+    .withMessage("Tags must be an array of strings"),
+  body("tags.*").optional().isString().withMessage("Each tag must be a string"),
 ];

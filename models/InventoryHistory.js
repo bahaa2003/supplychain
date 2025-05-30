@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { inventoryChangeTypeEnum } from "../enums/inventoryChangeType.enum.js";
+import { inventoryReferenceTypeEnum } from "../enums/inventoryReferenceType.enum.js";
 const { Schema } = mongoose;
 const inventoryHistorySchema = new Schema(
   {
@@ -9,7 +11,7 @@ const inventoryHistorySchema = new Schema(
     },
     changeType: {
       type: String,
-      enum: ["Increase", "Decrease", "Adjustment", "Initial"],
+      enum: inventoryChangeTypeEnum,
       required: true,
     },
     quantityChange: {
@@ -33,7 +35,7 @@ const inventoryHistorySchema = new Schema(
     },
     referenceType: {
       type: String,
-      enum: ["Order", "Shipment", "Return", "Adjustment", "Other"],
+      enum: inventoryReferenceTypeEnum,
     },
     referenceId: {
       type: Schema.Types.ObjectId,
