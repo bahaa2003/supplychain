@@ -7,7 +7,7 @@ import setupRoutes from "./routes/setup.routes.js";
 import userRoutes from "./routes/users.routes.js";
 import { securityMiddleware } from "./middleware/security.middleware.js";
 import { globalErrorHandler } from "./middleware/globalErrorHandler.js";
-
+import inventoryRoutes from "./routes/inventory.routes.js";
 dotenv.config();
 
 const app = express();
@@ -28,7 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users/", userRoutes);
-
+app.use("/api/inventory", inventoryRoutes);
 // Global error handler
 app.use(globalErrorHandler);
 

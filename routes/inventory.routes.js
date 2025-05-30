@@ -11,22 +11,17 @@ const router = express.Router();
 
 router.use(protectedRoute);
 
-router.get(
-  "/",
-  allowedTo("admin", "manager", "staff"),
-  catchError(getAllInventory)
-);
-router.get(
-  "/:id",
-  allowedTo("admin", "manager", "staff"),
-  catchError(getInventoryById)
-);
-router.post("/", allowedTo("admin", "manager"), catchError(createInventory));
-router.patch(
-  "/:id",
-  allowedTo("admin", "manager"),
-  catchError(updateInventory)
-);
-router.delete("/:id", allowedTo("admin"), catchError(deleteInventory));
+router
+  .get("/", allowedTo("admin", "manager", "staff"), catchError(getAllInventory))
+  .post("/", allowedTo("admin", "manager"), catchError(createInventory));
+
+router
+  .get(
+    "/:id",
+    allowedTo("admin", "manager", "staff"),
+    catchError(getInventoryById)
+  )
+  .patch("/:id", allowedTo("admin", "manager"), catchError(updateInventory))
+  .delete("/:id", allowedTo("admin"), catchError(deleteInventory));
 
 export default router;
