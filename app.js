@@ -34,7 +34,7 @@ app.use("/api/users/", userRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/product", productRoutes);
-app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/v1/notification", notificationRoutes);
 // Global error handler
 app.use(globalErrorHandler);
 
