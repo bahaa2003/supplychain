@@ -4,8 +4,24 @@ import { AppError } from "../../utils/AppError.js";
 export const getAllProducts = async (req, res, next) => {
   try {
     const companyId = req.user.company?._id || req.user.company;
-    const products = await Product.find({ company: companyId });
-    res.status(200).json({ status: "success", data: products });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const skip = (page - 1) * limit;
+
+    const [products, total] = await Promise.all([
+      Product.find({ company: companyId }).skip(skip).limit(limit),
+      Product.countDocuments({ company: companyId }),
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      results: products.length,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      data: products,
+    });
   } catch (err) {
     next(err);
   }
