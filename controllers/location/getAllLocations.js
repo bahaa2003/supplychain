@@ -25,6 +25,6 @@ export const getAllLocations = async (req, res, next) => {
       data: locations,
     });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to fetch locations", 500));
   }
 };

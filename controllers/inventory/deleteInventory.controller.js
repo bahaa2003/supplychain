@@ -13,6 +13,6 @@ export const deleteInventory = async (req, res, next) => {
     if (!inventory) return next(new AppError("Inventory not found", 404));
     res.status(204).json({ status: "success", data: null });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to delete inventory", 500));
   }
 };

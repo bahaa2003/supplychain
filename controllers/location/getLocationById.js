@@ -9,6 +9,6 @@ export const getLocationById = async (req, res, next) => {
     if (!location) return next(new AppError("Location not found", 404));
     res.status(200).json({ status: "success", data: location });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to get location", 500));
   }
 };

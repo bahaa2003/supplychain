@@ -11,6 +11,6 @@ export const createInventory = async (req, res, next) => {
     });
     res.status(201).json({ status: "success", data: inventory });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to create inventory", 500));
   }
 };

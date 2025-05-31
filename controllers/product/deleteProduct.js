@@ -12,6 +12,6 @@ export const deleteProduct = async (req, res, next) => {
     if (!product) return next(new AppError("Product not found", 404));
     res.status(204).json({ status: "success", data: null });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to delete product", 500));
   }
 };

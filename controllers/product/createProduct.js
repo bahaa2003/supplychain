@@ -6,6 +6,6 @@ export const createProduct = async (req, res, next) => {
     const product = await Product.create({ ...req.body, company: companyId });
     res.status(201).json({ status: "success", data: product });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to create product", 500));
   }
 };

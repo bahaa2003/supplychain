@@ -1,6 +1,7 @@
 import User from "../../models/User.js";
 import Company from "../../models/Company.js";
 import { sendValidEmail } from "../../utils/email.js";
+import { AppError } from "../../utils/AppError.js";
 
 export const resendVerificationEmail = async (req, res, next) => {
   try {
@@ -24,6 +25,12 @@ export const resendVerificationEmail = async (req, res, next) => {
       message: "Verification email resent and TTL extended by 1 day.",
     });
   } catch (err) {
-    next(err);
+    next(
+      new AppError(
+        err.message ||
+          "Failed to resend verification email or extend TTL please try again later",
+        500
+      )
+    );
   }
 };

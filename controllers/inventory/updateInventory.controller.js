@@ -15,6 +15,6 @@ export const updateInventory = async (req, res, next) => {
     if (!inventory) return next(new AppError("Inventory not found", 404));
     res.status(200).json({ status: "success", data: inventory });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to update inventory", 500));
   }
 };

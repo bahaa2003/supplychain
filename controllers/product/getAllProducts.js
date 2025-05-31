@@ -23,6 +23,6 @@ export const getAllProducts = async (req, res, next) => {
       data: products,
     });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to fetch products", 500));
   }
 };

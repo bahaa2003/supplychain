@@ -26,6 +26,6 @@ export const getAllInventory = async (req, res, next) => {
       data: inventory,
     });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to fetch inventory", 500));
   }
 };

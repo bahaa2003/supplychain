@@ -14,6 +14,6 @@ export const deleteLocation = async (req, res, next) => {
     if (!location) return next(new AppError("Location not found", 404));
     res.status(204).json({ status: "success", data: null });
   } catch (err) {
-    next(err);
+    next(new AppError(err.message || "Failed to delete location", 500));
   }
 };
