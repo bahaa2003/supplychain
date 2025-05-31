@@ -10,6 +10,7 @@ import { globalErrorHandler } from "./middleware/globalErrorHandler.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 import productRoutes from "./routes/product.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
 dotenv.config();
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/users/", userRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 // Global error handler
 app.use(globalErrorHandler);
 
