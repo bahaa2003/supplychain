@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Schema } from "mongoose";
+const { Schema } = mongoose;
 const companySchema = new Schema(
   {
     name: { type: String, required: true, unique: true },
@@ -7,7 +7,7 @@ const companySchema = new Schema(
     size: { type: String },
     location: { type: String },
     isApproved: { type: Boolean, default: false },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     expiresAt: {
       type: Date,
       default: function () {

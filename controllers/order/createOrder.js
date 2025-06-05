@@ -48,9 +48,19 @@ export const createOrder = async (req, res) => {
     await createNotification({
       recipient: supplier, // assuming supplier is a userId or company admin userId
       type: "New Order",
-      title,
-      message,
-      htmlMessage,
+      title: "New Order Received",
+      message:
+        "New order received from " +
+        (req.user.name || "A company") +
+        ". Order Number: " +
+        orderNumber +
+        "." +
+        " Please check your orders.",
+      htmlMessage: `<p>New order received from <strong>${
+        req.user.name || "A company"
+      }</strong>.</p>
+         <p>Order Number: <strong>${orderNumber}</strong>.</p>
+         <p>Please check your orders.</p>`,
       related: "Order",
       relatedId: order._id,
     });
