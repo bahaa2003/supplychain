@@ -1,6 +1,11 @@
 import express from "express";
 import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
 import { roleEnum } from "../enums/role.enum.js";
+import { validate } from "../middleware/validate.middleware.js";
+import {
+  notificationValidator,
+  bulkNotificationValidator,
+} from "../validators/notification.validator.js";
 import { getAllNotifications } from "../controllers/notification/getAllNotifications.js";
 import { getNotificationById } from "../controllers/notification/getNotificationById.js";
 import { markNotificationAsReadController } from "../controllers/notification/markNotificationAsRead.js";
@@ -34,7 +39,7 @@ router.patch(
   markAllNotificationsAsReadController
 );
 
-// Delete a single notification
+// Delete a notification
 router.delete(
   "/:id",
   protectedRoute,
@@ -50,19 +55,21 @@ router.delete(
   deleteAllNotificationsForUserController
 );
 
-// (Optional) Create a notification (for admin/platform_admin only)
+// Create a notification (for admin/platform_admin only)
 router.post(
   "/",
   protectedRoute,
   allowedTo("admin", "platform_admin"),
+  validate(notificationValidator()),
   createNotificationController
 );
 
-// (Optional) Send notification to multiple users (for platform_admin only)
+// Send notification to multiple users (for platform_admin only)
 router.post(
   "/bulk",
   protectedRoute,
   allowedTo("platform_admin"),
+  validate(bulkNotificationValidator()),
   sendNotificationToUsersController
 );
 

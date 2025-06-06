@@ -1,52 +1,50 @@
 import express from "express";
-import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
-import { roleEnum } from "../enums/role.enum.js";
-import { createPartnerConnection } from "../controllers/partnerConnection/createPartnerConnection.js";
-import { getAllPartnerConnections } from "../controllers/partnerConnection/getAllPartnerConnections.js";
-import { getPartnerConnectionById } from "../controllers/partnerConnection/getPartnerConnectionById.js";
-import { updatePartnerConnectionStatus } from "../controllers/partnerConnection/updatePartnerConnectionStatus.js";
-import { deletePartnerConnection } from "../controllers/partnerConnection/deletePartnerConnection.js";
+import { protect, restrictTo } from "../middleware/auth.middleware.js";
+import { validate } from "../middleware/validate.middleware.js";
+import {
+  createPartnerConnectionValidator,
+  updatePartnerConnectionStatusValidator,
+} from "../validators/partnerConnection.validator.js";
+import {
+  createPartnerConnectionController,
+  updatePartnerConnectionStatusController,
+  updatePartnerConnectionVisibilityController,
+  terminatePartnerConnectionController,
+} from "../controllers/partnerConnection/index.js";
 
 const router = express.Router();
 
-// Create a new partner connection (request partnership)
+// Protect all routes
+router.use(protect);
+
+// Create partner connection
 router.post(
   "/",
-  protectedRoute,
-  allowedTo("admin", "manager"),
-  createPartnerConnection
+  restrictTo("admin", "platform_admin"),
+  validate(createPartnerConnectionValidator()),
+  createPartnerConnectionController
 );
 
-// Get all partner connections for the current user's company
-router.get(
-  "/",
-  protectedRoute,
-  allowedTo(...roleEnum),
-  getAllPartnerConnections
-);
-
-// Get a specific partner connection by ID
-router.get(
-  "/:id",
-  protectedRoute,
-  allowedTo(...roleEnum),
-  getPartnerConnectionById
-);
-
-// Update status (accept/reject) of a partner connection
+// Update partner connection status
 router.patch(
-  "/:id/status",
-  protectedRoute,
-  allowedTo("admin", "manager"),
-  updatePartnerConnectionStatus
+  "/:connectionId/status",
+  restrictTo("admin", "platform_admin"),
+  validate(updatePartnerConnectionStatusValidator()),
+  updatePartnerConnectionStatusController
 );
 
-// Delete a partner connection (cancel or remove partnership)
-router.delete(
-  "/:id",
-  protectedRoute,
-  allowedTo("admin", "manager"),
-  deletePartnerConnection
+// Update partner connection visibility settings
+router.patch(
+  "/:connectionId/visibility",
+  restrictTo("admin", "platform_admin"),
+  updatePartnerConnectionVisibilityController
+);
+
+// Terminate partner connection
+router.post(
+  "/:connectionId/terminate",
+  restrictTo("admin", "platform_admin"),
+  terminatePartnerConnectionController
 );
 
 export default router;

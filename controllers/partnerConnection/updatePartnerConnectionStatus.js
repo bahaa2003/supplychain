@@ -1,41 +1,83 @@
 import PartnerConnection from "../../models/PartnerConnection.js";
-import { AppError } from "../../utils/AppError.js";
+import Company from "../../models/Company.js";
+import AppError from "../../utils/AppError.js";
+import { createNotification } from "../../utils/notification/createNotification.js";
 
-export const updatePartnerConnectionStatus = async (req, res) => {
+export const updatePartnerConnectionStatusController = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const companyId = req.user.company?._id || req.user.company;
+    const { connectionId } = req.params;
     const { status, rejectionReason } = req.body;
-    const connection = await PartnerConnection.findById(req.params.id);
-    if (!connection) throw new AppError("Partner connection not found", 404);
-    // Only recipient can accept/reject
+    const updatedBy = req.user._id;
+    const companyId = req.user.companyId;
+
+    // Find the connection
+    const connection = await PartnerConnection.findById(connectionId);
+    if (!connection) {
+      throw new AppError("Partner connection not found", 404);
+    }
+
+    // Verify the company has permission to update this connection
     if (connection.recipient.toString() !== companyId.toString()) {
       throw new AppError(
-        "Not authorized to update this partner connection",
+        "You are not authorized to update this connection",
         403
       );
     }
-    if (!["Accepted", "Rejected"].includes(status)) {
-      throw new AppError(
-        "Invalid status. Only 'Accepted' or 'Rejected' allowed.",
-        400
-      );
+
+    // Validate status transition
+    if (connection.status === "Accepted" && status === "Pending") {
+      throw new AppError("Cannot change status from Accepted to Pending", 400);
     }
+
+    if (connection.status === "Terminated") {
+      throw new AppError("Cannot update a terminated connection", 400);
+    }
+
+    // Update connection status
     connection.status = status;
     if (status === "Accepted") {
-      connection.acceptedBy = req.user._id;
+      connection.acceptedBy = updatedBy;
       connection.acceptedAt = new Date();
-      connection.rejectionReason = undefined;
     } else if (status === "Rejected") {
       connection.rejectionReason = rejectionReason;
-      connection.acceptedBy = undefined;
-      connection.acceptedAt = undefined;
     }
+
     await connection.save();
-    res.status(200).json({ status: "success", data: connection });
-  } catch (err) {
-    throw new AppError(
-      err.message || "Failed to update partner connection status",
-      500
-    );
+
+    // Get company details for notification
+    const requesterCompany = await Company.findById(connection.requester);
+    const recipientCompany = await Company.findById(connection.recipient);
+
+    // Create notification for requester
+    await createNotification({
+      type: "Partner Request Update",
+      data: {
+        recipientCompany: recipientCompany.name,
+        status,
+        rejectionReason,
+        connectionId: connection._id,
+      },
+      recipient: connection.requester,
+    });
+
+    // Populate connection details
+    await connection.populate([
+      { path: "requester", select: "name logo" },
+      { path: "recipient", select: "name logo" },
+      { path: "invitedBy", select: "name email" },
+      { path: "acceptedBy", select: "name email" },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: `Partner connection ${status.toLowerCase()} successfully`,
+      data: connection,
+    });
+  } catch (error) {
+    next(error);
   }
 };

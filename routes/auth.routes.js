@@ -16,15 +16,14 @@ import { completeRegistration } from "../controllers/auth/completeRegistration.c
 
 import { companyValidator } from "../validators/company.validator.js";
 import { userValidator } from "../validators/user.validator.js";
-import { validationExecution } from "../middleware/validation.middleware.js";
+import { validate } from "../middleware/validate.middleware.js";
 
 const router = express.Router();
 
 router.post(
   "/register",
-  userValidator(),
-  companyValidator(),
-  validationExecution,
+  validate(userValidator()),
+  validate(companyValidator()),
   catchError(register)
 );
 router.post("/login", catchError(login));

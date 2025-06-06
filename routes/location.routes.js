@@ -7,7 +7,7 @@ import { getAllLocations } from "../controllers/location/getAllLocations.js";
 import { catchError } from "../utils/catchError.js";
 import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
 import { locationValidator } from "../validators/location.validator.js";
-import { validationExecution } from "../middleware/validation.middleware.js";
+import { validate } from "../middleware/validate.middleware.js";
 
 const router = express.Router();
 
@@ -26,15 +26,13 @@ router.get(
 router.post(
   "/",
   allowedTo("admin", "manager"),
-  locationValidator(),
-  validationExecution,
+  validate(locationValidator()),
   catchError(createLocation)
 );
 router.put(
   "/:id",
   allowedTo("admin", "manager"),
-  locationValidator(),
-  validationExecution,
+  validate(locationValidator()),
   catchError(updateLocation)
 );
 router.delete("/:id", allowedTo("admin"), catchError(deleteLocation));
