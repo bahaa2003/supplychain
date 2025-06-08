@@ -7,19 +7,16 @@ const partnerConnectionSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Company",
       required: true,
-      index: true,
     },
     recipient: {
       type: Schema.Types.ObjectId,
       ref: "Company",
       required: true,
-      index: true,
     },
     status: {
       type: String,
       enum: ["Pending", "Accepted", "Rejected", "Terminated"],
       default: "Pending",
-      index: true,
     },
     partnershipType: {
       type: String,
@@ -32,7 +29,6 @@ const partnerConnectionSchema = new Schema(
         "Other",
       ],
       required: true,
-      index: true,
     },
     visibilitySettings: {
       orders: { type: Boolean, default: true },

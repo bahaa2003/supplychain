@@ -2,7 +2,7 @@ import { body } from "express-validator";
 import mongoose from "mongoose";
 
 export const companyValidator = () => [
-  body("name")
+  body("companyName")
     .notEmpty()
     .withMessage("Company name is required")
     .isString()

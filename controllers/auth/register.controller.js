@@ -3,6 +3,7 @@ import Company from "../../models/Company.js";
 import { AppError } from "../../utils/AppError.js";
 import { sendValidEmail } from "../../utils/email.js";
 import { generateToken } from "../../utils/generateToken.js";
+import bcrypt from "bcrypt";
 
 export const register = async (req, res, next) => {
   const { name, email, password, companyName, industry, size, location } =
@@ -26,7 +27,7 @@ export const register = async (req, res, next) => {
   const user = await User.create({
     name,
     email,
-    password,
+    password: bcrypt.hashSync(password, 12),
     role: "admin",
     company: company._id,
     isEmailVerified: false,

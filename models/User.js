@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
 import { roleEnum } from "../enums/role.enum.js";
 import { userStatusEnum } from "../enums/userStatus.enum.js";
 
@@ -40,22 +39,11 @@ const userSchema = new mongoose.Schema(
     passwordChangeAt: { type: Date },
     expiresAt: {
       type: Date,
-      default: function () {
-        return this.isEmailVerified
-          ? undefined
-          : new Date(Date.now() + 24 * 60 * 60 * 1000);
-      },
+      default: () => new Date(Date.now() + 1 * 3 * 60 * 1000),
       index: { expireAfterSeconds: 0 },
     },
   },
   { timestamps: true }
 );
-
-userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 12);
-  }
-  next();
-});
 
 export default mongoose.model("User", userSchema);

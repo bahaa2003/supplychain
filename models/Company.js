@@ -10,11 +10,7 @@ const companySchema = new Schema(
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     expiresAt: {
       type: Date,
-      default: function () {
-        return this.isApproved
-          ? undefined
-          : new Date(Date.now() + 24 * 60 * 60 * 1000);
-      },
+      default: () => new Date(Date.now() + 1 * 3 * 60 * 1000),
       index: { expireAfterSeconds: 0 },
     },
   },

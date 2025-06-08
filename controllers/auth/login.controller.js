@@ -8,9 +8,11 @@ export const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }).populate("company");
+  console.log("User found:", user);
   if (!user) throw new AppError("Invalid email or password", 401);
 
   const isMatch = await bcrypt.compare(password, user.password);
+  console.log("Password match:", isMatch);
   if (!isMatch) throw new AppError("Invalid email or password", 401);
 
   if (user.company && !user.company.isApproved)
