@@ -38,11 +38,8 @@ export const register = async (req, res, next) => {
   await company.save();
   await user.save();
 
-  const token = generateToken(user);
-
   res.status(201).json({
     status: "success",
     message: "Company registered. Waiting for approval.",
-    token,
   });
 };

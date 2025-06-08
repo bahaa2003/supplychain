@@ -14,6 +14,12 @@ export const verifyEmail = async (req, res, next) => {
       return res.status(400).json({
         message: "Registration session expired, please sign up again",
       });
+    // Also Remove the expiresAt field from the document
+    console.log("user company: ", user.company);
+    await Company.updateOne(
+      { _id: user.company },
+      { $unset: { expiresAt: 1 } }
+    );
     // Remove the expiresAt field from the user document
     await User.updateOne(
       { email },
@@ -22,13 +28,6 @@ export const verifyEmail = async (req, res, next) => {
         $unset: { expiresAt: 1 },
       }
     );
-    // Also Remove the expiresAt field from the document
-    console.log("user company: ", user.company);
-    if (!user.company)
-      await Company.updateOne(
-        { _id: user.company },
-        { $unset: { expiresAt: 1 } }
-      );
     res.status(200).json({
       message: "Verification Completed. You can now log in.",
     });

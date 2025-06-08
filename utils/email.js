@@ -34,11 +34,17 @@ export const sendEmail = async (to, subject, resetLink) => {
   await transporter.sendMail(mailOptions);
 };
 
-export const sendTeamInviteEmail = async (to, inviteLink, invitedBy) => {
+export const sendTeamInviteEmail = async (
+  to,
+  password,
+  inviteLink,
+  invitedBy
+) => {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px; background-color: #f9f9f9; border-radius: 10px;">
       <h2 style="color: #3c3c3c;">🤝 دعوة للانضمام إلى فريق ChainFlow</h2>
       <p style="color: #333;">${invitedBy} قام بدعوتك للانضمام إلى فريق عمله في منصة <strong>ChainFlow</strong>.</p>
+      <p style="color: #333;">كلمة المرور الخاصة بك هي: <br> <strong>${password}</strong></p>
       <p style="color: #333;">اضغط على الزر التالي لإنشاء حسابك:</p>
       <a href="${inviteLink}" 
          style="display: inline-block; margin-top: 20px; background-color: #28a745; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px;">

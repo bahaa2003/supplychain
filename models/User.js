@@ -6,16 +6,12 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: function () {
-        return this.status !== "invited";
-      },
+      required: () => this.status !== "invited",
     },
     email: { type: String, required: true, unique: true },
     password: {
       type: String,
-      required: function () {
-        return this.status !== "invited";
-      },
+      required,
     },
     role: {
       type: String,
@@ -39,7 +35,7 @@ const userSchema = new mongoose.Schema(
     passwordChangeAt: { type: Date },
     expiresAt: {
       type: Date,
-      default: () => new Date(Date.now() + 1 * 3 * 60 * 1000),
+      default: () => new Date(Date.now() + 24 * 60 * 60 * 1000),
       index: { expireAfterSeconds: 0 },
     },
   },
