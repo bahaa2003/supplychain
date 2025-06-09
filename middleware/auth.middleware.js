@@ -40,3 +40,17 @@ export const allowedTo = (...roles) => {
     next();
   });
 };
+
+export const checkEmailVerified = (req, res, next) => {
+  if (!req.user.isEmailVerified) {
+    return next(new AppError("Email is not verified", 403));
+  }
+  next();
+};
+
+export const checkTwoFactorEnabled = (req, res, next) => {
+  if (!req.user.isTwoFactorEnabled) {
+    return next(new AppError("Two-factor authentication is not enabled", 403));
+  }
+  next();
+};

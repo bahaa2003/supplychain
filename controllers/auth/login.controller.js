@@ -15,9 +15,6 @@ export const login = async (req, res, next) => {
   console.log("Password match:", isMatch);
   if (!isMatch) throw new AppError("Invalid email or password", 401);
 
-  if (user.company && !user.company.isApproved)
-    throw new AppError("Your company is awaiting approval.", 403);
-
   if (user.twoFactorEnabled) {
     return res.status(200).json({
       message: "2FA code required",

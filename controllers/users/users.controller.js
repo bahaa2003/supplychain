@@ -13,8 +13,7 @@ export const get_all_employee = async (req, res, next) => {
     if (role) filter.role = role;
 
     const [users, total] = await Promise.all([
-      User.find(filter, { password: false, __v: false })
-        .populate({ path: "company", select: "-__v" })
+      User.find(filter, { password: false, __v: false, company: false })
         .skip(skip)
         .limit(limit)
         .lean(),

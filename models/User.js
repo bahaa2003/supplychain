@@ -6,12 +6,14 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: () => this.status !== "invited",
+      required: function () {
+        return this.status !== "invited";
+      },
     },
     email: { type: String, required: true, unique: true },
     password: {
       type: String,
-      required,
+      required: true,
     },
     role: {
       type: String,
@@ -33,11 +35,11 @@ const userSchema = new mongoose.Schema(
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
     passwordChangeAt: { type: Date },
-    expiresAt: {
-      type: Date,
-      default: () => new Date(Date.now() + 24 * 60 * 60 * 1000),
-      index: { expireAfterSeconds: 0 },
-    },
+    // expiresAt: {
+    //   type: Date,
+    //   default: () => new Date(Date.now() + 1 * 5 * 60 * 1000),
+    //   // index: { expireAfterSeconds: 0 },
+    // },
   },
   { timestamps: true }
 );

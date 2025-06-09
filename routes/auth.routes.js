@@ -11,7 +11,10 @@ import { forgotPassword } from "../controllers/auth/forgotPassword.controller.js
 import { resetPassword } from "../controllers/auth/resetPassword.controller.js";
 import { catchError } from "../utils/catchError.js";
 
-import { protectedRoute } from "../middleware/auth.middleware.js";
+import {
+  protectedRoute,
+  checkEmailVerified,
+} from "../middleware/auth.middleware.js";
 import { completeRegistration } from "../controllers/auth/completeRegistration.controller.js";
 
 import { companyValidator } from "../validators/company.validator.js";
@@ -29,9 +32,23 @@ router.post(
 router.post("/login", catchError(login));
 router.post("/logout", protectedRoute, catchError(logout));
 
-router.post("/enable-2fa", protectedRoute, catchError(enable2FA));
-router.post("/verify-2fa", protectedRoute, catchError(verify2FA));
-router.post("/confirm-2fa-login", catchError(confirm2FALogin));
+router.post(
+  "/enable-2fa",
+  protectedRoute,
+  checkEmailVerified,
+  catchError(enable2FA)
+);
+router.post(
+  "/verify-2fa",
+  protectedRoute,
+  checkEmailVerified,
+  catchError(verify2FA)
+);
+router.post(
+  "/confirm-2fa-login",
+  checkEmailVerified,
+  catchError(confirm2FALogin)
+);
 
 router.post("/forgot-password", catchError(forgotPassword));
 router.post("/reset-password", catchError(resetPassword));

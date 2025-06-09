@@ -40,6 +40,6 @@ export const register = async (req, res, next) => {
 
   res.status(201).json({
     status: "success",
-    message: "Company registered. Waiting for approval.",
+    message: "Company registered. Waiting for active email.",
   });
 };

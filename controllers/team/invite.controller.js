@@ -33,7 +33,7 @@ export const inviteUser = async (req, res, next) => {
   );
 
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 2);
+  // expiresAt.setDate(expiresAt.getDate() + 2);
   const password = Math.random().toString(36).substring(2, 15);
   await User.create({
     name,
@@ -43,7 +43,7 @@ export const inviteUser = async (req, res, next) => {
     company: admin.company._id,
     status: "invited",
     inviteToken: token,
-    expiresAt,
+    // expiresAt,
   });
 
   const inviteLink = `${process.env.BACKEND_URL}/api/team/verify-invite/${token}`;

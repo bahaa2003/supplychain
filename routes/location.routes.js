@@ -11,8 +11,6 @@ import { validate } from "../middleware/validate.middleware.js";
 
 const router = express.Router();
 
-router.use(protectedRoute);
-
 router.get(
   "/",
   allowedTo("admin", "manager", "staff"),

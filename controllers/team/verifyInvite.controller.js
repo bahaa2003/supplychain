@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 
 export const verifyInvite = async (req, res, next) => {
   const { token } = req.params;
-  const { name } = req.body;
 
   try {
     // verify tocken
@@ -36,7 +35,14 @@ export const verifyInvite = async (req, res, next) => {
     invitedUser.expiresAt = undefined;
 
     await invitedUser.save();
-
+    // Remove the expiresAt field from the invited user document
+    await User.updateOne(
+      { email },
+      {
+        $set: { isEmailVerified: true },
+        $unset: { expiresAt: 1 },
+      }
+    );
     res.status(200).json({
       status: "success",
       message: "Registration completed successfully. You can now login.",

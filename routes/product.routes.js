@@ -7,12 +7,13 @@ import { deleteProduct } from "../controllers/product/deleteProduct.js";
 
 import { catchError } from "../utils/catchError.js";
 import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
-import { productValidator } from "../validators/product.validator.js";
+import {
+  createProductValidator,
+  updateProductValidator,
+} from "../validators/product.validator.js";
 import { validate } from "../middleware/validate.middleware.js";
 
 const router = express.Router();
-
-router.use(protectedRoute);
 
 router.get(
   "/",
@@ -28,13 +29,13 @@ router.post(
   "/",
   allowedTo("admin", "manager"),
 
-  validate(productValidator()),
+  validate(createProductValidator()),
   catchError(createProduct)
 );
-router.put(
+router.patch(
   "/:id",
   allowedTo("admin", "manager"),
-  validate(productValidator()),
+  validate(updateProductValidator()),
   catchError(updateProduct)
 );
 router.delete("/:id", allowedTo("admin"), catchError(deleteProduct));
