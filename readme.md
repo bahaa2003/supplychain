@@ -453,3 +453,119 @@ graph TD
 > `Authorization: Bearer <token>`
 
 ---
+
+## <a name="invoice"></a>💸 Invoice Controllers
+
+
+### 📌 1. Generate Invoice from Order
+
+| Method | Endpoint                          | Auth | Description                           |
+|--------|-----------------------------------|------|---------------------------------------|
+| POST   | /api/invoice/from-order/:orderId | User | Generate an invoice from an order     |
+
+**Request Example:**
+
+```http
+POST /api/invoice/from-order/664fb123bcfecc0012391a7e
+Headers:
+  token: <user_token>
+```
+
+**Response Example:**
+
+```json
+{
+  "message": "Invoice generated from order successfully",
+  "invoice": {
+    "invoiceNumber": "INV-1717773215000",
+    "status": "accepted",
+    "totalAmount": 114,
+    "relatedOrder": "664fb123bcfecc0012391a7e"
+  }
+}
+```
+
+**Importance:** Automatically generates invoice with tax and details based on a sales order.
+
+---
+
+### 📌 2. Get All Invoices for a Company
+
+| Method | Endpoint         | Auth | Description                        |
+|--------|------------------|------|------------------------------------|
+| GET    | /api/invoice/    | User | Fetch all invoices (sent/received) |
+
+**Response Example:**
+
+```json
+{
+  "count": 2,
+  "invoices": [
+    {
+      "invoiceNumber": "INV-1717773215000",
+      "totalAmount": 114,
+      "issuer": { "name": "ChainFlow" },
+      "receiver": { "name": "Ali Co." },
+      "status": "accepted"
+    }
+  ]
+}
+```
+
+**Importance:** Allows companies to see all invoices related to them.
+
+---
+
+### 📌 3. Get Single Invoice Details
+
+| Method | Endpoint                | Auth | Description                  |
+|--------|-------------------------|------|------------------------------|
+| GET    | /api/invoice/:invoiceId | User | Fetch invoice by ID          |
+
+**Response Example:**
+
+```json
+{
+  "invoice": {
+    "invoiceNumber": "INV-1717773215000",
+    "issuer": { "name": "ChainFlow" },
+    "receiver": { "name": "Ali Co." },
+    "items": [
+      {
+        "description": "Subscription service",
+        "quantity": 1,
+        "unitPrice": 100,
+        "taxRate": 14,
+        "total": 100
+      }
+    ],
+    "totalSales": 100,
+    "totalTax": 14,
+    "totalAmount": 114
+  }
+}
+```
+
+**Importance:** View full invoice details for review or printing.
+
+---
+
+### 📌 4. Download Invoice as PDF
+
+| Method | Endpoint                    | Auth | Description                       |
+|--------|-----------------------------|------|-----------------------------------|
+| GET    | /api/invoice/:id/pdf        | User | Download the invoice as a PDF     |
+
+**Headers:**
+
+```
+token: <user_token>
+```
+
+**Response:** Returns a real downloadable PDF of the invoice.
+
+**Importance:** Exporting invoice for printing or sending to client via email.
+
+---
+
+📌 **Note**: PDF generation is powered by **Puppeteer** + **Handlebars** using a clean HTML template.
