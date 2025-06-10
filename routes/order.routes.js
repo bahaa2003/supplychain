@@ -7,6 +7,11 @@ import { createOrder } from "../controllers/order/createOrder.js";
 import { getOrderById } from "../controllers/order/getOrderById.js";
 import { updateOrderStatus } from "../controllers/order/updateOrderStatus.js";
 import { deleteOrder } from "../controllers/order/deleteOrder.js";
+import { validate } from "../middleware/validate.middleware.js";
+import {
+  createOrderValidator,
+  updateOrderStatusValidator,
+} from "../validators/order.validator.js";
 
 const router = express.Router();
 
@@ -31,6 +36,7 @@ router.post(
   "/",
   protectedRoute,
   allowedTo("admin", "manager", "staff"),
+  validate(createOrderValidator()),
   createOrder
 );
 
@@ -42,6 +48,7 @@ router.patch(
   "/:id/status",
   protectedRoute,
   allowedTo("admin", "manager", "staff"),
+  validate(updateOrderStatusValidator()),
   updateOrderStatus
 );
 

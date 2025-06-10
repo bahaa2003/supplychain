@@ -140,21 +140,20 @@ graph TD
 
 ## <a name="inventory"></a>📦 Inventory Controllers
 
-| Endpoint           | Method | Auth | Purpose                     |
-| ------------------ | ------ | ---- | --------------------------- |
-| /api/inventory     | POST   | User | Add new inventory item      |
-| /api/inventory     | GET    | User | Get all inventory items     |
-| /api/inventory/:id | GET    | User | Get specific inventory item |
-| /api/inventory/:id | PUT    | User | Update inventory item       |
-| /api/inventory/:id | DELETE | User | Delete inventory item       |
+| Endpoint           | Method | Auth                  | Purpose                     |
+| ------------------ | ------ | --------------------- | --------------------------- |
+| /api/inventory     | GET    | admin, manager, staff | Get all inventory items     |
+| /api/inventory/:id | GET    | admin, manager, staff | Get specific inventory item |
+| /api/inventory/:id | PATCH  | admin, manager        | Update inventory item       |
 
-**Request Example (Create):**
+<!-- You can add POST if it actually exists in the project -->
+
+**Request Example (Update):**
 
 ```json
 {
-  "product": "64f1a2b3c4d5e6f7a8b9c0d1",
-  "quantity": 100,
-  "location": "Warehouse 1"
+  "quantity": 150,
+  "location": "Warehouse 2"
 }
 ```
 
@@ -162,16 +161,16 @@ graph TD
 
 ```json
 {
-  "success": true,
-  "inventory": {
+  "status": "success",
+  "data": {
     "id": "inv123",
     "product": "64f1a2b3c4d5e6f7a8b9c0d1",
-    "quantity": 100
+    "quantity": 150
   }
 }
 ```
 
-**Importance:** Accurate inventory management for each company.
+**Importance:** Precise inventory management with specific permissions based on job roles.
 
 ---
 
@@ -264,8 +263,16 @@ graph TD
 
 ```json
 {
-  "receiverCompany": "64f1a2b3c4d5e6f7a8b9c0d1",
-  "products": [{ "product": "prod123", "quantity": 10 }]
+  "supplier": "64f1a2b3c4d5e6f7a8b9c0d1",
+  "items": [{ "product": "prod123", "quantity": 10 }],
+  "totalAmount": 1000,
+  "currency": "USD",
+  "notes": "Urgent order",
+  "requestedDeliveryDate": "2024-06-15",
+  "deliveryAddress": "123 Main St",
+  "billingAddress": "456 Billing Rd",
+  "paymentTerms": "Net 30",
+  "tags": ["priority"]
 }
 ```
 
@@ -273,15 +280,16 @@ graph TD
 
 ```json
 {
-  "success": true,
-  "order": {
+  "status": "success",
+  "data": {
     "id": "order123",
+    "orderNumber": "ORD-1718123456789",
     "status": "pending"
   }
 }
 ```
 
-**Importance:** Manage sales and purchases between companies.
+**Importance:** Manage purchase and sales operations between companies with complete tracking of orders and their details.
 
 ---
 

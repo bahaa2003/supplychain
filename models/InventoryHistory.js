@@ -36,9 +36,11 @@ const inventoryHistorySchema = new Schema(
     referenceType: {
       type: String,
       enum: inventoryReferenceTypeEnum,
+      required: true,
     },
     referenceId: {
       type: Schema.Types.ObjectId,
+      required: true,
     },
     performedBy: {
       type: Schema.Types.ObjectId,
