@@ -106,6 +106,10 @@ const orderSchema = new Schema(
       enum: paymentStatusEnum,
       default: "Pending",
     },
+    invoice: {
+      type: Schema.Types.ObjectId,
+      ref: "Invoice",
+    },
     tags: [
       {
         type: String,
