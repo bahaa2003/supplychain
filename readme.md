@@ -145,7 +145,7 @@ graph TD
 | /api/inventory     | POST   | User | Add new inventory item      |
 | /api/inventory     | GET    | User | Get all inventory items     |
 | /api/inventory/:id | GET    | User | Get specific inventory item |
-| /api/inventory/:id | PUT    | User | Update inventory item       |
+| /api/inventory/:id | PATCH    | User | Update inventory item       |
 | /api/inventory/:id | DELETE | User | Delete inventory item       |
 
 **Request Example (Create):**
@@ -182,7 +182,7 @@ graph TD
 | /api/locations     | POST   | User | Add new location      |
 | /api/locations     | GET    | User | Get all locations     |
 | /api/locations/:id | GET    | User | Get specific location |
-| /api/locations/:id | PUT    | User | Update location       |
+| /api/locations/:id | PATCH    | User | Update location       |
 | /api/locations/:id | DELETE | User | Delete location       |
 
 **Request Example (Create):**
@@ -219,8 +219,8 @@ graph TD
 | /api/notifications/:id      | GET    | User | Get specific notification      |
 | /api/notifications/:id      | DELETE | User | Delete notification            |
 | /api/notifications/all      | DELETE | User | Delete all notifications       |
-| /api/notifications/:id/read | PUT    | User | Mark notification as read      |
-| /api/notifications/read-all | PUT    | User | Mark all notifications as read |
+| /api/notifications/:id/read | PATCH    | User | Mark notification as read      |
+| /api/notifications/read-all | PATCH    | User | Mark all notifications as read |
 | /api/notifications/send     | POST   | User | Send notification to users     |
 
 **Request Example (Create):**
@@ -258,7 +258,7 @@ graph TD
 | /api/orders/:id        | DELETE | User | Delete order        |
 | /api/orders/received   | GET    | User | Get received orders |
 | /api/orders/sent       | GET    | User | Get sent orders     |
-| /api/orders/:id/status | PUT    | User | Update order status |
+| /api/orders/:id/status | PATCH    | User | Update order status |
 
 **Request Example (Create):**
 
@@ -293,9 +293,9 @@ graph TD
 | /api/partner-connections                | GET    | User | Get all partner connections   |
 | /api/partner-connections/:id            | GET    | User | Get specific connection       |
 | /api/partner-connections/:id            | DELETE | User | Delete connection             |
-| /api/partner-connections/:id/terminate  | PUT    | User | Terminate connection          |
-| /api/partner-connections/:id/status     | PUT    | User | Update connection status      |
-| /api/partner-connections/:id/visibility | PUT    | User | Update connection visibility  |
+| /api/partner-connections/:id/terminate  | PATCH    | User | Terminate connection          |
+| /api/partner-connections/:id/status     | PATCH    | User | Update connection status      |
+| /api/partner-connections/:id/visibility | PATCH    | User | Update connection visibility  |
 
 **Request Example (Create):**
 
@@ -328,7 +328,7 @@ graph TD
 | /api/products     | POST   | User | Add new product      |
 | /api/products     | GET    | User | Get all products     |
 | /api/products/:id | GET    | User | Get specific product |
-| /api/products/:id | PUT    | User | Update product       |
+| /api/products/:id | PATCH    | User | Update product       |
 | /api/products/:id | DELETE | User | Delete product       |
 
 **Request Example (Create):**
