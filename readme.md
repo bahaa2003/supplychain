@@ -1,370 +1,563 @@
-# Controllers Documentation
+# Supply Chain API Documentation
 
-This document provides a comprehensive overview of all controllers in the application, organized by domain.
+Comprehensive documentation for all routes in the system, including request/response examples, the importance of each route, and a general architecture diagram.
+
+---
+
+## 🗺️ Architecture Overview
+
+```mermaid
+graph TD
+  A[Client] -->|HTTP| B[Express API]
+  B --> C[Auth Controllers]
+  B --> D[Admin Controllers]
+  B --> E[Product Controllers]
+  B --> F[Order Controllers]
+  B --> G[Inventory Controllers]
+  B --> H[Location Controllers]
+  B --> I[Notification Controllers]
+  B --> J[Team Controllers]
+  B --> K[User Controllers]
+  B --> L[Partner Connection Controllers]
+  B --> M[Setup Controllers]
+  B --> N[MongoDB]
+```
+
+---
 
 ## Table of Contents
-- [Admin Controllers](#admin-controllers)
-- [Auth Controllers](#auth-controllers)
-- [Inventory Controllers](#inventory-controllers)
-- [Location Controllers](#location-controllers)
-- [Notification Controllers](#notification-controllers)
-- [Order Controllers](#order-controllers)
-- [Partner Connection Controllers](#partner-connection-controllers)
-- [Product Controllers](#product-controllers)
-- [Setup Controllers](#setup-controllers)
-- [Team Controllers](#team-controllers)
-- [User Controllers](#user-controllers)
 
-## Admin Controllers
+| Domain                                    | Description                                |
+| ----------------------------------------- | ------------------------------------------ |
+| [Admin](#admin)                           | Manage companies and approvals             |
+| [Auth](#auth)                             | Authentication, registration, verification |
+| [Inventory](#inventory)                   | Inventory management                       |
+| [Location](#location)                     | Manage locations (warehouses, stores)      |
+| [Notification](#notification)             | Notifications                              |
+| [Order](#order)                           | Order management                           |
+| [Partner Connection](#partner-connection) | Business relationships                     |
+| [Product](#product)                       | Product management                         |
+| [Setup](#setup)                           | System setup                               |
+| [Team](#team)                             | Team management and invitations            |
+| [User](#user)                             | User management                            |
 
-Controllers for administrative operations.
+---
+
+## <a name="admin"></a>🛡️ Admin Controllers
 
 ### approveCompany.controller.js
-- **Purpose**: Approves a company registration
-- **Endpoint**: POST /api/admin/companies/approve
-- **Description**: Allows platform administrators to approve pending company registrations.
-- **Authorization**: Requires admin role
+
+| Method | Endpoint                     | Auth  | Description                        |
+| ------ | ---------------------------- | ----- | ---------------------------------- |
+| POST   | /api/admin/companies/approve | Admin | Approve a new company registration |
+
+**Request Example:**
+
+```json
+{
+  "companyId": "64f1a2b3c4d5e6f7a8b9c0d1"
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "message": "Company approved successfully"
+}
+```
+
+**Importance:** Only admins can approve new companies, ensuring control over system access.
+
+---
 
 ### getPendingCompanies.controller.js
-- **Purpose**: Retrieves pending company registrations
-- **Endpoint**: GET /api/admin/companies/pending
-- **Description**: Fetches all companies that are waiting for approval.
-- **Authorization**: Requires admin role
-
-## Auth Controllers
-
-Controllers for authentication and user management.
-
-### completeRegistration.controller.js
-- **Purpose**: Completes user registration process
-- **Endpoint**: POST /api/auth/complete-registration
-- **Description**: Finalizes user registration by providing additional required information.
-
-### confirm2faLogin.controller.js
-- **Purpose**: Confirms two-factor authentication during login
-- **Endpoint**: POST /api/auth/confirm-2fa
-- **Description**: Validates the 2FA code entered by a user during login.
-
-### enable2fa.controller.js
-- **Purpose**: Enables two-factor authentication for a user
-- **Endpoint**: POST /api/auth/enable-2fa
-- **Description**: Activates 2FA security for a user account.
-- **Authorization**: Requires authentication
-
-### forgotPassword.controller.js
-- **Purpose**: Initiates password reset process
-- **Endpoint**: POST /api/auth/forgot-password
-- **Description**: Sends a password reset link to the user's email.
-
-### login.controller.js
-- **Purpose**: Authenticates users
-- **Endpoint**: POST /api/auth/login
-- **Description**: Validates credentials and provides authentication tokens.
-
-### logout.controller.js
-- **Purpose**: Logs out users
-- **Endpoint**: POST /api/auth/logout
-- **Description**: Invalidates current authentication tokens.
-- **Authorization**: Requires authentication
-
-### register.controller.js
-- **Purpose**: Registers new users
-- **Endpoint**: POST /api/auth/register
-- **Description**: Creates a new user account with provided information.
-
-### resendVerificationEmail.controller.js
-- **Purpose**: Resends verification email
-- **Endpoint**: POST /api/auth/resend-verification
-- **Description**: Sends a new verification email to the user.
-
-### resetPassword.controller.js
-- **Purpose**: Resets user password
-- **Endpoint**: POST /api/auth/reset-password
-- **Description**: Updates user password after verification.
-
-### verify2fa.controller.js
-- **Purpose**: Verifies 2FA setup
-- **Endpoint**: POST /api/auth/verify-2fa
-- **Description**: Verifies that 2FA setup is working correctly.
-- **Authorization**: Requires authentication
-
-### verifyEmail.controller.js
-- **Purpose**: Verifies user email
-- **Endpoint**: GET /api/auth/verify-email/:token
-- **Description**: Confirms user email address via verification token.
-
-## Inventory Controllers
-
-Controllers for inventory management.
-
-### createInventory.controller.js
-- **Purpose**: Creates new inventory items
-- **Endpoint**: POST /api/inventory
-- **Description**: Adds new inventory items to a company's stock.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### deleteInventory.controller.js
-- **Purpose**: Deletes inventory items
-- **Endpoint**: DELETE /api/inventory/:id
-- **Description**: Removes inventory items from the system.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### getAllInventory.controller.js
-- **Purpose**: Retrieves all inventory items
-- **Endpoint**: GET /api/inventory
-- **Description**: Gets all inventory items for the user's company with optional filtering.
-- **Authorization**: Requires authentication
-
-### getInventoryById.controller.js
-- **Purpose**: Gets a specific inventory item
-- **Endpoint**: GET /api/inventory/:id
-- **Description**: Retrieves detailed information for a specific inventory item.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### updateInventory.controller.js
-- **Purpose**: Updates inventory information
-- **Endpoint**: PUT /api/inventory/:id
-- **Description**: Modifies existing inventory item details.
-- **Authorization**: Requires authentication and appropriate permissions
-
-## Location Controllers
-
-Controllers for location management.
-
-### createLocation.js
-- **Purpose**: Creates new locations
-- **Endpoint**: POST /api/locations
-- **Description**: Adds new warehouses, stores, or other locations to a company.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### deleteLocation.js
-- **Purpose**: Deletes locations
-- **Endpoint**: DELETE /api/locations/:id
-- **Description**: Removes locations from the system.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### getAllLocations.js
-- **Purpose**: Retrieves all locations
-- **Endpoint**: GET /api/locations
-- **Description**: Gets all locations for a company with optional filtering.
-- **Authorization**: Requires authentication
-
-### getLocationById.js
-- **Purpose**: Gets a specific location
-- **Endpoint**: GET /api/locations/:id
-- **Description**: Retrieves detailed information for a specific location.
-- **Authorization**: Requires authentication
-
-### updateLocation.js
-- **Purpose**: Updates location information
-- **Endpoint**: PUT /api/locations/:id
-- **Description**: Modifies existing location details.
-- **Authorization**: Requires authentication and appropriate permissions
-
-## Notification Controllers
-
-Controllers for managing notifications.
-
-### createNotification.js
-- **Purpose**: Creates new notifications
-- **Endpoint**: POST /api/notifications
-- **Description**: Generates notifications for users.
-- **Authorization**: Requires authentication
-
-### deleteAllNotificationsForUser.js
-- **Purpose**: Deletes all notifications for a user
-- **Endpoint**: DELETE /api/notifications/all
-- **Description**: Clears all notifications for the authenticated user.
-- **Authorization**: Requires authentication
-
-### deleteNotification.js
-- **Purpose**: Deletes a specific notification
-- **Endpoint**: DELETE /api/notifications/:id
-- **Description**: Removes a single notification.
-- **Authorization**: Requires authentication
-
-### getAllNotifications.js
-- **Purpose**: Retrieves all notifications
-- **Endpoint**: GET /api/notifications
-- **Description**: Gets all notifications for the authenticated user.
-- **Authorization**: Requires authentication
-
-### getNotificationById.js
-- **Purpose**: Gets a specific notification
-- **Endpoint**: GET /api/notifications/:id
-- **Description**: Retrieves detailed information for a specific notification.
-- **Authorization**: Requires authentication
-
-### markAllNotificationsAsRead.js
-- **Purpose**: Marks all notifications as read
-- **Endpoint**: PUT /api/notifications/read-all
-- **Description**: Updates all notifications for the user to read status.
-- **Authorization**: Requires authentication
-
-### markNotificationAsRead.js
-- **Purpose**: Marks a notification as read
-- **Endpoint**: PUT /api/notifications/:id/read
-- **Description**: Updates the read status of a specific notification.
-- **Authorization**: Requires authentication
-
-### sendNotificationToUsers.js
-- **Purpose**: Sends notifications to users
-- **Endpoint**: POST /api/notifications/send
-- **Description**: Sends notifications to specified users.
-- **Authorization**: Requires authentication and appropriate permissions
-
-## Order Controllers
-
-Controllers for order management.
-
-### createOrder.js
-- **Purpose**: Creates new orders
-- **Endpoint**: POST /api/orders
-- **Description**: Creates purchase orders between companies.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### deleteOrder.js
-- **Purpose**: Deletes orders
-- **Endpoint**: DELETE /api/orders/:id
-- **Description**: Removes orders from the system.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### getOrderById.js
-- **Purpose**: Gets a specific order
-- **Endpoint**: GET /api/orders/:id
-- **Description**: Retrieves detailed information for a specific order.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### getOrdersReceivedByCompany.js
-- **Purpose**: Retrieves orders received by a company
-- **Endpoint**: GET /api/orders/received
-- **Description**: Gets all orders where the company is the receiver.
-- **Authorization**: Requires authentication
-
-### getOrdersSentByCompany.js
-- **Purpose**: Retrieves orders sent by a company
-- **Endpoint**: GET /api/orders/sent
-- **Description**: Gets all orders where the company is the sender.
-- **Authorization**: Requires authentication
-
-### updateOrderStatus.js
-- **Purpose**: Updates order status
-- **Endpoint**: PUT /api/orders/:id/status
-- **Description**: Modifies the status of an existing order.
-- **Authorization**: Requires authentication and appropriate permissions
-
-## Partner Connection Controllers
-
-Controllers for managing connections between business partners.
-
-### createPartnerConnection.js
-- **Purpose**: Creates new partner connections
-- **Endpoint**: POST /api/partner-connections
-- **Description**: Establishes a new business relationship between companies.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### deletePartnerConnection.js
-- **Purpose**: Deletes partner connections
-- **Endpoint**: DELETE /api/partner-connections/:id
-- **Description**: Removes a business relationship from the system.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### getAllPartnerConnections.js
-- **Purpose**: Retrieves all partner connections
-- **Endpoint**: GET /api/partner-connections
-- **Description**: Gets all business relationships for a company.
-- **Authorization**: Requires authentication
-
-### getPartnerConnectionById.js
-- **Purpose**: Gets a specific partner connection
-- **Endpoint**: GET /api/partner-connections/:id
-- **Description**: Retrieves detailed information for a specific business relationship.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### terminatePartnerConnection.js
-- **Purpose**: Terminates a partner connection
-- **Endpoint**: PUT /api/partner-connections/:id/terminate
-- **Description**: Ends a business relationship between companies.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### updatePartnerConnectionStatus.js
-- **Purpose**: Updates partner connection status
-- **Endpoint**: PUT /api/partner-connections/:id/status
-- **Description**: Modifies the status of a business relationship.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### updatePartnerConnectionVisibility.js
-- **Purpose**: Updates partner connection visibility
-- **Endpoint**: PUT /api/partner-connections/:id/visibility
-- **Description**: Changes visibility settings for a business relationship.
-- **Authorization**: Requires authentication and appropriate permissions
-
-## Product Controllers
-
-Controllers for product management.
-
-### createProduct.js
-- **Purpose**: Creates new products
-- **Endpoint**: POST /api/products
-- **Description**: Adds new products to a company's catalog.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### deleteProduct.js
-- **Purpose**: Deletes products
-- **Endpoint**: DELETE /api/products/:id
-- **Description**: Removes products from the system.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### getAllProducts.js
-- **Purpose**: Retrieves all products
-- **Endpoint**: GET /api/products
-- **Description**: Gets all products for a company with optional filtering.
-- **Authorization**: Requires authentication
-
-### getProductById.js
-- **Purpose**: Gets a specific product
-- **Endpoint**: GET /api/products/:id
-- **Description**: Retrieves detailed information for a specific product.
-- **Authorization**: Requires authentication
-
-### updateProduct.js
-- **Purpose**: Updates product information
-- **Endpoint**: PUT /api/products/:id
-- **Description**: Modifies existing product details.
-- **Authorization**: Requires authentication and appropriate permissions
-
-## Setup Controllers
-
-Controllers for system setup operations.
-
-### createPlatformAdmin.controller.js
-- **Purpose**: Creates platform administrator
-- **Endpoint**: POST /api/setup/admin
-- **Description**: Sets up the initial platform administrator for the system.
-- **Authorization**: Special one-time setup process
-
-## Team Controllers
-
-Controllers for team management.
-
-### invite.controller.js
-- **Purpose**: Sends team invitations
-- **Endpoint**: POST /api/team/invite
-- **Description**: Invites new members to join a company team.
-- **Authorization**: Requires authentication and appropriate permissions
-
-### verifyInvite.controller.js
-- **Purpose**: Verifies team invitations
-- **Endpoint**: GET /api/team/verify-invite/:token
-- **Description**: Validates invitation tokens when users accept invites.
-
-## User Controllers
-
-Controllers for user management.
-
-### users.controller.js
-- **Purpose**: Manages user operations
-- **Endpoints**: 
-  - GET /api/users - Gets all users
-- **Description**: Provides functionality for user management within a company.
-- **Authorization**: Requires authentication and appropriate permissions
+
+| Method | Endpoint                     | Auth  | Description                        |
+| ------ | ---------------------------- | ----- | ---------------------------------- |
+| GET    | /api/admin/companies/pending | Admin | Get all companies pending approval |
+
+**Response Example:**
+
+```json
+[
+  {
+    "id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "name": "Company A",
+    "status": "pending"
+  }
+]
+```
+
+**Importance:** Allows admins to review companies before approval.
+
+---
+
+## <a name="auth"></a>🔐 Auth Controllers
+
+| Endpoint                        | Method | Auth   | Purpose                                |
+| ------------------------------- | ------ | ------ | -------------------------------------- |
+| /api/auth/register              | POST   | Public | Register a new user                    |
+| /api/auth/login                 | POST   | Public | User login                             |
+| /api/auth/logout                | POST   | User   | User logout                            |
+| /api/auth/forgot-password       | POST   | Public | Request password reset                 |
+| /api/auth/reset-password        | POST   | Public | Reset password                         |
+| /api/auth/verify-email/:token   | GET    | Public | Email verification                     |
+| /api/auth/resend-verification   | POST   | Public | Resend verification email              |
+| /api/auth/enable-2fa            | POST   | User   | Enable two-factor authentication       |
+| /api/auth/verify-2fa            | POST   | User   | Verify 2FA setup                       |
+| /api/auth/confirm-2fa           | POST   | Public | Confirm 2FA login                      |
+| /api/auth/complete-registration | POST   | Public | Complete registration after invitation |
+
+### Register Example
+
+**Request:**
+
+```json
+{
+  "name": "Ali",
+  "email": "ali@example.com",
+  "password": "StrongPassword123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "user": {
+    "id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "email": "ali@example.com"
+  }
+}
+```
+
+**Importance:** All authentication and account security operations.
+
+---
+
+## <a name="inventory"></a>📦 Inventory Controllers
+
+| Endpoint           | Method | Auth | Purpose                     |
+| ------------------ | ------ | ---- | --------------------------- |
+| /api/inventory     | POST   | User | Add new inventory item      |
+| /api/inventory     | GET    | User | Get all inventory items     |
+| /api/inventory/:id | GET    | User | Get specific inventory item |
+| /api/inventory/:id | PUT    | User | Update inventory item       |
+| /api/inventory/:id | DELETE | User | Delete inventory item       |
+
+**Request Example (Create):**
+
+```json
+{
+  "product": "64f1a2b3c4d5e6f7a8b9c0d1",
+  "quantity": 100,
+  "location": "Warehouse 1"
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "inventory": {
+    "id": "inv123",
+    "product": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "quantity": 100
+  }
+}
+```
+
+**Importance:** Accurate inventory management for each company.
+
+---
+
+## <a name="location"></a>📍 Location Controllers
+
+| Endpoint           | Method | Auth | Purpose               |
+| ------------------ | ------ | ---- | --------------------- |
+| /api/locations     | POST   | User | Add new location      |
+| /api/locations     | GET    | User | Get all locations     |
+| /api/locations/:id | GET    | User | Get specific location |
+| /api/locations/:id | PUT    | User | Update location       |
+| /api/locations/:id | DELETE | User | Delete location       |
+
+**Request Example (Create):**
+
+```json
+{
+  "name": "Warehouse 1",
+  "address": "123 Main St"
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "location": {
+    "id": "loc123",
+    "name": "Warehouse 1"
+  }
+}
+```
+
+**Importance:** Organize storage and distribution points.
+
+---
+
+## <a name="notification"></a>🔔 Notification Controllers
+
+| Endpoint                    | Method | Auth | Purpose                        |
+| --------------------------- | ------ | ---- | ------------------------------ |
+| /api/notifications          | POST   | User | Create new notification        |
+| /api/notifications          | GET    | User | Get all notifications          |
+| /api/notifications/:id      | GET    | User | Get specific notification      |
+| /api/notifications/:id      | DELETE | User | Delete notification            |
+| /api/notifications/all      | DELETE | User | Delete all notifications       |
+| /api/notifications/:id/read | PUT    | User | Mark notification as read      |
+| /api/notifications/read-all | PUT    | User | Mark all notifications as read |
+| /api/notifications/send     | POST   | User | Send notification to users     |
+
+**Request Example (Create):**
+
+```json
+{
+  "title": "New Order",
+  "message": "You have a new order."
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "notification": {
+    "id": "notif123",
+    "title": "New Order"
+  }
+}
+```
+
+**Importance:** Keep users up to date.
+
+---
+
+## <a name="order"></a>📑 Order Controllers
+
+| Endpoint               | Method | Auth | Purpose             |
+| ---------------------- | ------ | ---- | ------------------- |
+| /api/orders            | POST   | User | Create new order    |
+| /api/orders            | GET    | User | Get all orders      |
+| /api/orders/:id        | GET    | User | Get specific order  |
+| /api/orders/:id        | DELETE | User | Delete order        |
+| /api/orders/received   | GET    | User | Get received orders |
+| /api/orders/sent       | GET    | User | Get sent orders     |
+| /api/orders/:id/status | PUT    | User | Update order status |
+
+**Request Example (Create):**
+
+```json
+{
+  "receiverCompany": "64f1a2b3c4d5e6f7a8b9c0d1",
+  "products": [{ "product": "prod123", "quantity": 10 }]
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "order": {
+    "id": "order123",
+    "status": "pending"
+  }
+}
+```
+
+**Importance:** Manage sales and purchases between companies.
+
+---
+
+## <a name="partner-connection"></a>🤝 Partner Connection Controllers
+
+| Endpoint                                | Method | Auth | Purpose                       |
+| --------------------------------------- | ------ | ---- | ----------------------------- |
+| /api/partner-connections                | POST   | User | Create new partner connection |
+| /api/partner-connections                | GET    | User | Get all partner connections   |
+| /api/partner-connections/:id            | GET    | User | Get specific connection       |
+| /api/partner-connections/:id            | DELETE | User | Delete connection             |
+| /api/partner-connections/:id/terminate  | PUT    | User | Terminate connection          |
+| /api/partner-connections/:id/status     | PUT    | User | Update connection status      |
+| /api/partner-connections/:id/visibility | PUT    | User | Update connection visibility  |
+
+**Request Example (Create):**
+
+```json
+{
+  "partnerCompanyId": "64f1a2b3c4d5e6f7a8b9c0d1"
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "connection": {
+    "id": "conn123",
+    "status": "active"
+  }
+}
+```
+
+**Importance:** Build a business network between companies.
+
+---
+
+## <a name="product"></a>🛒 Product Controllers
+
+| Endpoint          | Method | Auth | Purpose              |
+| ----------------- | ------ | ---- | -------------------- |
+| /api/products     | POST   | User | Add new product      |
+| /api/products     | GET    | User | Get all products     |
+| /api/products/:id | GET    | User | Get specific product |
+| /api/products/:id | PUT    | User | Update product       |
+| /api/products/:id | DELETE | User | Delete product       |
+
+**Request Example (Create):**
+
+```json
+{
+  "name": "Product X",
+  "sku": "SKU123",
+  "unitPrice": 100,
+  "currency": "USD"
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "product": {
+    "id": "prod123",
+    "name": "Product X"
+  }
+}
+```
+
+**Importance:** Manage each company's product catalog.
+
+---
+
+## <a name="setup"></a>⚙️ Setup Controllers
+
+| Endpoint         | Method | Auth    | Purpose                    |
+| ---------------- | ------ | ------- | -------------------------- |
+| /api/setup/admin | POST   | Special | Create main platform admin |
+
+**Request Example:**
+
+```json
+{
+  "name": "Super Admin",
+  "email": "admin@example.com",
+  "password": "StrongPassword123"
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "admin": {
+    "id": "admin123",
+    "email": "admin@example.com"
+  }
+}
+```
+
+**Importance:** Initial system setup.
+
+---
+
+## <a name="team"></a>👥 Team Controllers
+
+| Endpoint                       | Method | Auth   | Purpose                |
+| ------------------------------ | ------ | ------ | ---------------------- |
+| /api/team/invite               | POST   | User   | Invite new team member |
+| /api/team/verify-invite/:token | GET    | Public | Verify team invitation |
+
+**Request Example (Invite):**
+
+```json
+{
+  "email": "newuser@example.com",
+  "role": "staff"
+}
+```
+
+**Response Example:**
+
+```json
+{
+  "success": true,
+  "message": "Invitation sent"
+}
+```
+
+**Importance:** Expand the company team.
+
+---
+
+## <a name="user"></a>👤 User Controllers
+
+| Endpoint   | Method | Auth | Purpose       |
+| ---------- | ------ | ---- | ------------- |
+| /api/users | GET    | User | Get all users |
+
+**Response Example:**
+
+```json
+[
+  {
+    "id": "user123",
+    "name": "Ali",
+    "email": "ali@example.com"
+  }
+]
+```
+
+**Importance:** Manage users within the company.
+
+---
+
+> **Note:** All routes requiring authentication expect the token in the header:  
+> `Authorization: Bearer <token>`
+
+---
+
+## <a name="invoice"></a>💸 Invoice Controllers
+
+
+### 📌 1. Generate Invoice from Order
+
+| Method | Endpoint                          | Auth | Description                           |
+|--------|-----------------------------------|------|---------------------------------------|
+| POST   | /api/invoice/from-order/:orderId | User | Generate an invoice from an order     |
+
+**Request Example:**
+
+```http
+POST /api/invoice/from-order/664fb123bcfecc0012391a7e
+Headers:
+  token: <user_token>
+```
+
+**Response Example:**
+
+```json
+{
+  "message": "Invoice generated from order successfully",
+  "invoice": {
+    "invoiceNumber": "INV-1717773215000",
+    "status": "accepted",
+    "totalAmount": 114,
+    "relatedOrder": "664fb123bcfecc0012391a7e"
+  }
+}
+```
+
+**Importance:** Automatically generates invoice with tax and details based on a sales order.
+
+---
+
+### 📌 2. Get All Invoices for a Company
+
+| Method | Endpoint         | Auth | Description                        |
+|--------|------------------|------|------------------------------------|
+| GET    | /api/invoice/    | User | Fetch all invoices (sent/received) |
+
+**Response Example:**
+
+```json
+{
+  "count": 2,
+  "invoices": [
+    {
+      "invoiceNumber": "INV-1717773215000",
+      "totalAmount": 114,
+      "issuer": { "name": "ChainFlow" },
+      "receiver": { "name": "Ali Co." },
+      "status": "accepted"
+    }
+  ]
+}
+```
+
+**Importance:** Allows companies to see all invoices related to them.
+
+---
+
+### 📌 3. Get Single Invoice Details
+
+| Method | Endpoint                | Auth | Description                  |
+|--------|-------------------------|------|------------------------------|
+| GET    | /api/invoice/:invoiceId | User | Fetch invoice by ID          |
+
+**Response Example:**
+
+```json
+{
+  "invoice": {
+    "invoiceNumber": "INV-1717773215000",
+    "issuer": { "name": "ChainFlow" },
+    "receiver": { "name": "Ali Co." },
+    "items": [
+      {
+        "description": "Subscription service",
+        "quantity": 1,
+        "unitPrice": 100,
+        "taxRate": 14,
+        "total": 100
+      }
+    ],
+    "totalSales": 100,
+    "totalTax": 14,
+    "totalAmount": 114
+  }
+}
+```
+
+**Importance:** View full invoice details for review or printing.
+
+---
+
+### 📌 4. Download Invoice as PDF
+
+| Method | Endpoint                    | Auth | Description                       |
+|--------|-----------------------------|------|-----------------------------------|
+| GET    | /api/invoice/:id/pdf        | User | Download the invoice as a PDF     |
+
+**Headers:**
+
+```
+token: <user_token>
+```
+
+**Response:** Returns a real downloadable PDF of the invoice.
+
+**Importance:** Exporting invoice for printing or sending to client via email.
+
+---
+
+📌 **Note**: PDF generation is powered by **Puppeteer** + **Handlebars** using a clean HTML template.
