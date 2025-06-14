@@ -1,9 +1,9 @@
 import User from "../../models/User.js";
 import jwt from "jsonwebtoken";
 import { AppError } from "../../utils/AppError.js";
-import { sendTeamInviteEmail } from "../../utils/email.js";
 import { roleEnum } from "../../enums/role.enum.js";
 import bcrypt from "bcrypt";
+import sendEmail from "../../services/email.service.js";
 export const inviteUser = async (req, res, next) => {
   const { email, role, name } = req.body;
   const admin = req.user;
@@ -32,8 +32,6 @@ export const inviteUser = async (req, res, next) => {
     { expiresIn: "2d" }
   );
 
-  const expiresAt = new Date();
-  // expiresAt.setDate(expiresAt.getDate() + 2);
   const password = Math.random().toString(36).substring(2, 15);
   await User.create({
     name,
@@ -43,12 +41,19 @@ export const inviteUser = async (req, res, next) => {
     company: admin.company._id,
     status: "invited",
     inviteToken: token,
-    // expiresAt,
   });
 
   const inviteLink = `${process.env.BACKEND_URL}/api/team/verify-invite/${token}`;
 
-  await sendTeamInviteEmail(email, password, inviteLink, admin.name);
+  await sendEmail(
+    "teamInvite",
+    {
+      inviteLink,
+      password,
+      invitedBy: admin.name,
+    },
+    [email]
+  );
 
   res.status(201).json({
     message: "User invited successfully.",

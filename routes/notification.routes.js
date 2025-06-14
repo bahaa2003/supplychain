@@ -13,7 +13,6 @@ import { markAllNotificationsAsReadController } from "../controllers/notificatio
 import { deleteNotificationController } from "../controllers/notification/deleteNotification.js";
 import { deleteAllNotificationsForUserController } from "../controllers/notification/deleteAllNotificationsForUser.js";
 import { createNotificationController } from "../controllers/notification/createNotification.js";
-import { sendNotificationToUsersController } from "../controllers/notification/sendNotificationToUsers.js";
 
 const router = express.Router();
 
@@ -62,15 +61,6 @@ router.post(
   allowedTo("admin", "platform_admin"),
   validate(notificationValidator()),
   createNotificationController
-);
-
-// Send notification to multiple users (for platform_admin only)
-router.post(
-  "/bulk",
-  protectedRoute,
-  allowedTo("platform_admin"),
-  validate(bulkNotificationValidator()),
-  sendNotificationToUsersController
 );
 
 export default router;

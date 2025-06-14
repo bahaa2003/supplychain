@@ -1,9 +1,9 @@
-import deleteNotification from "../../utils/notification/deleteNotification.js";
+import Notification from "../../models/Notification.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const deleteNotificationController = async (req, res) => {
   try {
-    await deleteNotification(req.params.id);
+    await Notification.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (err) {
     throw new AppError(err.message || "Failed to delete notification", 500);

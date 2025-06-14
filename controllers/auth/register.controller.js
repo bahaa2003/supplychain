@@ -1,9 +1,10 @@
 import User from "../../models/User.js";
 import Company from "../../models/Company.js";
 import { AppError } from "../../utils/AppError.js";
-import { sendValidEmail } from "../../utils/email.js";
-import { generateToken } from "../../utils/generateToken.js";
+import sendEmail from "../../services/email.service.js";
+import NotificationSettings from "../../models/NotificationSettings.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const register = async (req, res, next) => {
   const { name, email, password, companyName, industry, size, location } =
@@ -34,12 +35,29 @@ export const register = async (req, res, next) => {
   });
 
   company.createdBy = user._id;
-  await sendValidEmail(email);
   await company.save();
-  await user.save();
+
+  await NotificationSettings.create({
+    user: user._id,
+    email: { enabled: true },
+    sms: { enabled: false },
+    inApp: { enabled: true },
+  });
+
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+  sendEmail(
+    "verifyEmail",
+    {
+      verifyLink: `http://localhost:${process.env.PORT}/api/auth/verify/${token}`,
+    },
+    [user]
+  );
 
   res.status(201).json({
     status: "success",
-    message: "Company registered. Waiting for active email.",
+    message:
+      "Registration successful! Please check your email to verify your account.",
   });
 };

@@ -1,9 +1,12 @@
-import markAllNotificationsAsRead from "../../utils/notification/markAllNotificationsAsRead.js";
+import Notification from "../../models/Notification.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const markAllNotificationsAsReadController = async (req, res) => {
   try {
-    await markAllNotificationsAsRead(req.user._id);
+    await Notification.updateMany(
+      { recipient: req.user._id, isRead: false },
+      { $set: { isRead: true } }
+    );
     res.status(200).json({ status: "success" });
   } catch (err) {
     throw new AppError(

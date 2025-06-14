@@ -15,7 +15,6 @@ import {
   protectedRoute,
   checkEmailVerified,
 } from "../middleware/auth.middleware.js";
-import { completeRegistration } from "../controllers/auth/completeRegistration.controller.js";
 
 import { companyValidator } from "../validators/company.validator.js";
 import { userValidator } from "../validators/user.validator.js";
@@ -53,7 +52,6 @@ router.post(
 router.post("/forgot-password", catchError(forgotPassword));
 router.post("/reset-password", catchError(resetPassword));
 
-router.patch("/complete-registration", catchError(completeRegistration));
 router.get("/verify/:token", catchError(verifyEmail));
 router.get(
   "/resend-verification",

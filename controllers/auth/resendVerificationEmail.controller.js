@@ -1,7 +1,6 @@
 import User from "../../models/User.js";
-import Company from "../../models/Company.js";
-import { sendValidEmail } from "../../utils/email.js";
 import { AppError } from "../../utils/AppError.js";
+import sendEmail from "../../services/email.service.js";
 
 export const resendVerificationEmail = async (req, res, next) => {
   try {
@@ -11,24 +10,26 @@ export const resendVerificationEmail = async (req, res, next) => {
     console.log("user verification status:", user.isEmailVerified);
     if (user.isEmailVerified)
       return next(new AppError("Email already verified", 400));
-    // Extend TTL by 1 day from now
-    // user.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    // await user.save();
-    // if (user.company) {
-    //   const company = await Company.findById(user.company);
-    //   if (company && !company.isApproved) {
-    //     company.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    //     await company.save();
-    //   }
-    // }
-    await sendValidEmail(user.email);
+    // Extend the expire time by 1 day
+    const email = user.email;
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    sendEmail(
+      "verifyEmail",
+      {
+        verifyLink: `${process.env.BACKEND_URL}/api/auth/verify/${token}`,
+      },
+      [user]
+    );
+    // Update the user's verification token and expire time
     res.status(200).json({
-      message: "Verification email resent and TTL extended by 1 day.",
+      message: "Verification email resent and expire extended by 1 day.",
     });
   } catch (err) {
     return next(
       new AppError(
-        "Failed to resend verification email or extend TTL please try again later" +
+        "Failed to resend verification email or extend expire please try again later" +
           " - " +
           err.message,
         500
