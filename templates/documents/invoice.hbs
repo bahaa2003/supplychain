@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Invoice</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h1 { color: #4CAF50; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #4CAF50;
+    }
+
     .invoice-box {
       max-width: 800px;
       margin: auto;
@@ -14,11 +22,26 @@
       line-height: 24px;
       font-size: 14px;
     }
-    .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .table th, .table td { border: 1px solid #ddd; padding: 8px; }
-    .total { font-weight: bold; text-align: right; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    .total {
+      font-weight: bold;
+      text-align: right;
+    }
   </style>
 </head>
+
 <body>
   <div class="invoice-box">
     <h1>Invoice</h1>
@@ -55,4 +78,5 @@
     <p class="total">Total Amount: {{totalAmount}}</p>
   </div>
 </body>
+
 </html>
