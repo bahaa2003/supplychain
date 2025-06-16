@@ -20,14 +20,18 @@ import { companyValidator } from "../validators/company.validator.js";
 import { userValidator } from "../validators/user.validator.js";
 import { validate } from "../middleware/validate.middleware.js";
 
+import { upload } from "../middleware/upload.middleware.js"; // 👈 تمت إضافتها
+
 const router = express.Router();
 
 router.post(
   "/register",
+  upload.array("documents"), // 👈 رفع مستندات الشركة
   validate(userValidator()),
   validate(companyValidator()),
   catchError(register)
 );
+
 router.post("/login", catchError(login));
 router.post("/logout", protectedRoute, catchError(logout));
 
