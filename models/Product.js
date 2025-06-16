@@ -54,11 +54,6 @@ const productSchema = new Schema(
         enum: ["cm", "in", "m", "ft"],
       },
     },
-    images: [
-      {
-        type: String,
-      },
-    ],
     isActive: {
       type: Boolean,
       default: true,
