@@ -1,7 +1,8 @@
 import Order from "../../models/Order.js";
 import { AppError } from "../../utils/AppError.js";
-import createNotification from "../../utils/notification/createNotification.js";
-import { notificationTemplates } from "../../utils/notificationTemplates/index.js";
+import createNotification from "../../services/notification.service.js";
+import Product from "../../models/Product.js";
+import { userRoleEnum } from "../../enums/role.enum.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -10,7 +11,6 @@ export const createOrder = async (req, res) => {
     const {
       supplier,
       items,
-      totalAmount,
       currency,
       notes,
       requestedDeliveryDate,
@@ -19,6 +19,13 @@ export const createOrder = async (req, res) => {
       paymentTerms,
       tags,
     } = req.body;
+    const selectedItems = await Product.find({
+      _id: { $in: items },
+    });
+    const amount = selectedItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
     if (!supplier || !items || !Array.isArray(items) || items.length === 0) {
       throw new AppError("Supplier and items are required", 400);
     }
@@ -39,31 +46,19 @@ export const createOrder = async (req, res) => {
       paymentTerms,
       tags,
     });
-
-    // Send notification to supplier (receiver)
-    const { title, message, htmlMessage } = notificationTemplates.newOrder({
-      orderNumber,
-      customerName: req.user.name || "A company",
+    const recipient = await User.findBy({
+      company: supplier,
+      role: { $in: ["admin", "manager"] },
     });
-    await createNotification({
-      recipient: supplier, // assuming supplier is a userId or company admin userId
-      type: "New Order",
-      title: "New Order Received",
-      message:
-        "New order received from " +
-        (req.user.name || "A company") +
-        ". Order Number: " +
-        orderNumber +
-        "." +
-        " Please check your orders.",
-      htmlMessage: `<p>New order received from <strong>${
-        req.user.name || "A company"
-      }</strong>.</p>
-         <p>Order Number: <strong>${orderNumber}</strong>.</p>
-         <p>Please check your orders.</p>`,
-      related: "Order",
-      relatedId: order._id,
-    });
+    // Send notification to supplier using the notification service
+    await createNotification(
+      "newOrder",
+      {
+        orderNumber,
+        amount,
+      },
+      recipient
+    );
 
     res.status(201).json({ status: "success", data: order });
   } catch (err) {

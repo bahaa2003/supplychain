@@ -1,7 +1,7 @@
 import Order from "../../models/Order.js";
 import { AppError } from "../../utils/AppError.js";
-import createNotification from "../../utils/notification/createNotification.js";
-import { notificationTemplates } from "../../utils/notificationTemplates/index.js";
+import createNotification from "../../services/notification.service.js";
+import User from "../../models/User.js";
 
 export const getOrdersReceivedByCompany = async (req, res) => {
   try {
@@ -16,15 +16,22 @@ export const getOrdersReceivedByCompany = async (req, res) => {
         .limit(limit),
       Order.countDocuments({ supplier: companyId }),
     ]);
-    // Send notification (optional, for auditing)
-    await createNotification({
-      recipient: companyId,
-      type: "Order Status Change",
-      title: "Viewed Received Orders",
-      message: `You viewed your received orders list.`,
-      htmlMessage: `<p>You viewed your received orders list.</p>`,
-      related: "Order",
+
+    // Get company users with admin or manager role
+    const recipients = await User.find({
+      company: companyId,
+      role: { $in: ["admin", "manager"] },
     });
+
+    // Send notification (optional, for auditing)
+    await createNotification(
+      "systemAlert",
+      {
+        message: "Viewed received orders list",
+      },
+      recipients
+    );
+
     res.status(200).json({
       status: "success",
       results: orders.length,

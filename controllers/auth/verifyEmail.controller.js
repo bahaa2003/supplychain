@@ -17,16 +17,12 @@ export const verifyEmail = async (req, res, next) => {
 
     // Remove the expiresAt field from the document
     console.log("user company: ", user.company); // user company:  new ObjectId("6845dc758e263f91c3353c13")
-    await Company.updateOne(
-      { _id: user.company },
-      { $unset: { expiresAt: 1 } }
-    );
+    await Company.updateOne({ _id: user.company });
     // Also Remove the expiresAt field from the user document
     await User.updateOne(
       { email },
       {
         $set: { isEmailVerified: true },
-        $unset: { expiresAt: 1 },
       }
     );
 

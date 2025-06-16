@@ -45,6 +45,7 @@ router.post(
 );
 router.post(
   "/confirm-2fa-login",
+  protectedRoute,
   checkEmailVerified,
   catchError(confirm2FALogin)
 );

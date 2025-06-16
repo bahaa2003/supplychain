@@ -1,7 +1,7 @@
 import Order from "../../models/Order.js";
 import { AppError } from "../../utils/AppError.js";
-import createNotification from "../../utils/notification/createNotification.js";
-import { notificationTemplates } from "../../utils/notificationTemplates/index.js";
+import createNotification from "../../services/notification.service.js";
+import User from "../../models/User.js";
 
 export const deleteOrder = async (req, res) => {
   try {
@@ -17,16 +17,21 @@ export const deleteOrder = async (req, res) => {
     }
     await order.deleteOne();
 
-    // Send notification to supplier about order deletion
-    await createNotification({
-      recipient: order.supplier,
-      type: "Order Status Change",
-      title: `Order #${order.orderNumber} Deleted`,
-      message: `Order #${order.orderNumber} was deleted by the buyer.`,
-      htmlMessage: `<p>Order #${order.orderNumber} was deleted by the buyer.</p>`,
-      related: "Order",
-      relatedId: order._id,
+    // Get supplier company users with admin or manager role
+    const recipients = await User.find({
+      company: order.supplier,
+      role: { $in: ["admin", "manager"] },
     });
+
+    // Send notification to supplier about order deletion
+    await createNotification(
+      "orderStatusChange",
+      {
+        orderNumber: order.orderNumber,
+        newStatus: "Deleted",
+      },
+      recipients
+    );
 
     res.status(204).send();
   } catch (err) {

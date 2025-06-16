@@ -1,9 +1,9 @@
 import Order from "../../models/Order.js";
 import { AppError } from "../../utils/AppError.js";
-import createNotification from "../../utils/notification/createNotification.js";
-import { notificationTemplates } from "../../utils/notificationTemplates/index.js";
+import createNotification from "../../services/notification.service.js";
 import Inventory from "../../models/Inventory.js";
 import InventoryHistory from "../../models/InventoryHistory.js";
+import User from "../../models/User.js";
 
 export const updateOrderStatus = async (req, res) => {
   try {
@@ -65,21 +65,21 @@ export const updateOrderStatus = async (req, res) => {
     order.status = status;
     await order.save();
 
+    // Get buyer company users with admin or manager role
+    const recipients = await User.find({
+      company: order.buyer,
+      role: { $in: ["admin", "manager"] },
+    });
+
     // Send notification to buyer about status change
-    const { title, message, htmlMessage } =
-      notificationTemplates.orderStatusChange({
+    await createNotification(
+      "orderStatusChange",
+      {
         orderNumber: order.orderNumber,
         newStatus: status,
-      });
-    await createNotification({
-      recipient: order.buyer,
-      type: "Order Status Change",
-      title,
-      message,
-      htmlMessage,
-      related: "Order",
-      relatedId: order._id,
-    });
+      },
+      recipients
+    );
 
     res.status(200).json({ status: "success", data: order });
   } catch (err) {

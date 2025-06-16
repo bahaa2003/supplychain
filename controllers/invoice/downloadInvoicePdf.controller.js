@@ -1,6 +1,5 @@
-import puppeteer from "puppeteer";
 import Invoice from "../../models/Invoice.js";
-import renderTemplate from "../../utils/templateRenderer.js";
+import createInvoicePdf from "../../services/invoice.service.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const downloadInvoicePdf = async (req, res, next) => {
@@ -12,15 +11,10 @@ export const downloadInvoicePdf = async (req, res, next) => {
     if (!invoice) {
       return next(new AppError("Invoice not found", 404));
     }
-    const html = renderTemplate("document", "invoice", invoice);
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-    });
-    await browser.close();
+    const pdfBuffer = createInvoicePdf(invoice);
+    if (!pdfBuffer) {
+      return next(new AppError("Failed to generate PDF", 500));
+    }
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename=${invoice.invoiceNumber}.pdf`,

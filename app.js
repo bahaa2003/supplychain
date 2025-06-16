@@ -15,6 +15,7 @@ import {
   checkEmailVerified,
   protectedRoute,
 } from "./middleware/auth.middleware.js";
+import invoiceRoutes from "./routes/invoice.routes.js";
 dotenv.config();
 
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/users/", userRoutes);
 app.use("/api/inventory", protectedRoute, checkEmailVerified, inventoryRoutes);
 app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
 app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);
+app.use("/api/invoice", protectedRoute, invoiceRoutes);
 app.use("/api/notification", notificationRoutes);
 // Global error handler
 app.use(globalErrorHandler);
