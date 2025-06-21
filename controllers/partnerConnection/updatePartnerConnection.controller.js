@@ -1,29 +1,30 @@
-import PartnerConnection from "../../models/PartnerConnection.js";
 import Company from "../../models/Company.js";
 import AppError from "../../utils/AppError.js";
-import { createNotification } from "../../utils/notification/createNotification.js";
+import createNotification from "../../services/notification.service.js";
 
-export const updatePartnerConnectionStatusController = async (
-  req,
-  res,
-  next
-) => {
+export const updatePartnerConnection = async (req, res, next) => {
   try {
-    const { connectionId } = req.params;
     const { status, rejectionReason } = req.body;
     const updatedBy = req.user._id;
     const companyId = req.user.companyId;
-
-    // Find the connection
-    const connection = await PartnerConnection.findById(connectionId);
-    if (!connection) {
-      throw new AppError("Partner connection not found", 404);
-    }
+    const connection = req.connection; // connection is fetched from middleware
 
     // Verify the company has permission to update this connection
     if (connection.recipient.toString() !== companyId.toString()) {
       throw new AppError(
         "You are not authorized to update this connection",
+        403
+      );
+    }
+    //verify permission to update status
+    if (
+      [
+        connection.requester.toString(),
+        connection.recipient.toString(),
+      ].includes(updatedBy.toString()) === false
+    ) {
+      throw new AppError(
+        "You are not authorized to update this connection status",
         403
       );
     }
@@ -44,24 +45,22 @@ export const updatePartnerConnectionStatusController = async (
       connection.acceptedAt = new Date();
     } else if (status === "Rejected") {
       connection.rejectionReason = rejectionReason;
+    } else if (status === "terminated") {
+      connection.terminate(updatedBy, rejectionReason);
     }
 
     await connection.save();
 
     // Get company details for notification
-    const requesterCompany = await Company.findById(connection.requester);
     const recipientCompany = await Company.findById(connection.recipient);
-
     // Create notification for requester
     await createNotification({
-      type: "Partner Request Update",
+      type: "partnerRequestUpdate",
       data: {
         recipientCompany: recipientCompany.name,
         status,
-        rejectionReason,
-        connectionId: connection._id,
       },
-      recipient: connection.requester,
+      recipient: requster_user._id,
     });
 
     // Populate connection details

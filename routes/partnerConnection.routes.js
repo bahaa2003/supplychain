@@ -1,16 +1,14 @@
 import express from "express";
-import { protect, restrictTo } from "../middleware/auth.middleware.js";
+import { allowedTo, protect } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 import {
   createPartnerConnectionValidator,
   updatePartnerConnectionStatusValidator,
 } from "../validators/partnerConnection.validator.js";
-import {
-  createPartnerConnectionController,
-  updatePartnerConnectionStatusController,
-  updatePartnerConnectionVisibilityController,
-  terminatePartnerConnectionController,
-} from "../controllers/partnerConnection/index.js";
+import createPartnerConnection from "../controllers/partnerConnection/createPartnerconnction.controller.js";
+import getAllPartnerConnections from "../controllers/partnerConnection/getAllPartnerConnections.controller.js";
+import getPartnerConnectionById from "../controllers/partnerConnection/getPartnerConnectionById.controller.js";
+import updatePartnerConnection from "../controllers/partnerConnection/updatePartnerConnection.controller.js";
 
 const router = express.Router();
 
@@ -20,31 +18,20 @@ router.use(protect);
 // Create partner connection
 router.post(
   "/",
-  restrictTo("admin", "platform_admin"),
+  allowedTo("admin"),
   validate(createPartnerConnectionValidator()),
-  createPartnerConnectionController
+  createPartnerConnection
 );
 
 // Update partner connection status
 router.patch(
-  "/:connectionId/status",
-  restrictTo("admin", "platform_admin"),
+  "/:connectionId/",
+  allowedTo("admin"),
   validate(updatePartnerConnectionStatusValidator()),
-  updatePartnerConnectionStatusController
+  updatePartnerConnection
 );
 
-// Update partner connection visibility settings
-router.patch(
-  "/:connectionId/visibility",
-  restrictTo("admin", "platform_admin"),
-  updatePartnerConnectionVisibilityController
-);
-
-// Terminate partner connection
-router.post(
-  "/:connectionId/terminate",
-  restrictTo("admin", "platform_admin"),
-  terminatePartnerConnectionController
-);
-
+router.get("/", allowedTo("admin"), getAllPartnerConnections);
+// Get partner connection by ID
+router.get("/:connectionId", allowedTo("admin"), getPartnerConnectionById);
 export default router;

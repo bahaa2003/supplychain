@@ -71,11 +71,6 @@ const partnerConnectionSchema = new Schema(
   }
 );
 
-// Compound indexes for common queries
-partnerConnectionSchema.index({ requester: 1, recipient: 1, status: 1 });
-partnerConnectionSchema.index({ requester: 1, partnershipType: 1, status: 1 });
-partnerConnectionSchema.index({ recipient: 1, partnershipType: 1, status: 1 });
-
 // Prevent self-connection
 partnerConnectionSchema.pre("save", function (next) {
   if (this.requester.toString() === this.recipient.toString()) {
@@ -91,21 +86,6 @@ partnerConnectionSchema.pre("save", function (next) {
   }
   next();
 });
-
-// Add method to check if connection is active
-partnerConnectionSchema.methods.isActive = function () {
-  return this.status === "Accepted";
-};
-
-// Add method to check if connection is pending
-partnerConnectionSchema.methods.isPending = function () {
-  return this.status === "Pending";
-};
-
-// Add method to check if connection is terminated
-partnerConnectionSchema.methods.isTerminated = function () {
-  return this.status === "Terminated";
-};
 
 // Add method to terminate connection
 partnerConnectionSchema.methods.terminate = async function (userId, reason) {

@@ -29,20 +29,17 @@ const imagekit = new ImageKit({
 });
 
 export const uploadToImageKit = async (file, folder = "company_documents") => {
-  return new Promise((resolve, reject) => {
-    imagekit.upload(
-      {
-        file: file.buffer, // buffer from multer
-        fileName: file.originalname,
-        folder,
-      },
-      function (error, result) {
-        if (error) return reject(new AppError(error.message, 500));
-        resolve({
-          url: result.url,
-          fileId: result.fileId,
-        });
-      }
-    );
-  });
+  try {
+    const result = await imagekit.upload({
+      file: file.buffer,
+      fileName: file.originalname,
+      folder,
+    });
+    return {
+      url: result.url,
+      fileId: result.fileId,
+    };
+  } catch (error) {
+    throw new AppError(error.message, 500);
+  }
 };

@@ -3,7 +3,7 @@ import Company from "../../models/Company.js";
 import AppError from "../../utils/AppError.js";
 import { createNotification } from "../../utils/notification/createNotification.js";
 
-export const createPartnerConnectionController = async (req, res, next) => {
+export const createPartnerConnection = async (req, res, next) => {
   try {
     const { recipient, partnershipType, visibilitySettings, notes } = req.body;
     const requester = req.user.companyId;
