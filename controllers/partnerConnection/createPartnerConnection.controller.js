@@ -51,13 +51,13 @@ export const createPartnerConnection = async (req, res, next) => {
 
     // Create notification for recipient
     await createNotification({
-      type: "Partner Request",
+      type: "PartnerRequest",
       data: {
         requesterCompany: requesterCompany.name,
         partnershipType,
         connectionId: connection._id,
       },
-      recipient: recipientCompany._id,
+      recipient: recipient,
     });
 
     // Populate connection details

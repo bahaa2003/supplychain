@@ -21,7 +21,7 @@ export const updatePartnerConnection = async (req, res, next) => {
       [
         connection.requester.toString(),
         connection.recipient.toString(),
-      ].includes(updatedBy.toString()) === false
+      ].includes(companyId.toString()) === false
     ) {
       throw new AppError(
         "You are not authorized to update this connection status",
