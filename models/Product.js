@@ -63,6 +63,12 @@ const productSchema = new Schema(
         type: String,
       },
     ],
+    relatedProducts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   {
     timestamps: true,

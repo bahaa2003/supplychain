@@ -51,9 +51,6 @@ const inventorySchema = new Schema(
     batchNumber: {
       type: String,
     },
-    expiryDate: {
-      type: Date,
-    },
     status: {
       type: String,
       enum: inventoryStatusEnum,

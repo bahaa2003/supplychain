@@ -34,7 +34,7 @@ export const updatePartnerConnection = async (req, res, next) => {
       throw new AppError("Cannot change status from Accepted to Pending", 400);
     }
 
-    if (connection.status === "Terminated") {
+    if (connection.status === "Terminated" && status !== "Accepted") {
       throw new AppError("Cannot update a terminated connection", 400);
     }
 
