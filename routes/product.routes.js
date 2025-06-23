@@ -18,8 +18,8 @@ import { upload } from "../middleware/upload.middleware.js";
 const router = express.Router();
 
 router
-  .route()
-  .get("/", allowedTo("admin", "manager", "staff"), catchError(getAllProducts))
+  .route("/")
+  .get(allowedTo("admin", "manager", "staff"), catchError(getAllProducts))
   .post(
     protectedRoute,
     allowedTo("admin", "manager"),
