@@ -37,7 +37,6 @@ export const createProduct = async (req, res, next) => {
       minimumThreshold: req.body.minimumThreshold || 10,
       maximumThreshold: req.body.maximumThreshold || 100,
       lastUpdated: new Date(),
-      batchNumber: req.body.batchNumber || "",
     });
 
     const files = req.files?.length ? req.files : [];
