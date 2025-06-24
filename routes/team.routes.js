@@ -5,7 +5,7 @@ import {
   protectedRoute,
   allowedTo,
   checkEmailVerified,
-} from "../middleware/auth.middleware.js";
+} from "../middlewares/auth.middleware.js";
 import { catchError } from "../utils/catchError.js";
 
 const router = express.Router();

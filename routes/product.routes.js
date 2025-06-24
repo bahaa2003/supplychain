@@ -7,13 +7,13 @@ import { deleteProduct } from "../controllers/product/deleteProduct.controller.j
 import { createProductFromSource } from "../controllers/product/createProductFromSource.controller.js";
 import { relateProduct } from "../controllers/product/updateRelateProduct.controller.js";
 import { catchError } from "../utils/catchError.js";
-import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
+import { protectedRoute, allowedTo } from "../middlewares/auth.middleware.js";
 import {
   createProductValidator,
   updateProductValidator,
 } from "../validators/product.validator.js";
-import { validate } from "../middleware/validate.middleware.js";
-import { upload } from "../middleware/upload.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
+import { upload } from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 

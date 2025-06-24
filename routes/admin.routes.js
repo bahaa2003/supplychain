@@ -1,7 +1,7 @@
 import express from "express";
 import { getPendingCompanies } from "../controllers/admin/getPendingCompanies.controller.js";
 import { approveCompany } from "../controllers/admin/approveCompany.controller.js";
-import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
+import { protectedRoute, allowedTo } from "../middlewares/auth.middleware.js";
 import { catchError } from "../utils/catchError.js";
 
 const router = express.Router();

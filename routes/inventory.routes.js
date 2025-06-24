@@ -4,9 +4,9 @@ import { getAllInventory } from "../controllers/inventory/getAllInventory.contro
 import { updateInventory } from "../controllers/inventory/updateInventory.controller.js";
 import { getInventoryById } from "../controllers/inventory/getInventoryById.controller.js";
 import { catchError } from "../utils/catchError.js";
-import { allowedTo } from "../middleware/auth.middleware.js";
+import { allowedTo } from "../middlewares/auth.middleware.js";
 import { updateInventoryValidator } from "../validators/inventory.validator.js";
-import { validate } from "../middleware/validate.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 

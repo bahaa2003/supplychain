@@ -5,8 +5,8 @@ import teamRoutes from "./routes/team.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import setupRoutes from "./routes/setup.routes.js";
 import userRoutes from "./routes/users.routes.js";
-import { securityMiddleware } from "./middleware/security.middleware.js";
-import { globalErrorHandler } from "./middleware/globalErrorHandler.js";
+import { securityMiddleware } from "./middlewares/security.middleware.js";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 import productRoutes from "./routes/product.routes.js";
@@ -14,7 +14,7 @@ import notificationRoutes from "./routes/notification.routes.js";
 import {
   checkEmailVerified,
   protectedRoute,
-} from "./middleware/auth.middleware.js";
+} from "./middlewares/auth.middleware.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 dotenv.config();
 

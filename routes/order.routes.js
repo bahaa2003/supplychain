@@ -1,5 +1,5 @@
 import express from "express";
-import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
+import { protectedRoute, allowedTo } from "../middlewares/auth.middleware.js";
 import { roleEnum } from "../enums/role.enum.js";
 import { getOrdersSentByCompany } from "../controllers/order/getOrdersSentByCompany.js";
 import { getOrdersReceivedByCompany } from "../controllers/order/getOrdersReceivedByCompany.js";
@@ -7,7 +7,7 @@ import { createOrder } from "../controllers/order/createOrder.js";
 import { getOrderById } from "../controllers/order/getOrderById.js";
 import { updateOrderStatus } from "../controllers/order/updateOrderStatus.js";
 import { deleteOrder } from "../controllers/order/deleteOrder.js";
-import { validate } from "../middleware/validate.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
 import {
   createOrderValidator,
   updateOrderStatusValidator,

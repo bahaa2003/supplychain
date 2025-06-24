@@ -1,7 +1,7 @@
 import express from "express";
-import { protectedRoute, allowedTo } from "../middleware/auth.middleware.js";
+import { protectedRoute, allowedTo } from "../middlewares/auth.middleware.js";
 import { roleEnum } from "../enums/role.enum.js";
-import { validate } from "../middleware/validate.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
 import {
   notificationValidator,
   bulkNotificationValidator,

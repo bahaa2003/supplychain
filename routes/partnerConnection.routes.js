@@ -1,6 +1,6 @@
 import express from "express";
-import { allowedTo, protect } from "../middleware/auth.middleware.js";
-import { validate } from "../middleware/validate.middleware.js";
+import { allowedTo, protect } from "../middlewares/auth.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
 import {
   createPartnerConnectionValidator,
   updatePartnerConnectionStatusValidator,

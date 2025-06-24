@@ -1,5 +1,5 @@
 import express from "express";
-import { validate } from "../middleware/validate.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
 import {
   createCartValidator,
   updateCartValidator,
@@ -8,7 +8,7 @@ import { createCart } from "../controllers/cart/createCart.controller.js";
 import { updateCart } from "../controllers/cart/updateCart.controller.js";
 import { getCart } from "../controllers/cart/getCart.controller.js";
 import { deleteCart } from "../controllers/cart/deleteCart.controller.js";
-import { protect } from "../middleware/auth.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 

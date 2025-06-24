@@ -1,7 +1,7 @@
 import Product from "../../models/Product.js";
 import Attachment from "../../models/Attachment.js";
 import { AppError } from "../../utils/AppError.js";
-import { uploadToImageKit } from "../../middleware/upload.middleware.js";
+import { uploadToImageKit } from "../../middlewares/upload.middleware.js";
 import Inventory from "../../models/Inventory.js";
 
 const generateSku = () => {

@@ -14,13 +14,13 @@ import { catchError } from "../utils/catchError.js";
 import {
   protectedRoute,
   checkEmailVerified,
-} from "../middleware/auth.middleware.js";
+} from "../middlewares/auth.middleware.js";
 
 import { companyValidator } from "../validators/company.validator.js";
 import { userValidator } from "../validators/user.validator.js";
-import { validate } from "../middleware/validate.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
 
-import { upload } from "../middleware/upload.middleware.js"; // 👈 تمت إضافتها
+import { upload } from "../middlewares/upload.middleware.js"; // 👈 تمت إضافتها
 
 const router = express.Router();
 

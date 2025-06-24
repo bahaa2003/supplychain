@@ -3,7 +3,7 @@ import { getCompanyInvoices } from "../controllers/invoice/getCompanyInvoices.co
 import { getSingleInvoice } from "../controllers/invoice/getSingleInvoice.controller.js";
 import { downloadInvoicePdf } from "../controllers/invoice/downloadInvoicePdf.controller.js";
 
-import { protectedRoute } from "./../middleware/auth.middleware.js";
+import { protectedRoute } from "./../middlewares/auth.middleware.js";
 
 import express from "express";
 const router = express.Router();
