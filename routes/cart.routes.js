@@ -1,22 +1,32 @@
-import express from "express";
-import { validate } from "../middlewares/validate.middleware.js";
+import { Router } from "express";
 import {
-  createCartValidator,
-  updateCartValidator,
+  addToCart,
+  getCarts,
+  removeCartItem,
+  updateCartItem,
+} from "../controllers/cart/cart.controller.js";
+import {
+  addToCartValidator,
+  removeCartItemValidator,
+  updateCartItemValidator,
 } from "../validators/cart.validator.js";
-import { createCart } from "../controllers/cart/createCart.controller.js";
-import { updateCart } from "../controllers/cart/updateCart.controller.js";
-import { getCart } from "../controllers/cart/getCart.controller.js";
-import { deleteCart } from "../controllers/cart/deleteCart.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
+import { protectedRoute } from "../middlewares/auth.middleware.js";
+import { catchError } from "../utils/catchError.js";
 
-const router = express.Router();
+const router = Router();
 
-router.use(protect);
+// All cart routes require authentication
+router.use(protectedRoute);
 
-router.post("/", validate(createCartValidator), createCart);
-router.put("/", validate(updateCartValidator), updateCart);
-router.get("/", getCart);
-router.delete("/", deleteCart);
+router
+  .route("/")
+  .get(catchError(getCarts)) // TODO: add role middleware
+  .post(addToCartValidator, validate, catchError(addToCart));
+
+router
+  .route("/items/:cartItemId")
+  .patch(updateCartItemValidator, validate, catchError(updateCartItem))
+  .delete(removeCartItemValidator, validate, catchError(removeCartItem));
 
 export default router;

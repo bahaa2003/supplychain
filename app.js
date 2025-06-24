@@ -16,9 +16,20 @@ import {
   protectedRoute,
 } from "./middlewares/auth.middleware.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
+import checkoutRoutes from "./routes/checkout.routes.js";
+import webhookRoutes from "./routes/webhook.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 dotenv.config();
 
 const app = express();
+
+// Stripe webhook needs to be registered before the json parser
+app.use(
+  "/api/webhooks",
+  express.raw({ type: "application/json" }),
+  webhookRoutes
+);
 
 app.use(express.json());
 
@@ -41,6 +52,9 @@ app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
 app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);
 app.use("/api/invoice", protectedRoute, invoiceRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/api/cart", protectedRoute, checkEmailVerified, cartRoutes);
+app.use("/api/checkout", protectedRoute, checkEmailVerified, checkoutRoutes);
+app.use("/api/orders", protectedRoute, checkEmailVerified, orderRoutes);
 // Global error handler
 app.use(globalErrorHandler);
 

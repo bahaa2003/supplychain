@@ -106,6 +106,9 @@ const orderSchema = new Schema(
       enum: paymentStatusEnum,
       default: "Pending",
     },
+    stripePaymentIntentId: {
+      type: String,
+    },
     invoice: {
       type: Schema.Types.ObjectId,
       ref: "Invoice",

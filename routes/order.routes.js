@@ -1,63 +1,39 @@
-import express from "express";
-import { protectedRoute, allowedTo } from "../middlewares/auth.middleware.js";
-import { roleEnum } from "../enums/role.enum.js";
-import { getOrdersSentByCompany } from "../controllers/order/getOrdersSentByCompany.js";
-import { getOrdersReceivedByCompany } from "../controllers/order/getOrdersReceivedByCompany.js";
-import { createOrder } from "../controllers/order/createOrder.js";
-import { getOrderById } from "../controllers/order/getOrderById.js";
-import { updateOrderStatus } from "../controllers/order/updateOrderStatus.js";
-import { deleteOrder } from "../controllers/order/deleteOrder.js";
-import { validate } from "../middlewares/validate.middleware.js";
+import { Router } from "express";
 import {
-  createOrderValidator,
-  updateOrderStatusValidator,
-} from "../validators/order.validator.js";
+  acceptOrder,
+  cancelOrder,
+  draftOrder,
+  getCompanyOrders,
+} from "../controllers/order/order.controller.js";
+import { validateMongoId } from "../validators/common.validator.js"; // Assuming a common validator for Mongo IDs
+import { validate } from "../middlewares/validate.middleware.js";
+import { protectedRoute } from "../middlewares/auth.middleware.js";
+import { isSupplier, isBuyer } from "../middlewares/role.middleware.js"; // Assuming a role middleware
+import { catchError } from "../utils/catchError.js";
 
-const router = express.Router();
+const router = Router();
 
-// Get all orders sent by the current user's company (sender)
-router.get(
-  "/sent",
-  protectedRoute,
-  allowedTo("admin", "manager", "staff"),
-  getOrdersSentByCompany
-);
+// All order routes require authentication
+router.use(protectedRoute);
 
-// Get all orders received by the current user's company (receiver)
-router.get(
-  "/received",
-  protectedRoute,
-  allowedTo("admin", "manager", "staff"),
-  getOrdersReceivedByCompany
-);
+router
+  .route("/:orderId/draft")
+  .post(
+    validateMongoId("orderId"),
+    validate,
+    isSupplier,
+    catchError(draftOrder)
+  ); // Protect with role middleware
 
-// Create a new order (sender only)
-router.post(
-  "/",
-  protectedRoute,
-  allowedTo("admin", "manager", "staff"),
-  validate(createOrderValidator()),
-  createOrder
-);
+router
+  .route("/:orderId/cancel")
+  .post(validateMongoId("orderId"), validate, catchError(cancelOrder)); // Accessible to both buyer and supplier
 
-// Get order by ID (must be sender or receiver)
-router.get("/:id", protectedRoute, allowedTo(...roleEnum), getOrderById);
+router
+  .route("/:orderId/accept")
+  .post(validateMongoId("orderId"), validate, isBuyer, catchError(acceptOrder));
 
-// Update order status (receiver only)
-router.patch(
-  "/:id/status",
-  protectedRoute,
-  allowedTo("admin", "manager", "staff"),
-  validate(updateOrderStatusValidator()),
-  updateOrderStatus
-);
-
-// Delete order (sender only, if allowed)
-router.delete(
-  "/:id",
-  protectedRoute,
-  allowedTo("admin", "manager"),
-  deleteOrder
-);
+// Fetch all orders for the current user's company
+router.route("/").get(catchError(getCompanyOrders)); // TODO: add role middleware
 
 export default router;

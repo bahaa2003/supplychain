@@ -1,38 +1,38 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 
-export const cartItemValidators = [
-  body("items.*.product")
-    .isString()
-    .withMessage("Product must be a string")
+const addToCartValidator = [
+  body("productId")
     .notEmpty()
-    .withMessage("Product is required"),
-  body("items.*.quantity")
-    .isInt({ min: 1 })
-    .withMessage("Quantity must be at least 1"),
-  body("items.*.unitPrice")
-    .isFloat({ min: 0 })
-    .withMessage("Unit price must be at least 0"),
-  body("items.*.subtotal")
-    .isFloat({ min: 0 })
-    .withMessage("Subtotal must be at least 0"),
+    .withMessage("Product ID is required")
+    .isMongoId()
+    .withMessage("Invalid Product ID format"),
+
+  body("quantity")
+    .notEmpty()
+    .withMessage("Quantity is required")
+    .isInt({ gt: 0 })
+    .withMessage("Quantity must be a positive integer"),
 ];
 
-export const createCartValidator = [
-  body("setAllOrNot")
-    .optional()
-    .isBoolean()
-    .withMessage("setAllOrNot must be boolean"),
-  body("items")
-    .isArray({ min: 1 })
-    .withMessage("Items must be an array with at least one item"),
-  ...cartItemValidators,
+const updateCartItemValidator = [
+  param("cartItemId")
+    .notEmpty()
+    .withMessage("Cart item ID is required")
+    .isMongoId()
+    .withMessage("Invalid cart item ID format"),
+  body("quantity")
+    .notEmpty()
+    .withMessage("Quantity is required")
+    .isInt({ gt: 0 })
+    .withMessage("Quantity must be a positive integer"),
 ];
 
-export const updateCartValidator = [
-  body("setAllOrNot")
-    .optional()
-    .isBoolean()
-    .withMessage("setAllOrNot must be boolean"),
-  body("items").optional().isArray().withMessage("Items must be an array"),
-  ...cartItemValidators,
+const removeCartItemValidator = [
+  param("cartItemId")
+    .notEmpty()
+    .withMessage("Cart item ID is required")
+    .isMongoId()
+    .withMessage("Invalid cart item ID format"),
 ];
+
+export { addToCartValidator, updateCartItemValidator, removeCartItemValidator };

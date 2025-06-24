@@ -1,11 +1,15 @@
 export const orderStatusEnum = [
   "Draft",
   "Submitted",
+  "Pending",
   "Approved",
   "In Production",
   "Ready for Shipment",
   "Shipped",
   "Delivered",
+  "Accepted",
+  "Returned",
   "Cancelled",
   "Rejected",
+  "Failed",
 ];

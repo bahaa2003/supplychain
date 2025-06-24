@@ -11,7 +11,7 @@ const cartItemSchema = new Schema({
     type: Number,
     required: true,
   },
-  unitPrice: {
+  priceAtTimeOfAddition: {
     type: Number,
     required: true,
   },

@@ -36,6 +36,7 @@
     "nodemon": "^3.1.10",
     "puppeteer": "^24.10.0",
     "speakeasy": "^2.0.0",
+    "stripe": "^18.2.1",
     "uuid": "^11.1.0",
     "xss-clean": "^0.1.1"
   }
