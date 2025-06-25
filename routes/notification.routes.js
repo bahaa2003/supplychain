@@ -2,17 +2,14 @@ import express from "express";
 import { protectedRoute, allowedTo } from "../middlewares/auth.middleware.js";
 import { roleEnum } from "../enums/role.enum.js";
 import { validate } from "../middlewares/validate.middleware.js";
-import {
-  notificationValidator,
-  bulkNotificationValidator,
-} from "../validators/notification.validator.js";
-import { getAllNotifications } from "../controllers/notification/getAllNotifications.js";
-import { getNotificationById } from "../controllers/notification/getNotificationById.js";
-import { markNotificationAsReadController } from "../controllers/notification/markNotificationAsRead.js";
-import { markAllNotificationsAsReadController } from "../controllers/notification/markAllNotificationsAsRead.js";
-import { deleteNotificationController } from "../controllers/notification/deleteNotification.js";
-import { deleteAllNotificationsForUserController } from "../controllers/notification/deleteAllNotificationsForUser.js";
-import { createNotificationController } from "../controllers/notification/createNotification.js";
+import { notificationValidator } from "../validators/notification.validator.js";
+import { getAllNotifications } from "../controllers/notifications/getAllNotifications.controller.js";
+import { getNotificationById } from "../controllers/notifications/getNotificationById.controller.js";
+import { markNotificationAsReadController } from "../controllers/notifications/markNotificationAsRead.controller.js";
+import { markAllNotificationsAsReadController } from "../controllers/notifications/markAllNotificationsAsRead.controller.js";
+import { deleteNotificationController } from "../controllers/notifications/deleteNotification.controller.js";
+import { deleteAllNotificationsForUserController } from "../controllers/notifications/deleteAllNotificationsForUser.controller.js";
+import { createNotificationController } from "../controllers/notifications/createNotification.controller.js";
 
 const router = express.Router();
 

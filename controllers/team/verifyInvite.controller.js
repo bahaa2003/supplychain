@@ -1,7 +1,6 @@
 import User from "../../models/User.js";
 import jwt from "jsonwebtoken";
 import { AppError } from "../../utils/AppError.js";
-import bcrypt from "bcrypt";
 
 export const verifyInvite = async (req, res, next) => {
   const { token } = req.params;

@@ -4,7 +4,6 @@ import Attachment from "../../models/Attachment.js";
 import { AppError } from "../../utils/AppError.js";
 import sendEmail from "../../services/email.service.js";
 import NotificationSettings from "../../models/NotificationSettings.js";
-import { generateToken } from "../../utils/generateToken.js";
 import { uploadToImageKit } from "../../middlewares/upload.middleware.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
