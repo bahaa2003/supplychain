@@ -38,21 +38,12 @@ const inventorySchema = new Schema(
     maximumThreshold: {
       type: Number,
     },
-    reorderPoint: {
-      type: Number,
-    },
     reorderQuantity: {
       type: Number,
     },
     lastUpdated: {
       type: Date,
       default: Date.now,
-    },
-    status: {
-      type: String,
-      enum: inventoryStatusEnum,
-      required: true,
-      default: "In Stock",
     },
   },
   {
@@ -63,6 +54,17 @@ const inventorySchema = new Schema(
 // Virtual for available quantity
 inventorySchema.virtual("available").get(function () {
   return this.currentQuantity - this.reservedQuantity;
+});
+
+// Virtual for status based on available quantity
+inventorySchema.virtual("status").get(function () {
+  if (this.available > this.maximumThreshold) {
+    return "In Stock";
+  } else if (this.available < this.minimumThreshold) {
+    return "Low Stock";
+  } else {
+    return "Out of Stock";
+  }
 });
 
 export default mongoose.model("Inventory", inventorySchema);

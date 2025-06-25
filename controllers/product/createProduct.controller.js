@@ -1,7 +1,6 @@
 import Product from "../../models/Product.js";
 import Attachment from "../../models/Attachment.js";
 import { AppError } from "../../utils/AppError.js";
-import { uploadToImageKit } from "../../middlewares/upload.middleware.js";
 import Inventory from "../../models/Inventory.js";
 
 const generateSku = () => {
@@ -13,7 +12,7 @@ export const createProduct = async (req, res, next) => {
     const companyId = req.user.company?._id || req.user.company;
 
     const existingProduct = await Product.findOne({
-      name: req.body.name,
+      productName: req.body.productName,
       company: companyId,
     }).lean();
 
@@ -39,39 +38,10 @@ export const createProduct = async (req, res, next) => {
       lastUpdated: new Date(),
     });
 
-    const files = req.files?.length ? req.files : [];
-    const attachments = [];
-
-    for (const file of files) {
-      if (
-        !file.mimetype.startsWith("image") &&
-        file.mimetype !== "image/png" &&
-        file.mimetype !== "image/jpeg"
-      ) {
-        continue;
-      }
-
-      const result = await uploadToImageKit(file, "products");
-
-      const attachment = await Attachment.create({
-        type: "product_image",
-        fileUrl: result.url,
-        fileId: result.fileId,
-        ownerCompany: companyId,
-        product: product._id,
-        relatedTo: "Product",
-        uploadedBy: req.user._id,
-        status: "approved",
-      });
-
-      attachments.push(attachment);
-    }
-
     res.status(201).json({
       status: "success",
       data: {
         product,
-        attachments,
       },
     });
   } catch (err) {

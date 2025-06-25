@@ -4,7 +4,7 @@ import { unitEnum } from "../enums/unit.enum.js";
 const { Schema } = mongoose;
 const productSchema = new Schema(
   {
-    name: {
+    ProductName: {
       type: String,
       required: true,
       trim: true,
@@ -17,9 +17,6 @@ const productSchema = new Schema(
     sku: {
       type: String,
       required: true,
-    },
-    description: {
-      type: String,
     },
     category: {
       type: String,
@@ -38,37 +35,10 @@ const productSchema = new Schema(
       enum: unitEnum,
       default: "piece",
     },
-    weight: {
-      value: Number,
-      unit: {
-        type: String,
-        enum: ["kg", "lb", "g", "oz"],
-      },
-    },
-    dimensions: {
-      length: Number,
-      width: Number,
-      height: Number,
-      unit: {
-        type: String,
-        enum: ["cm", "in", "m", "ft"],
-      },
-    },
     isActive: {
       type: Boolean,
       default: true,
     },
-    tags: [
-      {
-        type: String,
-      },
-    ],
-    relatedProducts: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
   },
   {
     timestamps: true,
