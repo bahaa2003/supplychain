@@ -4,8 +4,6 @@ import { getProductById } from "../controllers/product/getProductById.controller
 import { createProduct } from "../controllers/product/createProduct.controller.js";
 import { updateProduct } from "../controllers/product/updateProduct.controller.js";
 import { deleteProduct } from "../controllers/product/deleteProduct.controller.js";
-import { createProductFromSource } from "../controllers/product/createProductFromSource.controller.js";
-import { relateProduct } from "../controllers/product/updateRelateProduct.controller.js";
 import { catchError } from "../utils/catchError.js";
 import { protectedRoute, allowedTo } from "../middlewares/auth.middleware.js";
 import {
@@ -39,19 +37,4 @@ router
     catchError(updateProduct)
   );
 
-router
-  .route("/relate/:sourceProductId")
-  .post(
-    protectedRoute,
-    allowedTo("admin", "manager"),
-    catchError(createProductFromSource)
-  );
-
-router
-  .route("/:id/relate/:sourceProductId")
-  .patch(
-    protectedRoute,
-    allowedTo("admin", "manager"),
-    catchError(relateProduct)
-  );
 export default router;

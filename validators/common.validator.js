@@ -5,12 +5,10 @@ import { param } from "express-validator";
  * @param {string} fieldName - The name of the parameter field to validate.
  * @returns {ValidationChain} An express-validator validation chain.
  */
-const validateMongoId = (fieldName) => {
+export const validateMongoId = (fieldName) => {
   return param(fieldName)
     .notEmpty()
     .withMessage(`${fieldName} is required`)
     .isMongoId()
     .withMessage(`Invalid ${fieldName} format`);
 };
-
-export { validateMongoId };
