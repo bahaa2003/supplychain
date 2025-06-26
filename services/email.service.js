@@ -5,9 +5,8 @@ import NotificationSettings from "../models/NotificationSettings.js";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "bahaamohammed012003@gmail.com",
-    // pass: "pqpr hocv ylcl ilxp",
-    pass: "pqprhocvylclilxp",
+    user: process.env.NODEMAILER_USER,
+    pass: process.env.NODEMAILER_PASS,
   },
 });
 

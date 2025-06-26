@@ -1,12 +1,17 @@
 import mongoose from "mongoose";
-import { currencyEnum } from "../enums/currency.enum.js";
 import { unitEnum } from "../enums/unit.enum.js";
+
 const { Schema } = mongoose;
+
 const productSchema = new Schema(
   {
-    ProductName: {
+    name: {
       type: String,
       required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
       trim: true,
     },
     company: {
@@ -17,24 +22,25 @@ const productSchema = new Schema(
     sku: {
       type: String,
       required: true,
-    },
-    category: {
-      type: String,
+      trim: true,
+      uppercase: true,
     },
     unitPrice: {
       type: Number,
       required: true,
-    },
-    currency: {
-      type: String,
-      enum: currencyEnum,
-      default: "USD",
+      min: 0,
     },
     unit: {
       type: String,
       enum: unitEnum,
       default: "piece",
     },
+    // Used to link to an original supplier's product if this is a reseller's product
+    supplierInfo: {
+      supplierId: { type: Schema.Types.ObjectId, ref: "Company" },
+      supplierS_S_K_U: String,
+    },
+    category: String,
     isActive: {
       type: Boolean,
       default: true,
@@ -44,5 +50,8 @@ const productSchema = new Schema(
     timestamps: true,
   }
 );
+
+// Ensure SKU is unique per company
+productSchema.index({ company: 1, sku: 1 }, { unique: true });
 
 export default mongoose.model("Product", productSchema);
