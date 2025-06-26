@@ -37,16 +37,22 @@ export const updatePartnerConnection = async (req, res, next) => {
     if (connection.status === "Terminated" && status !== "Accepted") {
       throw new AppError("Cannot update a terminated connection", 400);
     }
-
-    // Update connection status
-    connection.status = status;
-    if (status === "Accepted") {
-      connection.acceptedBy = updatedBy;
-      connection.acceptedAt = new Date();
-    } else if (status === "Rejected") {
-      connection.rejectionReason = rejectionReason;
-    } else if (status === "terminated") {
-      connection.terminate(updatedBy, rejectionReason);
+    if (connection.recipient.toString() === companyId.toString()) {
+      if (status !== "Accepted" && status !== "Rejected") {
+        throw new AppError("recipient can only accept or reject", 400);
+      }
+      // Update connection status
+      connection.status = status;
+      if (status === "Accepted") {
+        connection.acceptedBy = updatedBy;
+        connection.acceptedAt = new Date();
+      } else if (status === "Rejected") {
+        connection.rejectionReason = rejectionReason;
+      }
+    } else if (connection.requester.toString() === companyId.toString()) {
+      if (status === "terminated" && connection.status !== "Pending") {
+        connection.deleteOne();
+      }
     }
 
     await connection.save();

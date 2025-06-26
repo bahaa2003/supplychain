@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import nodemailer from "nodemailer";
 import renderTemplate from "../utils/templateRenderer.js";
 import NotificationSettings from "../models/NotificationSettings.js";

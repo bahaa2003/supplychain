@@ -11,19 +11,19 @@ export const userValidator = () => [
     .isLength({ min: 2, max: 40 })
     .withMessage("User name must be between 2 and 40 characters"),
   body("email").isEmail().withMessage("Valid email is required"),
-  body("password")
-    .isLength({ max: 100 })
-    .withMessage("Password must be between 8 and 100 characters")
-    .isStrongPassword({
-      minLength: 8,
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-    })
-    .withMessage(
-      "Password must be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol"
-    ),
+  // body("password")
+  //   .isLength({ max: 100 })
+  //   .withMessage("Password must be between 8 and 100 characters")
+  //   .isStrongPassword({
+  //     minLength: 8,
+  //     minLowercase: 1,
+  //     minUppercase: 1,
+  //     minNumbers: 1,
+  //     minSymbols: 1,
+  //   })
+  // .withMessage(
+  //   "Password must be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol"
+  // ),
   body("role").optional().isIn(roleEnum).withMessage("Invalid role"),
   body("company")
     .optional()
