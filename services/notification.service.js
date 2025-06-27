@@ -1,9 +1,8 @@
 import renderTemplate from "../utils/templateRenderer.js";
 import Notification from "../models/Notification.js";
 
-export default async function createNotification(templateName, data, users) {
-  const content = renderTemplate("notifications", templateName, data);
-
+export default async function createNotification({ type, data, recipients }) {
+  const content = renderTemplate("notifications", type, data);
   const notificationTitles = {
     documentUpdate: "Document Update Required",
     inventoryAlert: "Inventory Alert",
@@ -16,13 +15,14 @@ export default async function createNotification(templateName, data, users) {
     systemAlert: "System Alert",
     taskAssignment: "New Task Assigned",
   };
+  console.log("Notification title:", notificationTitles[type]);
 
-  const userList = Array.isArray(users) ? users : [users];
+  const userList = Array.isArray(recipients) ? recipients : [recipients];
   for (const user of userList) {
     await Notification.create({
-      user: user._id,
-      title: notificationTitles[templateName] || "Notification",
-      type: templateName,
+      recipient: user,
+      title: notificationTitles[type] || "Notification",
+      type,
       content,
       read: false,
     });

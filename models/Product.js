@@ -5,13 +5,9 @@ const { Schema } = mongoose;
 
 const productSchema = new Schema(
   {
-    name: {
+    productName: {
       type: String,
       required: true,
-      trim: true,
-    },
-    description: {
-      type: String,
       trim: true,
     },
     company: {
@@ -23,7 +19,7 @@ const productSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      uppercase: true,
+      unique: true,
     },
     unitPrice: {
       type: Number,
@@ -35,11 +31,6 @@ const productSchema = new Schema(
       enum: unitEnum,
       default: "piece",
     },
-    // Used to link to an original supplier's product if this is a reseller's product
-    supplierInfo: {
-      supplierId: { type: Schema.Types.ObjectId, ref: "Company" },
-      supplierS_S_K_U: String,
-    },
     category: String,
     isActive: {
       type: Boolean,
@@ -50,8 +41,5 @@ const productSchema = new Schema(
     timestamps: true,
   }
 );
-
-// Ensure SKU is unique per company
-productSchema.index({ company: 1, sku: 1 }, { unique: true });
 
 export default mongoose.model("Product", productSchema);

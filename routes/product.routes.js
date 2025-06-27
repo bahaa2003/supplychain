@@ -10,8 +10,8 @@ import {
   createProductValidator,
   updateProductValidator,
 } from "../validators/product.validator.js";
+import { createinventoryValidator } from "../validators/inventory.validator.js";
 import { validate } from "../middlewares/validate.middleware.js";
-import { upload } from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
@@ -21,8 +21,8 @@ router
   .post(
     protectedRoute,
     allowedTo("admin", "manager"),
-    upload.array("images"),
     validate(createProductValidator()),
+    validate(createinventoryValidator()),
     catchError(createProduct)
   );
 

@@ -7,7 +7,10 @@ import { AppError } from "../../utils/AppError.js";
 export const approveCompany = async (req, res, next) => {
   const { id } = req.params;
 
-  const company = await Company.findById(id).populate("createdBy", "name email");
+  const company = await Company.findById(id).populate(
+    "createdBy",
+    "name email"
+  );
   if (!company) return next(new AppError("Company not found", 404));
 
   company.isApproved = true;
@@ -16,9 +19,9 @@ export const approveCompany = async (req, res, next) => {
 
   // إرسال البريد الإلكتروني
   await sendEmail(
-    "companyApproved",
+    "companyWelcome",
     { companyName: company.name, adminName: admin?.name },
-    company.admins
+    admin
   );
 
   // جلب مستندات الشركة
@@ -29,9 +32,9 @@ export const approveCompany = async (req, res, next) => {
     },
     {
       fileUrl: 1,
-      fileId: 1, 
+      fileId: 1,
       status: 1,
-      createdAt: 1
+      createdAt: 1,
     }
   );
 
@@ -46,6 +49,6 @@ export const approveCompany = async (req, res, next) => {
       createdBy: company.createdBy,
       isApproved: company.isApproved,
     },
-    documents
+    documents,
   });
 };

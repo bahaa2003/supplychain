@@ -15,7 +15,16 @@ const partnerConnectionSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "Accepted", "Rejected", "Terminated"],
+      enum: [
+        "Pending",
+        "Cancelled",
+        "Active",
+        "Rejected",
+        "Inactive",
+        "Completed",
+        "Expired",
+        "Terminated",
+      ],
       default: "Pending",
     },
     partnershipType: {
@@ -28,22 +37,7 @@ const partnerConnectionSchema = new Schema(
         "Retailer",
         "Other",
       ],
-      required: true,
-    },
-    visibilitySettings: {
-      orders: { type: Boolean, default: true },
-      inventory: { type: Boolean, default: true },
-      documents: { type: Boolean, default: true },
-      shipments: { type: Boolean, default: true },
-      analytics: { type: Boolean, default: false },
-    },
-    notes: {
-      type: String,
-      maxlength: 500,
-    },
-    rejectionReason: {
-      type: String,
-      maxlength: 500,
+      // required: true,
     },
     invitedBy: {
       type: Schema.Types.ObjectId,
@@ -57,7 +51,23 @@ const partnerConnectionSchema = new Schema(
     acceptedAt: { type: Date },
     terminatedAt: { type: Date },
     terminatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    terminationType: {
+      type: String,
+      enum: ["Terminated", "Completed", "Expired", "Cancelled"],
+    },
+    suspendedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    suspendedAt: { type: Date },
+    rejectedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    rejectedAt: { type: Date },
+    rejectionReason: {
+      type: String,
+      maxlength: 500,
+    },
     terminationReason: {
+      type: String,
+      maxlength: 500,
+    },
+    suspensionReason: {
       type: String,
       maxlength: 500,
     },

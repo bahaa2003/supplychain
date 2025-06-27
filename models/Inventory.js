@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { inventoryStatusEnum } from "../enums/inventoryStatus.enum.js";
+import { AppError } from "../utils/AppError.js";
 
 const { Schema } = mongoose;
 
@@ -10,11 +11,6 @@ const inventorySchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Product",
       required: true,
-    },
-    sku: {
-      type: String,
-      required: true,
-      index: true,
     },
     company: {
       type: Schema.Types.ObjectId,
@@ -41,19 +37,16 @@ const inventorySchema = new Schema(
       type: Number,
       default: 10,
     },
+    lastUpdated: {
+      type: Date,
+      default: Date.now(),
+    },
+    // Used to link to an original supplier's product if this is a reseller's product
+    supplierInfo: [{ type: Schema.Types.ObjectId, ref: "Company" }],
   },
   {
     timestamps: true,
-    versionKey: "__v", // Enable optimistic locking
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
-);
-
-// Compound index to ensure unique inventory entry per product, company, and location
-inventorySchema.index(
-  { product: 1, company: 1, location: 1 },
-  { unique: true }
 );
 
 // Virtual for available quantity
@@ -77,7 +70,7 @@ inventorySchema.virtual("status").get(function () {
 inventorySchema.pre("save", function (next) {
   if (this.reserved > this.onHand) {
     return next(
-      new Error("Reserved quantity cannot be greater than on-hand quantity.")
+      new AppError("Reserved quantity cannot exceed on-hand quantity.", 400)
     );
   }
   next();

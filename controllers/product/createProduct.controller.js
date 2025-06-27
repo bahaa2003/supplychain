@@ -1,10 +1,9 @@
 import Product from "../../models/Product.js";
-import Attachment from "../../models/Attachment.js";
 import { AppError } from "../../utils/AppError.js";
 import Inventory from "../../models/Inventory.js";
 
 const generateSku = () => {
-  return `SKU-${Math.random().toString(36).substring(2, 14).toUpperCase()}`;
+  return `${Math.random().toString(36).substring(2, 14).toUpperCase()}`;
 };
 
 export const createProduct = async (req, res, next) => {
@@ -19,25 +18,38 @@ export const createProduct = async (req, res, next) => {
     if (existingProduct) {
       return next(new AppError("Product with this name already exists", 400));
     }
-
+    const {
+      productName,
+      sku = generateSku(),
+      unitPrice,
+      unit,
+      category,
+      isActive,
+    } = req.body;
+    console.log("Creating product with SKU:", sku);
     const product = await Product.create({
-      ...req.body,
       company: companyId,
-      sku: generateSku(),
+      productName,
+      sku,
+      unitPrice,
+      unit,
+      category,
+      isActive,
     });
+    console.log("Product created:", product);
+    const defaultLocation = req.body.location || user.company?.location;
 
     // After normal product creation, create inventory
     await Inventory.create({
       product: product._id,
       company: companyId,
-      currentQuantity: req.body.initialQuantity || 0,
-      reservedQuantity: req.body.reservedQuantity || 0,
-      availableQuantity: req.body.initialQuantity || 0,
+      onHand: req.body.initialQuantity || 0,
       minimumThreshold: req.body.minimumThreshold || 10,
-      maximumThreshold: req.body.maximumThreshold || 100,
       lastUpdated: new Date(),
+      location: defaultLocation,
     });
 
+    console.log("Inventory created for product:", product._id);
     res.status(201).json({
       status: "success",
       data: {

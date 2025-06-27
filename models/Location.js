@@ -4,10 +4,9 @@ const { Schema } = mongoose;
 // Inventory model for managing product stock levels across different locations
 const locationSchema = new Schema(
   {
-    name: {
+    locationName: {
       type: String,
       required: true,
-      unique: true,
     },
     company: {
       type: Schema.Types.ObjectId,
@@ -17,6 +16,7 @@ const locationSchema = new Schema(
     type: {
       type: String,
       enum: locationTypeEnum,
+      default: "Warehouse",
       required: true,
     },
     address: {

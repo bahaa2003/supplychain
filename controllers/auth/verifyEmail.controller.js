@@ -17,10 +17,13 @@ export const verifyEmail = async (req, res, next) => {
         message: "Registration session expired, please sign up again",
       });
 
+<<<<<<< HEAD
     const companyExists = await Company.exists({ _id: user.company });
     if (!companyExists) {
     }
 
+=======
+>>>>>>> 74d7df00efc8d4d996c54824781b8015deacbecb
     await User.updateOne(
       { email },
       { $set: { isEmailVerified: true } }

@@ -1,6 +1,7 @@
 import User from "../../models/User.js";
 import { AppError } from "../../utils/AppError.js";
 import sendEmail from "../../services/email.service.js";
+import jwt from "jsonwebtoken";
 
 export const resendVerificationEmail = async (req, res, next) => {
   try {
