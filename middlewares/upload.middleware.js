@@ -43,3 +43,12 @@ export const uploadToImageKit = async (file, folder = "company_documents") => {
     throw new AppError(error.message, 500);
   }
 };
+
+export const deleteFromImageKit = async (fileId) => {
+  try {
+    const result = await imagekit.deleteFile(fileId);
+    return result;
+  } catch (error) {
+    throw new AppError("Failed to delete file from ImageKit", 500);
+  }
+};

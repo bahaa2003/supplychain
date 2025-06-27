@@ -8,22 +8,22 @@ export const verifyEmail = async (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err)
       return res.status(400).json({ message: "Invalid or expired token" });
+    
     const { email } = decoded;
     const user = await User.findOne({ email });
+    
     if (!user)
       return res.status(400).json({
         message: "Registration session expired, please sign up again",
       });
 
-    // Remove the expiresAt field from the document
-    console.log("user company: ", user.company); // user company:  new ObjectId("6845dc758e263f91c3353c13")
-    await Company.updateOne({ _id: user.company });
-    // Also Remove the expiresAt field from the user document
+    const companyExists = await Company.exists({ _id: user.company });
+    if (!companyExists) {
+    }
+
     await User.updateOne(
       { email },
-      {
-        $set: { isEmailVerified: true },
-      }
+      { $set: { isEmailVerified: true } }
     );
 
     res.status(200).json({

@@ -8,6 +8,11 @@ const companySchema = new Schema(
     location: { type: String },
     isApproved: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    budget: {
+      type: Number,
+      default: 0,
+    },
+
     // expiresAt: {
     //   type: Date,
     //   default: () => new Date(Date.now() + 1 * 5 * 60 * 1000),

@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema(
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
     passwordChangeAt: { type: Date },
+    avatar: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attachment",
+    },
     // expiresAt: {
     //   type: Date,
     //   default: () => new Date(Date.now() + 1 * 5 * 60 * 1000),

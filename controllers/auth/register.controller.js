@@ -74,7 +74,6 @@ export const register = async (req, res, next) => {
     }
   }
 
-  await sendValidEmail(email);
 
   res.status(201).json({
     status: "success",

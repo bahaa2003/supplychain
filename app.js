@@ -17,6 +17,7 @@ import {
 } from "./middlewares/auth.middleware.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import orderRoutes from "./routes/order.routes.js";
+import analyticsRoutes from "./routes/analytics.route.js";
 dotenv.config();
 
 const app = express();
@@ -37,12 +38,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users/", userRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/inventory", protectedRoute, checkEmailVerified, inventoryRoutes);
 app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
 app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);
 app.use("/api/invoice", protectedRoute, invoiceRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/orders", protectedRoute, checkEmailVerified, orderRoutes);
+
 // Global error handler
 app.use(globalErrorHandler);
 
