@@ -1,18 +1,20 @@
 import Company from "../../models/Company.js";
 import Attachment from "../../models/Attachment.js";
 
-export const getPendingCompanies = async (req, res, next) => {
+export const getAllCompanies = async (req, res, next) => {
   try {
-    const companies = await Company.find(
-      { isApproved: false },
-      { __v: false }
-    ).populate("createdBy", "name email isEmailVerified").lean();
+    const { status } = req.query;
+    let isApproved = true;
+    if (status === "pending") {
+      isApproved = false;
+    }
+    const pendingCompanies = await Company.find({ isApproved }, { __v: false })
+      // createdby and location
+      .populate("createdBy", "name email")
+      .populate("location", "locationName city country")
+      .lean();
 
-    const activeCompanies = companies.filter(
-      (company) => company.createdBy && company.createdBy.isEmailVerified
-    );
-
-    if (activeCompanies.length === 0) {
+    if (!pendingCompanies) {
       return res.status(404).json({
         status: "fail",
         message: "No pending companies found.",
@@ -20,7 +22,7 @@ export const getPendingCompanies = async (req, res, next) => {
     }
 
     // ✅ هات المستندات المرتبطة بكل شركة
-    for (const company of activeCompanies) {
+    for (const company of pendingCompanies) {
       const documents = await Attachment.find(
         {
           ownerCompany: company._id,
@@ -40,7 +42,7 @@ export const getPendingCompanies = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      data: activeCompanies,
+      data: pendingCompanies,
     });
   } catch (err) {
     console.error("❌ Error in getPendingCompanies:", err.message);

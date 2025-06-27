@@ -5,18 +5,19 @@ import teamRoutes from "./routes/team.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import setupRoutes from "./routes/setup.routes.js";
 import userRoutes from "./routes/users.routes.js";
-import { securityMiddleware } from "./middlewares/security.middleware.js";
-import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
+import partnerConnectionRoutes from "./routes/partnerConnection.routes.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 import productRoutes from "./routes/product.routes.js";
+import invoiceRoutes from "./routes/invoice.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import { securityMiddleware } from "./middlewares/security.middleware.js";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 import {
   checkEmailVerified,
   protectedRoute,
 } from "./middlewares/auth.middleware.js";
-import invoiceRoutes from "./routes/invoice.routes.js";
-import orderRoutes from "./routes/order.routes.js";
 dotenv.config();
 
 const app = express();
@@ -37,6 +38,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users/", userRoutes);
+app.use(
+  "/api/partner-connection",
+  protectedRoute,
+  checkEmailVerified,
+  partnerConnectionRoutes
+);
 app.use("/api/inventory", protectedRoute, checkEmailVerified, inventoryRoutes);
 app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
 app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);

@@ -1,4 +1,5 @@
 import User from "../../models/User.js";
+import Location from "../../models/Location.js";
 import Company from "../../models/Company.js";
 import Attachment from "../../models/Attachment.js";
 import { AppError } from "../../utils/AppError.js";
@@ -20,7 +21,7 @@ export const register = async (req, res, next) => {
   if (existingCompany) throw new AppError("Company name already taken", 400);
 
   const company = await Company.create({
-    name: companyName,
+    companyName,
     industry,
     size,
     location,
@@ -36,9 +37,30 @@ export const register = async (req, res, next) => {
     company: company._id,
     isEmailVerified: false,
   });
-
   company.createdBy = user._id;
   await company.save();
+
+  await Location.create({
+    locationName: req.body.locationName,
+    type: "Company",
+    company: company._id,
+    address: {
+      street: req.body.street,
+      city: req.body.city,
+      state: req.body.state,
+      country: req.body.country,
+      zipCode: req.body.zipCode,
+    },
+    contactPerson: {
+      name: user.name,
+      email: user.email,
+    },
+    coordinates: {
+      latitude: req.body.latitude,
+      longitude: req.body.longitude,
+    },
+    isActive: true,
+  });
 
   await NotificationSettings.create({
     user: user._id,

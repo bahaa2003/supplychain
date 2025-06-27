@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import mongoose from "mongoose";
 
 const partnershipTypes = [
@@ -11,7 +11,7 @@ const partnershipTypes = [
 ];
 
 export const createPartnerConnectionValidator = () => [
-  body("recipient")
+  param("recipientId")
     .notEmpty()
     .withMessage("Recipient company ID is required")
     .custom((value) => {
@@ -21,36 +21,13 @@ export const createPartnerConnectionValidator = () => [
       return true;
     }),
   body("partnershipType")
+    .optional()
     .notEmpty()
     .withMessage("Partnership type is required")
     .isIn(partnershipTypes)
     .withMessage(
       `Partnership type must be one of: ${partnershipTypes.join(", ")}`
     ),
-  body("visibilitySettings")
-    .optional()
-    .isObject()
-    .withMessage("Visibility settings must be an object"),
-  body("visibilitySettings.orders")
-    .optional()
-    .isBoolean()
-    .withMessage("Orders visibility must be a boolean"),
-  body("visibilitySettings.inventory")
-    .optional()
-    .isBoolean()
-    .withMessage("Inventory visibility must be a boolean"),
-  body("visibilitySettings.documents")
-    .optional()
-    .isBoolean()
-    .withMessage("Documents visibility must be a boolean"),
-  body("visibilitySettings.shipments")
-    .optional()
-    .isBoolean()
-    .withMessage("Shipments visibility must be a boolean"),
-  body("visibilitySettings.analytics")
-    .optional()
-    .isBoolean()
-    .withMessage("Analytics visibility must be a boolean"),
   body("notes")
     .optional()
     .isString()
@@ -63,8 +40,19 @@ export const updatePartnerConnectionStatusValidator = () => [
   body("status")
     .notEmpty()
     .withMessage("Status is required")
-    .isIn(["Accepted", "Rejected"])
-    .withMessage("Status must be either 'Accepted' or 'Rejected'"),
+    .isIn([
+      "Pending",
+      "Cancelled",
+      "Active",
+      "Rejected",
+      "Inactive",
+      "Completed",
+      "Expired",
+      "Terminated",
+    ])
+    .withMessage(
+      "Status must be one of: Pending, Cancelled, Active, Rejected, Inactive, Completed, Expired, Terminated"
+    ),
   body("rejectionReason")
     .optional()
     .isString()

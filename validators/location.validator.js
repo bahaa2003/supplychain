@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { locationTypeEnum } from "../enums/locationType.enum.js";
 
 export const locationValidator = () => [
-  body("name")
+  body("locationName")
     .notEmpty()
     .withMessage("Location name is required")
     .isString()
