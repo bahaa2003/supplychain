@@ -12,6 +12,7 @@ import productRoutes from "./routes/product.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import analyticsRoutes from "./routes/analytics.route.js";
 import { securityMiddleware } from "./middlewares/security.middleware.js";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 import {
@@ -38,6 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/company", protectedRoute, companyRoutes);
 app.use("/api/user/", userRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use(
   "/api/partner-connection",
   protectedRoute,

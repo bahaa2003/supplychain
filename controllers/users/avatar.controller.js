@@ -27,12 +27,13 @@ export const updateUserAvatar = async (req, res, next) => {
     return next(new AppError("Only image files are allowed", 400));
 
   const user = await User.findById(id);
+
   if (!user) return next(new AppError("User not found", 404));
 
   // Only admin of the same company can update
   if (
     req.user.role !== "admin" ||
-    user.company.toString() !== req.user.company.toString()
+    user.company.toString() !== req.user.company._id.toString()
   ) {
     return next(new AppError("Unauthorized", 403));
   }
@@ -71,7 +72,7 @@ export const deleteUserAvatar = async (req, res, next) => {
 
   if (
     req.user.role !== "admin" ||
-    user.company.toString() !== req.user.company.toString()
+    user.company.toString() !== req.user.company._id.toString()
   ) {
     return next(new AppError("Unauthorized", 403));
   }

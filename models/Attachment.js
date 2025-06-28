@@ -14,6 +14,7 @@ const attachmentSchema = new Schema(
         "shipment_proof",
         "partnership_agreement",
         "invoice_copy",
+        "user_avatar",
         "other"
       ]
     },
