@@ -1,7 +1,7 @@
 import User from "../../models/User.js";
 import { AppError } from "../../utils/AppError.js";
 
-export const get_all_employee = async (req, res, next) => {
+export const getAllEmployee = async (req, res, next) => {
   try {
     const { user } = req;
     const { company } = user;
@@ -17,7 +17,7 @@ export const get_all_employee = async (req, res, next) => {
       User.find(filter, { password: 0, __v: 0, company: 0 })
         .populate({
           path: "avatar",
-          select: "fileUrl -_id"
+          select: "fileUrl -_id",
         })
         .skip(skip)
         .limit(limit)
