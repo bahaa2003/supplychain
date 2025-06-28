@@ -13,7 +13,7 @@ const orderItemSchema = new Schema({
     type: String,
     required: true,
   },
-  name: {
+  productName: {
     type: String,
     required: true,
   },

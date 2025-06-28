@@ -36,8 +36,8 @@ app.get("/", (req, res) => {
 app.use("/api/setup", setupRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
-app.use("/api/company", companyRoutes);
-app.use("/api/users/", userRoutes);
+app.use("/api/company", protectedRoute, companyRoutes);
+app.use("/api/user/", userRoutes);
 app.use(
   "/api/partner-connection",
   protectedRoute,
@@ -49,7 +49,7 @@ app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
 app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);
 app.use("/api/invoice", protectedRoute, invoiceRoutes);
 app.use("/api/notification", notificationRoutes);
-app.use("/api/orders", protectedRoute, checkEmailVerified, orderRoutes);
+app.use("/api/order", protectedRoute, checkEmailVerified, orderRoutes);
 
 // Global error handler
 app.use(globalErrorHandler);

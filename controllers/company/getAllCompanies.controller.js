@@ -8,13 +8,13 @@ export const getAllCompanies = async (req, res, next) => {
     if (status === "pending") {
       isApproved = false;
     }
-    const pendingCompanies = await Company.find({ isApproved }, { __v: false })
+    const Companies = await Company.find({ isApproved }, { __v: false })
       // createdby and location
       .populate("createdBy", "name email")
       .populate("location", "locationName city country")
       .lean();
 
-    if (!pendingCompanies) {
+    if (!Companies) {
       return res.status(404).json({
         status: "fail",
         message: "No pending companies found.",
@@ -22,7 +22,7 @@ export const getAllCompanies = async (req, res, next) => {
     }
 
     // ✅ هات المستندات المرتبطة بكل شركة
-    for (const company of pendingCompanies) {
+    for (const company of Companies) {
       const documents = await Attachment.find(
         {
           ownerCompany: company._id,
@@ -42,10 +42,10 @@ export const getAllCompanies = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      data: pendingCompanies,
+      data: Companies,
     });
   } catch (err) {
-    console.error("❌ Error in getPendingCompanies:", err.message);
+    console.error("❌ Error in get Companies:", err.message);
     res.status(500).json({
       status: "fail",
       message: "Server error while fetching companies.",

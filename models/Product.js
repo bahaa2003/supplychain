@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { unitEnum } from "../enums/unit.enum.js";
-
+import { AppError } from "../utils/AppError.js";
 const { Schema } = mongoose;
 
 const productSchema = new Schema(
@@ -41,5 +41,14 @@ const productSchema = new Schema(
     timestamps: true,
   }
 );
+productSchema.index({ company: 1, productName: 1 }, { unique: true });
 
+productSchema.index({ company: 1, sku: 1 }, { unique: true });
+productSchema.post("save", function (error, doc, next) {
+  if (error.code === 11000) {
+    next(new AppError("Product sku already exists", 400));
+  } else {
+    next();
+  }
+});
 export default mongoose.model("Product", productSchema);

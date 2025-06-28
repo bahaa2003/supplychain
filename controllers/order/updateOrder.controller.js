@@ -9,16 +9,17 @@ import {
 } from "../../enums/orderStatus.enum.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
+import Product from "../../models/Product.js";
 
-export const updateOrder = async (req, res) => {
+export const updateOrder = async (req, res, next) => {
   const { orderId } = req.params;
   const { status: newStatus, notes, confirmedDeliveryDate } = req.body;
   const userId = req.user._id;
-  const userCompanyId = req.user.company;
+  const userCompanyId = req.user.company?._id || req.user.company;
 
   const order = await Order.findById(orderId);
   if (!order) {
-    throw new AppError("Order not found", 404);
+    return next(new AppError("Order not found", 404));
   }
 
   const currentStatus = order.status;
@@ -33,14 +34,29 @@ export const updateOrder = async (req, res) => {
       order
     )
   ) {
-    throw new AppError("Invalid status transition", 400);
+    console.log("order", order);
+    console.log("userCompanyId", userCompanyId);
+    console.log("buyer", order.buyer);
+    console.log("supplier", order.supplier);
+    return next(
+      new AppError(
+        `Invalid status transition from ${currentStatus} to ${newStatus} for ${
+          order.buyer.toString() === userCompanyId.toString()
+            ? "buyer"
+            : "supplier"
+        }`,
+        400
+      )
+    );
   }
 
   // check if the order has issues
-  if (newStatus === orderStatus.APPROVED && order.issues.length > 0) {
-    throw new AppError(
-      "Cannot approve order with unresolved issues. Please validate items first.",
-      400
+  if (newStatus === orderStatus.SUBMITTED && order.issues.length > 0) {
+    return next(
+      new AppError(
+        "Cannot submit order with unresolved issues. Please validate items first.",
+        400
+      )
     );
   }
 
@@ -75,7 +91,9 @@ export const updateOrder = async (req, res) => {
     data: { order },
   });
 };
-
+/////////////////////////////////////////////////
+/////////////////Helpers/////////////////////////
+/////////////////////////////////////////////////
 // process the inventory impact
 const handleInventoryImpact = async (
   order,
@@ -100,7 +118,7 @@ const handleInventoryImpact = async (
           item,
           impact.supplier,
           userId,
-          order._id,
+          order,
           `Order ${newStatus.toLowerCase()}`
         );
       }
@@ -108,20 +126,25 @@ const handleInventoryImpact = async (
 
     // effect on the buyer's inventory
     if (impact.buyer) {
+      const buyerProduct = await Product.findOne({ sku: item.sku });
+      if (!buyerProduct) {
+        throw new AppError(`Product with sku ${item.sku} not found`, 404);
+      }
       const buyerInventory = await Inventory.findOne({
-        product: item.productId,
+        product: buyerProduct._id,
         company: order.buyer,
       });
-
+      console.log("buyerInventory updating...");
       if (buyerInventory || impact.buyer.add) {
         await updateInventory(
           buyerInventory,
           item,
           impact.buyer,
           userId,
-          order._id,
+          order,
           `Order ${newStatus.toLowerCase()}`
         );
+        console.log("end buyerInventory updating");
       }
     }
   }
@@ -133,7 +156,7 @@ const updateInventory = async (
   item,
   impact,
   userId,
-  orderId,
+  order,
   reason
 ) => {
   let inventoryExists = !!inventory;
@@ -194,7 +217,7 @@ const updateInventory = async (
     after,
     reason,
     referenceType: inventoryReferenceType.ORDER,
-    referenceId: orderId,
+    referenceId: order._id,
     performedBy: userId,
   });
 };

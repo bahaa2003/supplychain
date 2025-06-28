@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { updateOrder } from "../controllers/order/updateOrder.controller.js";
 import { getCompanyOrders } from "../controllers/order/getCompanyOrders.controller.js";
+import { getOrderById } from "../controllers/order/getOrderById.controller.js";
 import { createOrder } from "../controllers/order/createOrder.controller.js";
 import { validateOrderItems } from "../controllers/order/validateOrderItems.controller.js";
 import { returnOrder } from "../controllers/order/returnOrder.controller.js";
@@ -19,13 +20,14 @@ const router = Router();
 // All order routes require authentication
 router.use(protectedRoute);
 
+router.route("/").get(catchError(getCompanyOrders));
 router
-  .route("/")
-  .get(catchError(getCompanyOrders))
+  .route("/:supplierId")
   .post(validate(createOrderValidator()), catchError(createOrder));
 
 router
   .route("/:orderId")
+  .get(catchError(getOrderById))
   .patch(validate(updateOrderValidator()), catchError(updateOrder));
 
 // Validate order items before approval or submission

@@ -16,7 +16,7 @@ export const getAllProducts = async (req, res, next) => {
       Product.countDocuments({ company: companyId }),
     ]);
 
-    res.status(200).json({
+    return res.status(200).json({
       status: "success",
       results: products.length,
       page,

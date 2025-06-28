@@ -1,8 +1,9 @@
 import Order from "../../models/Order.js";
 import { AppError } from "../../utils/AppError.js";
+import { orderStatus } from "../../enums/orderStatus.enum.js";
 
 export const getCompanyOrders = async (req, res) => {
-  const userCompanyId = req.user.company;
+  const userCompanyId = req.user.company?._id || req.user.company;
   const {
     page = 1,
     limit = 10,
@@ -15,16 +16,30 @@ export const getCompanyOrders = async (req, res) => {
 
   // build the filter
   let filter = {
-    $or: [{ buyer: userCompanyId }, { supplier: userCompanyId }],
+    $or: [
+      {
+        buyer: userCompanyId,
+        status: { $in: [orderStatus.CANCELLED, orderStatus.CREATED] },
+      },
+      {
+        $and: [
+          {
+            $or: [{ buyer: userCompanyId }, { supplier: userCompanyId }],
+            status: { $nin: [orderStatus.CANCELLED, orderStatus.CREATED] },
+          },
+        ],
+      },
+    ],
   };
 
   // filter by role
-  if (role === "buyer") {
-    filter = { buyer: userCompanyId };
-  } else if (role === "supplier") {
-    filter = { supplier: userCompanyId };
+  if (role) {
+    if (role === "buyer") {
+      filter = { buyer: userCompanyId };
+    } else if (role === "supplier") {
+      filter = { supplier: userCompanyId };
+    }
   }
-
   // filter by status
   if (status) {
     filter.status = status;
@@ -48,13 +63,28 @@ export const getCompanyOrders = async (req, res) => {
 
   const skip = (page - 1) * limit;
 
-  const [orders, totalCount] = await Promise.all([
+  const [orders, total] = await Promise.all([
     Order.find(filter)
+      .select({
+        __v: false,
+        items: false,
+        createdBy: false,
+        confirmedDeliveryDate: false,
+        requestedDeliveryDate: false,
+        notes: false,
+        totalAmount: false,
+        orderNumber: false,
+        history: false,
+        issues: false,
+        invoice: false,
+        shipments: false,
+        returnInfo: false,
+        returnProcessing: false,
+      })
       .populate([
-        { path: "buyer", select: "name" },
-        { path: "supplier", select: "name" },
-        { path: "createdBy", select: "name email" },
-        { path: "deliveryLocation", select: "name address" },
+        { path: "buyer", select: "companyName" },
+        { path: "supplier", select: "companyName" },
+        { path: "deliveryLocation", select: "locationName city state country" },
       ])
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -72,17 +102,13 @@ export const getCompanyOrders = async (req, res) => {
     return orderObj;
   });
 
-  res.json({
+  return res.status(200).json({
     status: "success",
-    data: {
-      orders: ordersWithRole,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(totalCount / limit),
-        totalCount,
-        hasNext: skip + orders.length < totalCount,
-        hasPrev: page > 1,
-      },
-    },
+    results: ordersWithRole.length,
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+    data: ordersWithRole,
   });
 };

@@ -6,7 +6,7 @@ import { orderStatus } from "../../enums/orderStatus.enum.js";
 
 export const validateOrderItems = async (req, res) => {
   const { orderId } = req.params;
-  const userCompanyId = req.user.company;
+  const userCompanyId = req.user.company?._id || req.user.company;
 
   const order = await Order.findById(orderId);
   if (!order) {

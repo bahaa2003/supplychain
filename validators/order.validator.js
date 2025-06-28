@@ -1,17 +1,13 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import mongoose from "mongoose";
 import { orderStatusEnum } from "../enums/orderStatus.enum.js";
 
 export const createOrderValidator = () => [
-  body("supplierId")
+  param("supplierId")
     .notEmpty()
     .withMessage("Supplier ID is required")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Supplier ID must be a valid MongoDB ObjectId");
-      }
-      return true;
-    }),
+    .isMongoId()
+    .withMessage("Supplier ID must be a valid MongoDB ObjectId"),
 
   body("items")
     .isArray({ min: 1 })
@@ -32,16 +28,6 @@ export const createOrderValidator = () => [
     .withMessage("Quantity must be at least 1")
     .toInt(),
 
-  body("deliveryLocationId")
-    .notEmpty()
-    .withMessage("Delivery location is required")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Delivery location must be a valid MongoDB ObjectId");
-      }
-      return true;
-    }),
-
   body("notes")
     .optional()
     .isString()
@@ -50,8 +36,6 @@ export const createOrderValidator = () => [
 
   body("requestedDeliveryDate")
     .optional()
-    .isISO8601()
-    .withMessage("Delivery date must be a valid ISO date")
     .custom((value) => {
       if (new Date(value) <= new Date()) {
         throw new Error("Delivery date must be in the future");

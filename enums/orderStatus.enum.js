@@ -1,6 +1,5 @@
 export const orderStatus = {
   CREATED: "Created", // employee created the order
-  APPROVED: "Approved", // manager approved the order
   REJECTED: "Rejected", // manager rejected the order
   SUBMITTED: "Submitted", // order submitted to the supplier
   ACCEPTED: "Accepted", // supplier accepted the order
@@ -22,11 +21,10 @@ export const orderStatusEnum = Object.values(orderStatus);
 // Valid status transitions
 export const VALID_ORDER_TRANSITIONS = {
   [orderStatus.CREATED]: [
-    orderStatus.APPROVED,
     orderStatus.REJECTED,
     orderStatus.CANCELLED,
+    orderStatus.SUBMITTED,
   ],
-  [orderStatus.APPROVED]: [orderStatus.SUBMITTED, orderStatus.CANCELLED],
   [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED], // re-adjustment
   [orderStatus.SUBMITTED]: [
     orderStatus.ACCEPTED,
@@ -55,11 +53,10 @@ export const VALID_ORDER_TRANSITIONS = {
 export const ORDER_ROLE_PERMISSIONS = {
   buyer: {
     [orderStatus.CREATED]: [
-      orderStatus.APPROVED,
       orderStatus.REJECTED,
       orderStatus.CANCELLED,
+      orderStatus.SUBMITTED,
     ],
-    [orderStatus.APPROVED]: [orderStatus.SUBMITTED, orderStatus.CANCELLED],
     [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED],
     [orderStatus.DELIVERED]: [orderStatus.RECEIVED, orderStatus.RETURNED],
     [orderStatus.RECEIVED]: [orderStatus.COMPLETED, orderStatus.RETURNED],
@@ -110,7 +107,7 @@ export const INVENTORY_IMPACT = {
     supplier: { reserve: true },
   },
   // when the order is shipped - deduct from the inventory
-  [orderStatus.SHIPPED]: {
+  [orderStatus.PREPARING]: {
     supplier: { deduct: true, unreserve: true },
   },
   // when the order is received - add to the inventory

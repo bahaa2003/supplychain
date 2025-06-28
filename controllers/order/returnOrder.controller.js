@@ -10,7 +10,7 @@ export const returnOrder = async (req, res) => {
   const { orderId } = req.params;
   const { returnItems, returnReason, isPartialReturn = false } = req.body;
   const userId = req.user._id;
-  const userCompanyId = req.user.company;
+  const userCompanyId = req.user.company?._id || req.user.company;
 
   const order = await Order.findById(orderId);
   if (!order) {
