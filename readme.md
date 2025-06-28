@@ -229,7 +229,7 @@ const notificationPriority = {
 
 **Endpoint:** `POST /api/setup/create-platform-admin`
 
-**Description:** Creates the initial platform administrator (only works if no admin exists)
+**Description:** Creates the initial platform administrator (only works in development mode)
 
 **Request Body:**
 
