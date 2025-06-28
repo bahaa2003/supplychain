@@ -1,4 +1,3 @@
-import Company from "../../models/Company.js";
 import PartnerConnection from "../../models/PartnerConnection.js";
 import { AppError } from "../../utils/AppError.js";
 import createNotification from "../../services/notification.service.js";

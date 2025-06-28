@@ -18,12 +18,6 @@ import {
   checkEmailVerified,
   protectedRoute,
 } from "./middlewares/auth.middleware.js";
-<<<<<<< HEAD
-import invoiceRoutes from "./routes/invoice.routes.js";
-import orderRoutes from "./routes/order.routes.js";
-import analyticsRoutes from "./routes/analytics.route.js";
-=======
->>>>>>> 74d7df00efc8d4d996c54824781b8015deacbecb
 dotenv.config();
 
 const app = express();
@@ -44,16 +38,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users/", userRoutes);
-<<<<<<< HEAD
-app.use("/api/analytics", analyticsRoutes);
-=======
 app.use(
   "/api/partner-connection",
   protectedRoute,
   checkEmailVerified,
   partnerConnectionRoutes
 );
->>>>>>> 74d7df00efc8d4d996c54824781b8015deacbecb
 app.use("/api/inventory", protectedRoute, checkEmailVerified, inventoryRoutes);
 app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
 app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);

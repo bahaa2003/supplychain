@@ -8,26 +8,16 @@ export const verifyEmail = async (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err)
       return res.status(400).json({ message: "Invalid or expired token" });
-    
+
     const { email } = decoded;
     const user = await User.findOne({ email });
-    
+
     if (!user)
       return res.status(400).json({
         message: "Registration session expired, please sign up again",
       });
 
-<<<<<<< HEAD
-    const companyExists = await Company.exists({ _id: user.company });
-    if (!companyExists) {
-    }
-
-=======
->>>>>>> 74d7df00efc8d4d996c54824781b8015deacbecb
-    await User.updateOne(
-      { email },
-      { $set: { isEmailVerified: true } }
-    );
+    await User.updateOne({ email }, { $set: { isEmailVerified: true } });
 
     res.status(200).json({
       message: "Verification Completed. You can now log in.",

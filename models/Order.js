@@ -37,6 +37,7 @@ const orderStatusHistorySchema = new Schema(
   {
     status: {
       type: String,
+      enum: orderStatusEnum,
       required: true,
     },
     updatedBy: {
@@ -54,19 +55,16 @@ const orderSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
     buyer: {
       type: Schema.Types.ObjectId,
       ref: "Company",
       required: true,
-      index: true,
     },
     supplier: {
       type: Schema.Types.ObjectId,
       ref: "Company",
       required: true,
-      index: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,
@@ -102,15 +100,49 @@ const orderSchema = new Schema(
       ref: "Invoice",
     },
     history: [orderStatusHistorySchema],
-    // To store issues found during the 'approve' step validation
+    // مشاكل تم اكتشافها أثناء التحقق
     issues: [
       {
         sku: String,
-        problem: String, // e.g., 'price_changed', 'insufficient_quantity'
+        problem: String, // e.g., 'price_changed', 'insufficient_quantity', 'product_inactive'
         current_price: Number,
         available_quantity: Number,
       },
     ],
+    // معلومات الإرجاع
+    returnInfo: {
+      returnItems: [
+        {
+          productId: { type: Schema.Types.ObjectId, ref: "Product" },
+          quantity: Number,
+          reason: String,
+        },
+      ],
+      returnReason: String,
+      isPartialReturn: { type: Boolean, default: false },
+      returnedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      returnedAt: Date,
+    },
+    // معالجة الإرجاع (من جانب المورد)
+    returnProcessing: {
+      acceptedItems: [
+        {
+          productId: { type: Schema.Types.ObjectId, ref: "Product" },
+          quantity: Number,
+          reason: String,
+        },
+      ],
+      rejectedItems: [
+        {
+          productId: { type: Schema.Types.ObjectId, ref: "Product" },
+          quantity: Number,
+          reason: String,
+        },
+      ],
+      processingNotes: String,
+      processedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      processedAt: Date,
+    },
   },
   {
     timestamps: true,
@@ -136,5 +168,14 @@ orderSchema.pre("save", function (next) {
   }
   next();
 });
+
+// Virtual للحصول على الدور الحالي للمستخدم
+orderSchema.virtual("userRole").get(function () {
+  // يجب تعيين هذا من الكونترولر
+  return this._userRole;
+});
+
+orderSchema.set("toJSON", { virtuals: true });
+orderSchema.set("toObject", { virtuals: true });
 
 export default mongoose.model("Order", orderSchema);

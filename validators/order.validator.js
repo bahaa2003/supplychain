@@ -1,57 +1,120 @@
-import { body, param } from "express-validator";
+import { body } from "express-validator";
+import mongoose from "mongoose";
 import { orderStatusEnum } from "../enums/orderStatus.enum.js";
-import { isValidObjectId } from "../utils/mongoose.js";
 
-const validateObjectId = (field, message) => {
-  return body(field)
-    .notEmpty()
-    .withMessage(`${field} is required.`)
-    .custom((value) => isValidObjectId(value))
-    .withMessage(message);
-};
-
-export const createOrderValidator = [
+export const createOrderValidator = () => [
   body("supplierId")
     .notEmpty()
-    .withMessage("Supplier ID is required.")
-    .custom((value) => isValidObjectId(value))
-    .withMessage("Invalid supplier ID."),
-
-  body("deliveryLocationId")
-    .notEmpty()
-    .withMessage("Delivery location ID is required.")
-    .custom((value) => isValidObjectId(value))
-    .withMessage("Invalid delivery location ID."),
+    .withMessage("Supplier ID is required")
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error("Supplier ID must be a valid MongoDB ObjectId");
+      }
+      return true;
+    }),
 
   body("items")
     .isArray({ min: 1 })
-    .withMessage("Order must contain at least one item."),
+    .withMessage("At least one item is required"),
 
   body("items.*.productId")
     .notEmpty()
-    .withMessage("Product ID is required for each item.")
-    .custom((value) => isValidObjectId(value))
-    .withMessage("Invalid product ID in items."),
+    .withMessage("Product ID is required")
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error("Product ID must be a valid MongoDB ObjectId");
+      }
+      return true;
+    }),
 
   body("items.*.quantity")
-    .isInt({ gt: 0 })
-    .withMessage("Item quantity must be a positive integer."),
+    .isInt({ min: 1 })
+    .withMessage("Quantity must be at least 1")
+    .toInt(),
 
-  body("notes").optional().isString().withMessage("Notes must be a string."),
+  body("deliveryLocationId")
+    .notEmpty()
+    .withMessage("Delivery location is required")
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error("Delivery location must be a valid MongoDB ObjectId");
+      }
+      return true;
+    }),
+
+  body("notes")
+    .optional()
+    .isString()
+    .isLength({ max: 500 })
+    .withMessage("Notes must be less than 500 characters"),
 
   body("requestedDeliveryDate")
     .optional()
     .isISO8601()
-    .toDate()
-    .withMessage("Invalid requested delivery date."),
+    .withMessage("Delivery date must be a valid ISO date")
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error("Delivery date must be in the future");
+      }
+      return true;
+    }),
 ];
 
-export const orderIdValidator = [
-  param("id").custom(isValidObjectId).withMessage("Invalid order ID."),
+export const updateOrderValidator = () => [
+  body("status")
+    .notEmpty()
+    .withMessage("Status is required")
+    .isIn(orderStatusEnum)
+    .withMessage(`Status must be one of: ${orderStatusEnum.join(", ")}`),
+
+  body("notes")
+    .optional()
+    .isString()
+    .isLength({ max: 500 })
+    .withMessage("Notes must be less than 500 characters"),
+
+  body("confirmedDeliveryDate")
+    .optional()
+    .isISO8601()
+    .withMessage("Confirmed delivery date must be a valid ISO date"),
 ];
 
-export const updateOrderStatusValidator = [
-  ...orderIdValidator,
-  body("status").isIn(orderStatusEnum).withMessage("Invalid order status."),
-  body("notes").optional().isString(),
+export const returnOrderValidator = () => [
+  body("returnItems")
+    .isArray({ min: 1 })
+    .withMessage("At least one item must be returned"),
+
+  body("returnItems.*.productId")
+    .notEmpty()
+    .withMessage("Product ID is required for each return item")
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error("Product ID must be a valid MongoDB ObjectId");
+      }
+      return true;
+    }),
+
+  body("returnItems.*.quantity")
+    .isInt({ min: 1 })
+    .withMessage("Quantity must be at least 1 for each return item")
+    .toInt(),
+
+  body("returnItems.*.reason")
+    .optional()
+    .isString()
+    .isLength({ max: 200 })
+    .withMessage("Reason must be less than 200 characters"),
+
+  body("returnReason")
+    .notEmpty()
+    .withMessage("Return reason is required")
+    .isString()
+    .isLength({ max: 500 })
+    .withMessage("Return reason must be less than 500 characters"),
+
+  body("isPartialReturn")
+    .optional()
+    .isBoolean()
+    .withMessage("isPartialReturn must be boolean")
+    .toBoolean(),
 ];

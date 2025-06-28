@@ -8,7 +8,6 @@ const companySchema = new Schema(
     location: { type: mongoose.Schema.Types.ObjectId, ref: "Location" },
     isApproved: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
-<<<<<<< HEAD
     budget: {
       type: Number,
       default: 0,
@@ -19,8 +18,6 @@ const companySchema = new Schema(
     //   default: () => new Date(Date.now() + 1 * 5 * 60 * 1000),
     //   // index: { expireAfterSeconds: 0 },
     // },
-=======
->>>>>>> 74d7df00efc8d4d996c54824781b8015deacbecb
   },
   { timestamps: true }
 );

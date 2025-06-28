@@ -96,10 +96,6 @@ export const register = async (req, res, next) => {
     }
   }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 74d7df00efc8d4d996c54824781b8015deacbecb
   res.status(201).json({
     status: "success",
     message:

@@ -1,11 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 import nodemailer from "nodemailer";
-import dotenv from 'dotenv';
-dotenv.config();
 import renderTemplate from "../utils/templateRenderer.js";
 import NotificationSettings from "../models/NotificationSettings.js";
-
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
