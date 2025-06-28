@@ -1,13 +1,13 @@
 export const inventoryChangeType = Object.freeze({
-  INCOMING: "Incoming", // استلام بضاعة
-  OUTGOING: "Outgoing", // إرسال بضاعة
-  RESERVED: "Reserved", // حجز كمية
-  UNRESERVED: "Unreserved", // إلغاء حجز
-  ADJUSTMENT: "Adjustment", // تعديل يدوي
-  DAMAGED: "Damaged", // تلف
-  EXPIRED: "Expired", // انتهاء صلاحية
-  RETURNED: "Returned", // إرجاع
-  TRANSFER: "Transfer", // نقل بين المواقع
+  INCOMING: "Incoming", // receive inventory
+  OUTGOING: "Outgoing", // send inventory
+  RESERVED: "Reserved", // reserve inventory
+  UNRESERVED: "Unreserved", // cancel reservation
+  ADJUSTMENT: "Adjustment", // manual adjustment
+  DAMAGED: "Damaged", // damaged
+  EXPIRED: "Expired", // expired
+  RETURNED: "Returned", // return
+  TRANSFER: "Transfer", // transfer between locations
 });
 
 export const inventoryChangeTypeEnum = Object.values(inventoryChangeType);

@@ -13,31 +13,31 @@ export const getCompanyOrders = async (req, res) => {
     search,
   } = req.query;
 
-  // بناء الفلتر
+  // build the filter
   let filter = {
     $or: [{ buyer: userCompanyId }, { supplier: userCompanyId }],
   };
 
-  // فلتر حسب الدور
+  // filter by role
   if (role === "buyer") {
     filter = { buyer: userCompanyId };
   } else if (role === "supplier") {
     filter = { supplier: userCompanyId };
   }
 
-  // فلتر حسب الحالة
+  // filter by status
   if (status) {
     filter.status = status;
   }
 
-  // فلتر حسب التاريخ
+  // filter by date
   if (startDate || endDate) {
     filter.createdAt = {};
     if (startDate) filter.createdAt.$gte = new Date(startDate);
     if (endDate) filter.createdAt.$lte = new Date(endDate);
   }
 
-  // البحث
+  // search
   if (search) {
     filter.$or = [
       { orderNumber: { $regex: search, $options: "i" } },
@@ -62,7 +62,7 @@ export const getCompanyOrders = async (req, res) => {
     Order.countDocuments(filter),
   ]);
 
-  // إضافة معلومة الدور للمستخدم الحالي
+  // add the role to the current user
   const ordersWithRole = orders.map((order) => {
     const orderObj = order.toObject();
     orderObj.userRole =

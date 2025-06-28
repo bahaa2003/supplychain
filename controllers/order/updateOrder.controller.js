@@ -23,7 +23,7 @@ export const updateOrder = async (req, res) => {
 
   const currentStatus = order.status;
 
-  // التحقق من صحة الانتقال
+  // check if the transition is valid
   if (
     !canTransitionTo(
       currentStatus,
@@ -36,7 +36,7 @@ export const updateOrder = async (req, res) => {
     throw new AppError("Invalid status transition", 400);
   }
 
-  // التحقق الخاص بحالة الموافقة
+  // check if the order has issues
   if (newStatus === orderStatus.APPROVED && order.issues.length > 0) {
     throw new AppError(
       "Cannot approve order with unresolved issues. Please validate items first.",
@@ -44,17 +44,17 @@ export const updateOrder = async (req, res) => {
     );
   }
 
-  // معالجة تأثير المخزون
+  // process the inventory impact
   await handleInventoryImpact(order, currentStatus, newStatus, userId);
 
-  // تحديث حالة الأوردر
+  // update the order status
   order.status = newStatus;
 
   if (confirmedDeliveryDate) {
     order.confirmedDeliveryDate = confirmedDeliveryDate;
   }
 
-  // إضافة إلى التاريخ
+  // add to the history
   order.history.push({
     status: newStatus,
     updatedBy: userId,
@@ -76,7 +76,7 @@ export const updateOrder = async (req, res) => {
   });
 };
 
-// معالجة تأثير المخزون
+// process the inventory impact
 const handleInventoryImpact = async (
   order,
   currentStatus,
@@ -87,7 +87,7 @@ const handleInventoryImpact = async (
   if (!impact) return;
 
   for (const item of order.items) {
-    // تأثير على مخزون المورد
+    // effect on the supplier's inventory
     if (impact.supplier) {
       const supplierInventory = await Inventory.findOne({
         product: item.productId,
@@ -106,7 +106,7 @@ const handleInventoryImpact = async (
       }
     }
 
-    // تأثير على مخزون المشتري
+    // effect on the buyer's inventory
     if (impact.buyer) {
       const buyerInventory = await Inventory.findOne({
         product: item.productId,
@@ -127,7 +127,7 @@ const handleInventoryImpact = async (
   }
 };
 
-// تحديث المخزون
+// update the inventory
 const updateInventory = async (
   inventory,
   item,
@@ -139,11 +139,11 @@ const updateInventory = async (
   let inventoryExists = !!inventory;
 
   if (!inventory) {
-    // إنشاء مخزون جديد إذا لم يكن موجوداً (للمشتري عند الاستلام)
+    // create a new inventory if it doesn't exist (for the buyer when received)
     inventory = new Inventory({
       product: item.productId,
       company: impact.add ? order.buyer : order.supplier,
-      location: order.deliveryLocation, // أو موقع افتراضي
+      location: order.deliveryLocation, // or a default location
       onHand: 0,
       reserved: 0,
     });
@@ -183,7 +183,7 @@ const updateInventory = async (
 
   await inventory.save();
 
-  // تسجيل في تاريخ المخزون
+  // log the inventory history
   await InventoryHistory.create({
     inventory: inventory._id,
     company: inventory.company,
@@ -199,7 +199,7 @@ const updateInventory = async (
   });
 };
 
-// تحديد نوع التغيير
+// determine the change type
 const getChangeType = (impact) => {
   if (impact.add) return inventoryChangeType.INCOMING;
   if (impact.deduct) return inventoryChangeType.OUTGOING;

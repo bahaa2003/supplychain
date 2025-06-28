@@ -9,8 +9,8 @@ import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.
 export const processReturn = async (req, res) => {
   const { orderId } = req.params;
   const {
-    acceptedItems, // المنتجات المقبولة للإرجاع
-    rejectedItems, // المنتجات المرفوضة
+    acceptedItems, // accepted items
+    rejectedItems, // rejected items
     processingNotes,
   } = req.body;
   const userId = req.user._id;
@@ -21,17 +21,17 @@ export const processReturn = async (req, res) => {
     throw new AppError("Order not found", 404);
   }
 
-  // التحقق من أن المستخدم ينتمي للشركة المورِّدة
+  // check if the user is the supplier
   if (order.supplier.toString() !== userCompanyId.toString()) {
     throw new AppError("You can only process returns for your own orders", 403);
   }
 
-  // التحقق من حالة الأوردر
+  // check if the order is in the returned status
   if (order.status !== orderStatus.RETURNED) {
     throw new AppError("Order is not in returned status", 400);
   }
 
-  // معالجة المنتجات المقبولة - إضافة لمخزون المورد
+  // process the accepted items - add to the supplier's inventory
   for (const acceptedItem of acceptedItems) {
     const supplierInventory = await Inventory.findOne({
       product: acceptedItem.productId,
@@ -53,7 +53,7 @@ export const processReturn = async (req, res) => {
 
       await supplierInventory.save();
 
-      // تسجيل في تاريخ المخزون
+      // log the inventory history
       await InventoryHistory.create({
         inventory: supplierInventory._id,
         company: order.supplier,
@@ -75,7 +75,7 @@ export const processReturn = async (req, res) => {
     }
   }
 
-  // تحديث معلومات معالجة الإرجاع
+  // update the return processing information
   order.returnProcessing = {
     acceptedItems,
     rejectedItems,
@@ -84,7 +84,7 @@ export const processReturn = async (req, res) => {
     processedAt: new Date(),
   };
 
-  // تحديث حالة الأوردر
+  // update the order status
   order.status = orderStatus.RETURN_PROCESSED;
 
   order.history.push({

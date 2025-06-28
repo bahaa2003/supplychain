@@ -16,7 +16,7 @@ export const createOrder = async (req, res) => {
   const buyerCompanyId = req.user.company;
   const userId = req.user._id;
 
-  // التحقق من وجود اتصال نشط بين الشركتين
+  // check if there is an active connection between the companies
   const connection = await PartnerConnection.findOne({
     $or: [
       { requester: buyerCompanyId, recipient: supplierId },
@@ -29,7 +29,7 @@ export const createOrder = async (req, res) => {
     throw new AppError("No active partnership exists with this supplier", 400);
   }
 
-  // التحقق من المنتجات وحساب المجموع
+  // check if the products are valid and calculate the total amount
   let totalAmount = 0;
   const orderItems = [];
 
@@ -60,7 +60,7 @@ export const createOrder = async (req, res) => {
     });
   }
 
-  // إنشاء رقم الأوردر
+  // create the order number
   const orderCount = await Order.countDocuments();
   const orderNumber = `ORD-${Date.now()}-${orderCount + 1}`;
 
@@ -75,7 +75,7 @@ export const createOrder = async (req, res) => {
     deliveryLocation: deliveryLocationId,
     notes,
     requestedDeliveryDate,
-    issues: [], // سيتم ملؤها عند التحقق
+    issues: [], // will be filled when the validation is done
   });
 
   await order.populate([

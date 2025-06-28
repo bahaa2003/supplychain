@@ -12,12 +12,6 @@ const companySchema = new Schema(
       type: Number,
       default: 0,
     },
-
-    // expiresAt: {
-    //   type: Date,
-    //   default: () => new Date(Date.now() + 1 * 5 * 60 * 1000),
-    //   // index: { expireAfterSeconds: 0 },
-    // },
   },
   { timestamps: true }
 );

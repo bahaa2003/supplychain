@@ -1,20 +1,20 @@
 export const orderStatus = {
-  CREATED: "Created", // موظف أنشأ الأوردر
-  APPROVED: "Approved", // مدير وافق على الأوردر
-  REJECTED: "Rejected", // مدير رفض الأوردر
-  SUBMITTED: "Submitted", // تم إرسال الأوردر للمورد
-  ACCEPTED: "Accepted", // المورد قبل الأوردر
-  DECLINED: "Declined", // المورد رفض الأوردر
-  PREPARING: "Preparing", // المورد يحضر الأوردر
-  READY_TO_SHIP: "Ready_to_ship", // جاهز للشحن
-  SHIPPED: "Shipped", // تم الشحن
-  DELIVERED: "Delivered", // تم التسليم
-  RECEIVED: "Received", // المستلم استلم الأوردر
-  RETURNED: "Returned", // تم إرجاع كامل أو جزئي
-  RETURN_PROCESSED: "Return_processed", // المورد عالج الإرجاع
-  COMPLETED: "Completed", // العملية مكتملة
-  CANCELLED: "Cancelled", // ملغي
-  FAILED: "Failed", // فشل
+  CREATED: "Created", // employee created the order
+  APPROVED: "Approved", // manager approved the order
+  REJECTED: "Rejected", // manager rejected the order
+  SUBMITTED: "Submitted", // order submitted to the supplier
+  ACCEPTED: "Accepted", // supplier accepted the order
+  DECLINED: "Declined", // supplier declined the order
+  PREPARING: "Preparing", // supplier is preparing the order
+  READY_TO_SHIP: "Ready_to_ship", // ready to ship
+  SHIPPED: "Shipped", // shipped
+  DELIVERED: "Delivered", // delivered
+  RECEIVED: "Received", // received
+  RETURNED: "Returned", // returned
+  RETURN_PROCESSED: "Return_processed", // supplier processed the return
+  COMPLETED: "Completed", // completed
+  CANCELLED: "Cancelled", // cancelled
+  FAILED: "Failed", // failed
 };
 
 export const orderStatusEnum = Object.values(orderStatus);
@@ -27,7 +27,7 @@ export const VALID_ORDER_TRANSITIONS = {
     orderStatus.CANCELLED,
   ],
   [orderStatus.APPROVED]: [orderStatus.SUBMITTED, orderStatus.CANCELLED],
-  [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED], // إعادة تعديل
+  [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED], // re-adjustment
   [orderStatus.SUBMITTED]: [
     orderStatus.ACCEPTED,
     orderStatus.DECLINED,
@@ -105,27 +105,27 @@ export const canTransitionTo = (
 
 // Inventory impact points
 export const INVENTORY_IMPACT = {
-  // عند قبول المورد للأوردر - حجز الكمية
+  // when the supplier accepts the order - reserve the quantity
   [orderStatus.ACCEPTED]: {
     supplier: { reserve: true },
   },
-  // عند الشحن - خصم من المخزون
+  // when the order is shipped - deduct from the inventory
   [orderStatus.SHIPPED]: {
     supplier: { deduct: true, unreserve: true },
   },
-  // عند الاستلام - إضافة للمخزون
+  // when the order is received - add to the inventory
   [orderStatus.RECEIVED]: {
     buyer: { add: true },
   },
-  // عند الإرجاع - خصم من مخزون المشتري
+  // when the order is returned - deduct from the buyer's inventory
   [orderStatus.RETURNED]: {
     buyer: { deduct: true },
   },
-  // عند معالجة الإرجاع - إضافة لمخزون المورد
+  // when the return is processed - add to the supplier's inventory
   [orderStatus.RETURN_PROCESSED]: {
     supplier: { add: true },
   },
-  // عند الإلغاء - إلغاء الحجز
+  // when the order is cancelled - cancel the reservation
   [orderStatus.CANCELLED]: {
     supplier: { unreserve: true },
   },

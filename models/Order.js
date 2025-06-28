@@ -100,7 +100,7 @@ const orderSchema = new Schema(
       ref: "Invoice",
     },
     history: [orderStatusHistorySchema],
-    // مشاكل تم اكتشافها أثناء التحقق
+    // problems found during validation
     issues: [
       {
         sku: String,
@@ -109,7 +109,7 @@ const orderSchema = new Schema(
         available_quantity: Number,
       },
     ],
-    // معلومات الإرجاع
+    // return information
     returnInfo: {
       returnItems: [
         {
@@ -123,7 +123,7 @@ const orderSchema = new Schema(
       returnedBy: { type: Schema.Types.ObjectId, ref: "User" },
       returnedAt: Date,
     },
-    // معالجة الإرجاع (من جانب المورد)
+    // return processing (supplier side)
     returnProcessing: {
       acceptedItems: [
         {
@@ -169,9 +169,9 @@ orderSchema.pre("save", function (next) {
   next();
 });
 
-// Virtual للحصول على الدور الحالي للمستخدم
+// Virtual to get the current user role
 orderSchema.virtual("userRole").get(function () {
-  // يجب تعيين هذا من الكونترولر
+  // this should be set by the controller
   return this._userRole;
 });
 

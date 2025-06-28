@@ -17,17 +17,17 @@ export const returnOrder = async (req, res) => {
     throw new AppError("Order not found", 404);
   }
 
-  // التحقق من أن المستخدم ينتمي للشركة المشترية
+  // check if the user is the buyer
   if (order.buyer.toString() !== userCompanyId.toString()) {
     throw new AppError("You can only return your own orders", 403);
   }
 
-  // التحقق من حالة الأوردر
+  // check if the order is in the delivered or received status
   if (![orderStatus.DELIVERED, orderStatus.RECEIVED].includes(order.status)) {
     throw new AppError("Order cannot be returned in current status", 400);
   }
 
-  // معالجة الإرجاع الفوري للمخزون عند المشتري
+  // process the return immediately
   for (const returnItem of returnItems) {
     const orderItem = order.items.find(
       (item) => item.productId.toString() === returnItem.productId.toString()
@@ -47,7 +47,7 @@ export const returnOrder = async (req, res) => {
       );
     }
 
-    // خصم من مخزون المشتري فوراً
+    // deduct from the buyer's inventory immediately
     const buyerInventory = await Inventory.findOne({
       product: returnItem.productId,
       company: order.buyer,
@@ -71,7 +71,7 @@ export const returnOrder = async (req, res) => {
 
       await buyerInventory.save();
 
-      // تسجيل في تاريخ المخزون
+      // log the inventory history
       await InventoryHistory.create({
         inventory: buyerInventory._id,
         company: order.buyer,
@@ -91,7 +91,7 @@ export const returnOrder = async (req, res) => {
     }
   }
 
-  // تحديث الأوردر
+  // update the order status
   order.status = orderStatus.RETURNED;
   order.returnInfo = {
     returnItems,
