@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use(protectedRoute, allowedTo("platform_admin"));
 
-router.get("/companies", catchError(getAllCompanies));
+router.get("/", catchError(getAllCompanies));
 router.patch("/approve-company/:id", catchError(approveCompany));
 
 export default router;

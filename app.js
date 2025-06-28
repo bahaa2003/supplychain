@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import teamRoutes from "./routes/team.routes.js";
-import adminRoutes from "./routes/admin.routes.js";
+import companyRoutes from "./routes/company.routes.js";
 import setupRoutes from "./routes/setup.routes.js";
 import userRoutes from "./routes/users.routes.js";
 import partnerConnectionRoutes from "./routes/partnerConnection.routes.js";
@@ -36,7 +36,7 @@ app.get("/", (req, res) => {
 app.use("/api/setup", setupRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/company", companyRoutes);
 app.use("/api/users/", userRoutes);
 app.use(
   "/api/partner-connection",
