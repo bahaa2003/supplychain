@@ -4,11 +4,6 @@ import { orderStatus, orderStatusEnum } from "../enums/orderStatus.enum.js";
 const { Schema } = mongoose;
 
 const orderItemSchema = new Schema({
-  productId: {
-    type: Schema.Types.ObjectId,
-    ref: "Product",
-    required: true,
-  },
   sku: {
     type: String,
     required: true,
@@ -113,7 +108,7 @@ const orderSchema = new Schema(
     returnInfo: {
       returnItems: [
         {
-          productId: { type: Schema.Types.ObjectId, ref: "Product" },
+          sku: String,
           quantity: Number,
           reason: String,
         },
@@ -127,14 +122,14 @@ const orderSchema = new Schema(
     returnProcessing: {
       acceptedItems: [
         {
-          productId: { type: Schema.Types.ObjectId, ref: "Product" },
+          sku: String,
           quantity: Number,
           reason: String,
         },
       ],
       rejectedItems: [
         {
-          productId: { type: Schema.Types.ObjectId, ref: "Product" },
+          sku: String,
           quantity: Number,
           reason: String,
         },
@@ -156,26 +151,5 @@ orderSchema.pre("save", function (next) {
   }
   next();
 });
-
-// Add initial status to history when creating a new order
-orderSchema.pre("save", function (next) {
-  if (this.isNew) {
-    this.history.push({
-      status: this.status,
-      updatedBy: this.createdBy,
-      notes: "Order created.",
-    });
-  }
-  next();
-});
-
-// Virtual to get the current user role
-orderSchema.virtual("userRole").get(function () {
-  // this should be set by the controller
-  return this._userRole;
-});
-
-orderSchema.set("toJSON", { virtuals: true });
-orderSchema.set("toObject", { virtuals: true });
 
 export default mongoose.model("Order", orderSchema);

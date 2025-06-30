@@ -102,17 +102,17 @@ export const createPartnerConnection = async (req, res, next) => {
 
     // Create notification for recipient
     if (recipientOwner?.owner) {
-      await createNotification({
-        type: "PartnerRequest",
-        data: {
+      await createNotification(
+        "PartnerRequest",
+        {
           requesterCompany:
             requesterCompany.name || requesterCompany.companyName,
           partnershipType,
           connectionId: connection._id,
           priority,
         },
-        recipients: [recipientOwner.owner._id],
-      });
+        [recipientOwner.owner._id]
+      );
     }
 
     // Populate connection for response

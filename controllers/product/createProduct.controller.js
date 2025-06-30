@@ -1,6 +1,8 @@
 import Product from "../../models/Product.js";
 import { AppError } from "../../utils/AppError.js";
 import Inventory from "../../models/Inventory.js";
+import InventoryHistory from "../../models/InventoryHistory.js";
+import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 
 const generateSku = () => {
   return `${Math.random().toString(36).substring(2, 14).toUpperCase()}`;
@@ -40,14 +42,33 @@ export const createProduct = async (req, res, next) => {
     const defaultLocation = req.body.location || user.company?.location;
 
     // After normal product creation, create inventory
-    await Inventory.create({
+    const inventory = await Inventory.create({
       product: product._id,
       company: companyId,
       onHand: req.body.initialQuantity || 0,
+      reserved: 0,
       minimumThreshold: req.body.minimumThreshold || 10,
       lastUpdated: new Date(),
       location: defaultLocation,
     });
+    if (inventory.onHand || inventory.reserved) {
+      await InventoryHistory.create({
+        inventory: inventory._id,
+        company: companyId,
+        before: {
+          onHand: 0,
+          reserved: 0,
+        },
+        after: {
+          onHand: inventory.onHand,
+          reserved: inventory.reserved,
+        },
+        product: product._id,
+        quantity: req.body.initialQuantity || 0,
+        changeType: inventoryChangeType.INITIAL_STOCK,
+        performedBy: req.user._id,
+      });
+    }
 
     console.log("Inventory created for product:", product._id);
     res.status(201).json({

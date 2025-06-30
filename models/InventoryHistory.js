@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { inventoryChangeTypeEnum } from "../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceTypeEnum } from "../enums/inventoryReferenceType.enum.js";
+import { inventoryChangeType } from "../enums/inventoryChangeType.enum.js";
 
 const { Schema } = mongoose;
 
@@ -20,7 +21,6 @@ const inventoryHistorySchema = new Schema(
     product: {
       type: Schema.Types.ObjectId,
       ref: "Product",
-      required: true,
     },
     changeType: {
       type: String,
@@ -44,12 +44,22 @@ const inventoryHistorySchema = new Schema(
     referenceType: {
       type: String,
       enum: inventoryReferenceTypeEnum,
-      required: true,
+      required: function () {
+        return !(
+          this.changeType === inventoryChangeType.ADJUSTMENT ||
+          this.changeType === inventoryChangeType.INITIAL_STOCK
+        );
+      },
     },
     referenceId: {
       type: Schema.Types.ObjectId,
-      required: true,
       refPath: "referenceType", // Dynamic reference to Order, Shipment, etc.
+      required: function () {
+        return !(
+          this.changeType === inventoryChangeType.ADJUSTMENT ||
+          this.changeType === inventoryChangeType.INITIAL_STOCK
+        );
+      },
     },
     performedBy: {
       type: Schema.Types.ObjectId,

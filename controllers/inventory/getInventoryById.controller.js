@@ -2,14 +2,14 @@ import Inventory from "../../models/Inventory.js";
 import InventoryHistory from "../../models/InventoryHistory.js";
 import { AppError } from "../../utils/AppError.js";
 
-// Get inventory by ID (only if it belongs to the user's company)
+// Get inventory and History by ID (only if it belongs to the user's company)
 
 export const getInventoryById = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { inventryId } = req.params;
     const companyId = req.user.company?._id || req.user.company;
     const inventory = await Inventory.findOne({
-      _id: id,
+      _id: inventryId,
       company: companyId,
     })
       .select({
@@ -22,7 +22,7 @@ export const getInventoryById = async (req, res, next) => {
     if (!inventory) return next(new AppError("Inventory not found", 404));
 
     const inventoryHistory = await InventoryHistory.find({
-      inventory: inventory._id,
+      inventory: inventryId,
     })
       .select({
         __v: false,

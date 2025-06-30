@@ -57,6 +57,7 @@ export const ORDER_ROLE_PERMISSIONS = {
       orderStatus.CANCELLED,
       orderStatus.SUBMITTED,
     ],
+    [orderStatus.SUBMITTED]: [orderStatus.CANCELLED],
     [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED],
     [orderStatus.DELIVERED]: [orderStatus.RECEIVED, orderStatus.RETURNED],
     [orderStatus.RECEIVED]: [orderStatus.COMPLETED, orderStatus.RETURNED],
@@ -71,57 +72,33 @@ export const ORDER_ROLE_PERMISSIONS = {
   },
 };
 
-// Helper function to check if transition is valid
-export const canTransitionTo = (
-  currentStatus,
-  newStatus,
-  userRole,
-  userCompany,
-  order
-) => {
-  // Check if transition is valid
-  if (!VALID_ORDER_TRANSITIONS[currentStatus]?.includes(newStatus)) {
-    return false;
-  }
-
-  // Determine user's role in this order
-  const isBuyer = userCompany.toString() === order.buyer.toString();
-  const isSupplier = userCompany.toString() === order.supplier.toString();
-
-  if (!isBuyer && !isSupplier) {
-    return false;
-  }
-
-  const role = isBuyer ? "buyer" : "supplier";
-
-  // Check role permissions
-  return (
-    ORDER_ROLE_PERMISSIONS[role]?.[currentStatus]?.includes(newStatus) || false
-  );
-};
-
 // Inventory impact points
 export const INVENTORY_IMPACT = {
   // when the supplier accepts the order - reserve the quantity
-  [orderStatus.ACCEPTED]: {
+  [orderStatus.SUBMITTED]: {
     supplier: { reserve: true },
   },
+
   // when the order is shipped - deduct from the inventory
   [orderStatus.PREPARING]: {
     supplier: { deduct: true, unreserve: true },
   },
+
   // when the order is received - add to the inventory
   [orderStatus.RECEIVED]: {
     buyer: { add: true },
   },
+
   // when the order is returned - deduct from the buyer's inventory
   [orderStatus.RETURNED]: {
     buyer: { deduct: true },
   },
+
   // when the return is processed - add to the supplier's inventory
   [orderStatus.RETURN_PROCESSED]: {
     supplier: { add: true },
   },
+
   // when the order is cancelled - cancel the reservation
   [orderStatus.CANCELLED]: {
     supplier: { unreserve: true },

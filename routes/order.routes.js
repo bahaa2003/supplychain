@@ -14,31 +14,59 @@ import {
 import { validate } from "../middlewares/validate.middleware.js";
 import { protectedRoute } from "../middlewares/auth.middleware.js";
 import { catchError } from "../utils/catchError.js";
-
+import { roles } from "../enums/role.enum.js";
+import { allowedTo } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 // All order routes require authentication
 router.use(protectedRoute);
 
-router.route("/").get(catchError(getCompanyOrders));
+router
+  .route("/")
+  .get(
+    allowedTo(roles.ADMIN, roles.MANAGER, roles.STAFF),
+    catchError(getCompanyOrders)
+  );
 router
   .route("/:supplierId")
-  .post(validate(createOrderValidator()), catchError(createOrder));
+  .post(
+    allowedTo(roles.ADMIN, roles.MANAGER, roles.STAFF),
+    validate(createOrderValidator()),
+    catchError(createOrder)
+  );
 
 router
   .route("/:orderId")
-  .get(catchError(getOrderById))
-  .patch(validate(updateOrderValidator()), catchError(updateOrder));
+  .get(
+    allowedTo(roles.ADMIN, roles.MANAGER, roles.STAFF),
+    catchError(getOrderById)
+  )
+  .patch(
+    allowedTo(roles.ADMIN, roles.MANAGER),
+    validate(updateOrderValidator()),
+    catchError(updateOrder)
+  );
 
 // Validate order items before approval or submission
-router.route("/:orderId/validate").post(catchError(validateOrderItems));
+router
+  .route("/:orderId/validate")
+  .get(
+    allowedTo(roles.ADMIN, roles.MANAGER, roles.STAFF),
+    catchError(validateOrderItems)
+  );
 
 // Return order functionality
 router
   .route("/:orderId/return")
-  .post(validate(returnOrderValidator()), catchError(returnOrder));
+  .post(
+    allowedTo(roles.ADMIN, roles.MANAGER),
+    validate(returnOrderValidator()),
+    catchError(returnOrder)
+  );
 
 // Process return (supplier side)
-router.route("/:orderId/process-return").patch(catchError(processReturn));
+router
+  .route("/:orderId/process-return")
+  .patch(allowedTo(roles.ADMIN, roles.MANAGER), catchError(processReturn));
 
 export default router;

@@ -1,1 +1,7 @@
-export const roleEnum = ["admin", "manager", "staff", "platform_admin"];
+export const roles = {
+  ADMIN: "admin",
+  MANAGER: "manager",
+  STAFF: "staff",
+  PLATFORM_ADMIN: "platform_admin",
+};
+export const roleEnum = Object.values(roles);

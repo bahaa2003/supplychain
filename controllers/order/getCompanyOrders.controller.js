@@ -82,8 +82,6 @@ export const getCompanyOrders = async (req, res) => {
         returnProcessing: false,
       })
       .populate([
-        { path: "buyer", select: "companyName" },
-        { path: "supplier", select: "companyName" },
         { path: "deliveryLocation", select: "locationName city state country" },
       ])
       .sort({ createdAt: -1 })

@@ -1,15 +1,12 @@
 import Order from "../../models/Order.js";
 import Inventory from "../../models/Inventory.js";
 import InventoryHistory from "../../models/InventoryHistory.js";
+import Product from "../../models/Product.js";
 import { AppError } from "../../utils/AppError.js";
-import {
-  canTransitionTo,
-  INVENTORY_IMPACT,
-  orderStatus,
-} from "../../enums/orderStatus.enum.js";
+import { INVENTORY_IMPACT, orderStatus } from "../../enums/orderStatus.enum.js";
+import { checkOrderStatusTransition } from "../../utils/checkOrderStatusTransition.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
-import Product from "../../models/Product.js";
 
 export const updateOrder = async (req, res, next) => {
   const { orderId } = req.params;
@@ -24,20 +21,10 @@ export const updateOrder = async (req, res, next) => {
 
   const currentStatus = order.status;
 
-  // check if the transition is valid
+  // Check if transition is valid
   if (
-    !canTransitionTo(
-      currentStatus,
-      newStatus,
-      req.user.role,
-      userCompanyId,
-      order
-    )
+    !checkOrderStatusTransition(currentStatus, newStatus, userCompanyId, order)
   ) {
-    console.log("order", order);
-    console.log("userCompanyId", userCompanyId);
-    console.log("buyer", order.buyer);
-    console.log("supplier", order.supplier);
     return next(
       new AppError(
         `Invalid status transition from ${currentStatus} to ${newStatus} for ${
@@ -50,7 +37,7 @@ export const updateOrder = async (req, res, next) => {
     );
   }
 
-  // check if the order has issues
+  // Check for unresolved issues before submission
   if (newStatus === orderStatus.SUBMITTED && order.issues.length > 0) {
     return next(
       new AppError(
@@ -60,17 +47,16 @@ export const updateOrder = async (req, res, next) => {
     );
   }
 
-  // process the inventory impact
+  // Process inventory impact
   await handleInventoryImpact(order, currentStatus, newStatus, userId);
 
-  // update the order status
+  // Update order
   order.status = newStatus;
-
   if (confirmedDeliveryDate) {
     order.confirmedDeliveryDate = confirmedDeliveryDate;
   }
 
-  // add to the history
+  // Add to history
   order.history.push({
     status: newStatus,
     updatedBy: userId,
@@ -78,7 +64,6 @@ export const updateOrder = async (req, res, next) => {
   });
 
   await order.save();
-
   await order.populate([
     { path: "buyer", select: "name" },
     { path: "supplier", select: "name" },
@@ -91,10 +76,8 @@ export const updateOrder = async (req, res, next) => {
     data: { order },
   });
 };
-/////////////////////////////////////////////////
-/////////////////Helpers/////////////////////////
-/////////////////////////////////////////////////
-// process the inventory impact
+
+// Helper functions
 const handleInventoryImpact = async (
   order,
   currentStatus,
@@ -105,52 +88,70 @@ const handleInventoryImpact = async (
   if (!impact) return;
 
   for (const item of order.items) {
-    // effect on the supplier's inventory
+    // Supplier inventory impact
     if (impact.supplier) {
-      const supplierInventory = await Inventory.findOne({
-        product: item.productId,
+      const supplierProduct = await Product.findOne({
+        sku: item.sku,
         company: order.supplier,
       });
 
-      if (supplierInventory) {
-        await updateInventory(
-          supplierInventory,
-          item,
-          impact.supplier,
-          userId,
-          order,
-          `Order ${newStatus.toLowerCase()}`
-        );
+      if (supplierProduct) {
+        const supplierInventory = await Inventory.findOne({
+          product: supplierProduct._id, // Fixed: use product ID instead of SKU
+          company: order.supplier,
+        });
+
+        if (supplierInventory) {
+          await updateInventory(
+            supplierInventory,
+            item,
+            impact.supplier,
+            userId,
+            order,
+            `Order ${newStatus.toLowerCase()}`
+          );
+        }
       }
     }
 
-    // effect on the buyer's inventory
+    // Buyer inventory impact
     if (impact.buyer) {
-      const buyerProduct = await Product.findOne({ sku: item.sku });
+      const buyerProduct = await Product.findOne({
+        sku: item.sku,
+        company: order.buyer,
+      });
+
       if (!buyerProduct) {
-        throw new AppError(`Product with sku ${item.sku} not found`, 404);
+        throw new AppError(
+          `Product ${item.sku} not found in buyer catalog`,
+          404
+        );
       }
+
       const buyerInventory = await Inventory.findOne({
         product: buyerProduct._id,
         company: order.buyer,
       });
-      console.log("buyerInventory updating...");
-      if (buyerInventory || impact.buyer.add) {
-        await updateInventory(
-          buyerInventory,
-          item,
-          impact.buyer,
-          userId,
-          order,
-          `Order ${newStatus.toLowerCase()}`
+
+      if (!buyerInventory) {
+        throw new AppError(
+          `No inventory record found for product ${item.sku} in buyer company`,
+          404
         );
-        console.log("end buyerInventory updating");
       }
+
+      await updateInventory(
+        buyerInventory,
+        item,
+        impact.buyer,
+        userId,
+        order,
+        `Order ${newStatus.toLowerCase()}`
+      );
     }
   }
 };
 
-// update the inventory
 const updateInventory = async (
   inventory,
   item,
@@ -159,17 +160,13 @@ const updateInventory = async (
   order,
   reason
 ) => {
-  let inventoryExists = !!inventory;
-
   if (!inventory) {
-    // create a new inventory if it doesn't exist (for the buyer when received)
-    inventory = new Inventory({
-      product: item.productId,
-      company: impact.add ? order.buyer : order.supplier,
-      location: order.deliveryLocation, // or a default location
-      onHand: 0,
-      reserved: 0,
-    });
+    throw new AppError(`Inventory not found for SKU ${item.sku}`, 404);
+  }
+
+  const product = await Product.findById(inventory.product);
+  if (!product) {
+    throw new AppError(`Product not found for SKU ${item.sku}`, 404);
   }
 
   const before = {
@@ -179,6 +176,7 @@ const updateInventory = async (
 
   const quantityChange = { onHand: 0, reserved: 0 };
 
+  // Apply inventory changes
   if (impact.reserve) {
     inventory.reserved += item.quantity;
     quantityChange.reserved = item.quantity;
@@ -206,11 +204,11 @@ const updateInventory = async (
 
   await inventory.save();
 
-  // log the inventory history
+  // Log inventory history
   await InventoryHistory.create({
     inventory: inventory._id,
     company: inventory.company,
-    product: item.productId,
+    product: product._id,
     changeType: getChangeType(impact),
     quantityChange,
     before,
@@ -222,7 +220,6 @@ const updateInventory = async (
   });
 };
 
-// determine the change type
 const getChangeType = (impact) => {
   if (impact.add) return inventoryChangeType.INCOMING;
   if (impact.deduct) return inventoryChangeType.OUTGOING;

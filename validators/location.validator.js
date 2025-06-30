@@ -10,15 +10,6 @@ export const locationValidator = () => [
     .withMessage("Location name must be a string")
     .isLength({ min: 2, max: 60 })
     .withMessage("Location name must be between 2 and 60 characters"),
-  body("company")
-    .notEmpty()
-    .withMessage("Company is required")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Company must be a valid MongoDB ObjectId");
-      }
-      return true;
-    }),
   body("type")
     .notEmpty()
     .withMessage("Location type is required")

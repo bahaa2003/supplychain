@@ -198,15 +198,15 @@ export const updatePartnerConnection = async (req, res, next) => {
       { path: "terminatedBy", select: "name email" },
     ]);
     // Send notification
-    await createNotification({
-      type: "partnerRequestUpdate",
-      data: {
+    await createNotification(
+      "partnerRequestUpdate",
+      {
         recipientCompany: connection.recipient.companyName,
         status,
         reason,
       },
-      recipients: connection.invitedBy,
-    });
+      connection.invitedBy
+    );
 
     const statusMessages = {
       Active: "Partnership activated successfully",
