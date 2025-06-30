@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { updateOrder } from "../controllers/order/updateOrder.controller.js";
+import { updateOrderStatus } from "../controllers/order/updateOrder.controller.js";
 import { getCompanyOrders } from "../controllers/order/getCompanyOrders.controller.js";
 import { getOrderById } from "../controllers/order/getOrderById.controller.js";
 import { createOrder } from "../controllers/order/createOrder.controller.js";
@@ -44,7 +44,7 @@ router
   .patch(
     allowedTo(roles.ADMIN, roles.MANAGER),
     validate(updateOrderValidator()),
-    catchError(updateOrder)
+    catchError(updateOrderStatus)
   );
 
 // Validate order items before approval or submission
@@ -56,17 +56,17 @@ router
   );
 
 // Return order functionality
-router
-  .route("/:orderId/return")
-  .post(
-    allowedTo(roles.ADMIN, roles.MANAGER),
-    validate(returnOrderValidator()),
-    catchError(returnOrder)
-  );
+// router
+//   .route("/:orderId/return")
+//   .post(
+//     allowedTo(roles.ADMIN, roles.MANAGER),
+//     validate(returnOrderValidator()),
+//     catchError(returnOrder)
+//   );
 
 // Process return (supplier side)
-router
-  .route("/:orderId/process-return")
-  .patch(allowedTo(roles.ADMIN, roles.MANAGER), catchError(processReturn));
+// router
+//   .route("/:orderId/process-return")
+//   .patch(allowedTo(roles.ADMIN, roles.MANAGER), catchError(processReturn));
 
 export default router;

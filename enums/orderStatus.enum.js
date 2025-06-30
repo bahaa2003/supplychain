@@ -9,8 +9,8 @@ export const orderStatus = {
   SHIPPED: "Shipped", // shipped
   DELIVERED: "Delivered", // delivered
   RECEIVED: "Received", // received
-  RETURNED: "Returned", // returned
-  RETURN_PROCESSED: "Return_processed", // supplier processed the return
+  // RETURNED: "Returned", // returned
+  // RETURN_PROCESSED: "Return_processed", // supplier processed the return
   COMPLETED: "Completed", // completed
   CANCELLED: "Cancelled", // cancelled
   FAILED: "Failed", // failed
@@ -38,11 +38,11 @@ export const VALID_ORDER_TRANSITIONS = {
   [orderStatus.SHIPPED]: [orderStatus.DELIVERED, orderStatus.FAILED],
   [orderStatus.DELIVERED]: [
     orderStatus.RECEIVED,
-    orderStatus.RETURNED,
+    // orderStatus.RETURNED,
     orderStatus.FAILED,
   ],
-  [orderStatus.RECEIVED]: [orderStatus.COMPLETED, orderStatus.RETURNED],
-  [orderStatus.RETURNED]: [orderStatus.RETURN_PROCESSED],
+  [orderStatus.RECEIVED]: [orderStatus.COMPLETED /*orderStatus.RETURNED*/],
+  // [orderStatus.RETURNED]: [orderStatus.RETURN_PROCESSED],
   [orderStatus.RETURN_PROCESSED]: [orderStatus.COMPLETED],
   [orderStatus.COMPLETED]: [],
   [orderStatus.CANCELLED]: [],
@@ -59,8 +59,8 @@ export const ORDER_ROLE_PERMISSIONS = {
     ],
     [orderStatus.SUBMITTED]: [orderStatus.CANCELLED],
     [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED],
-    [orderStatus.DELIVERED]: [orderStatus.RECEIVED, orderStatus.RETURNED],
-    [orderStatus.RECEIVED]: [orderStatus.COMPLETED, orderStatus.RETURNED],
+    [orderStatus.DELIVERED]: [orderStatus.RECEIVED /*orderStatus.RETURNED*/],
+    [orderStatus.RECEIVED]: [orderStatus.COMPLETED /*orderStatus.RETURNED*/],
   },
   supplier: {
     [orderStatus.SUBMITTED]: [orderStatus.ACCEPTED, orderStatus.DECLINED],
@@ -68,7 +68,7 @@ export const ORDER_ROLE_PERMISSIONS = {
     [orderStatus.PREPARING]: [orderStatus.READY_TO_SHIP, orderStatus.CANCELLED],
     [orderStatus.READY_TO_SHIP]: [orderStatus.SHIPPED, orderStatus.CANCELLED],
     [orderStatus.SHIPPED]: [orderStatus.DELIVERED],
-    [orderStatus.RETURNED]: [orderStatus.RETURN_PROCESSED],
+    // [orderStatus.RETURNED]: [orderStatus.RETURN_PROCESSED],
   },
 };
 
@@ -90,14 +90,14 @@ export const INVENTORY_IMPACT = {
   },
 
   // when the order is returned - deduct from the buyer's inventory
-  [orderStatus.RETURNED]: {
-    buyer: { deduct: true },
-  },
+  // [orderStatus.RETURNED]: {
+  //   buyer: { deduct: true },
+  // },
 
   // when the return is processed - add to the supplier's inventory
-  [orderStatus.RETURN_PROCESSED]: {
-    supplier: { add: true },
-  },
+  // [orderStatus.RETURN_PROCESSED]: {
+  //   supplier: { add: true },
+  // },
 
   // when the order is cancelled - cancel the reservation
   [orderStatus.CANCELLED]: {

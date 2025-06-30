@@ -49,9 +49,9 @@ export const validateOrderItemsService = async (orderId, userCompanyId) => {
     let hasIssue = false;
 
     // Check price changes
-    if (product.price !== item.unitPrice) {
+    if (product.unitPrice !== item.unitPrice) {
       issue.problem = "price_changed";
-      issue.current_price = product.price;
+      issue.current_price = product.unitPrice;
       hasIssue = true;
     }
 

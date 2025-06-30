@@ -8,7 +8,7 @@ import { checkOrderStatusTransition } from "../../utils/checkOrderStatusTransiti
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
 
-export const updateOrder = async (req, res, next) => {
+export const updateOrderStatus = async (req, res, next) => {
   const { orderId } = req.params;
   const { status: newStatus, notes, confirmedDeliveryDate } = req.body;
   const userId = req.user._id;
