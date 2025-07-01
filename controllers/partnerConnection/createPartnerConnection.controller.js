@@ -95,13 +95,13 @@ export const createPartnerConnection = async (req, res, next) => {
     const connection = await PartnerConnection.create(connectionData);
 
     // Get recipient company owner for notification
-    const recipientOwner = await User.find(
+    const recipientOwner = await User.findOne(
       { company: recipientId, role: "admin" },
-      { email: 1, name: 1 }
+      { _id: 1, email: 1, name: 1 }
     );
 
     // Create notification for recipient
-    if (recipientOwner?.owner) {
+    if (recipientOwner) {
       await createNotification(
         "PartnerRequest",
         {
@@ -111,7 +111,7 @@ export const createPartnerConnection = async (req, res, next) => {
           connectionId: connection._id,
           priority,
         },
-        [recipientOwner.owner._id]
+        [recipientOwner._id]
       );
     }
 

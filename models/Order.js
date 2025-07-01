@@ -69,7 +69,7 @@ const orderSchema = new Schema(
     status: {
       type: String,
       enum: orderStatusEnum,
-      default: orderStatus.CREATED,
+      required: true,
     },
     items: [orderItemSchema],
     totalAmount: {
@@ -95,49 +95,6 @@ const orderSchema = new Schema(
       ref: "Invoice",
     },
     history: [orderStatusHistorySchema],
-    // problems found during validation
-    issues: [
-      {
-        sku: String,
-        problem: String, // e.g., 'price_changed', 'insufficient_quantity', 'product_inactive'
-        current_price: Number,
-        available_quantity: Number,
-      },
-    ],
-    // return information
-    returnInfo: {
-      returnItems: [
-        {
-          sku: String,
-          quantity: Number,
-          reason: String,
-        },
-      ],
-      returnReason: String,
-      isPartialReturn: { type: Boolean, default: false },
-      returnedBy: { type: Schema.Types.ObjectId, ref: "User" },
-      returnedAt: Date,
-    },
-    // return processing (supplier side)
-    returnProcessing: {
-      acceptedItems: [
-        {
-          sku: String,
-          quantity: Number,
-          reason: String,
-        },
-      ],
-      rejectedItems: [
-        {
-          sku: String,
-          quantity: Number,
-          reason: String,
-        },
-      ],
-      processingNotes: String,
-      processedBy: { type: Schema.Types.ObjectId, ref: "User" },
-      processedAt: Date,
-    },
   },
   {
     timestamps: true,

@@ -72,6 +72,9 @@ export const updatePartnerConnection = async (req, res, next) => {
     if (!status) {
       return next(new AppError("Status is required", 400));
     }
+    if (!connection) {
+      return next(new AppError("Connection not found", 404));
+    }
 
     // Get user role
     const userRole = getUserRole(connection, companyId);
