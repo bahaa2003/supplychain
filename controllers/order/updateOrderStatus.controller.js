@@ -4,7 +4,7 @@ import InventoryHistory from "../../models/InventoryHistory.js";
 import Product from "../../models/Product.js";
 import { AppError } from "../../utils/AppError.js";
 import { INVENTORY_IMPACT, orderStatus } from "../../enums/orderStatus.enum.js";
-import { checkOrderStatusTransition } from "../../utils/checkOrderStatusTransition.js";
+import { checkOrderStatusTransition } from "../../utils/order/checkOrderStatusTransition.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
 
@@ -84,7 +84,7 @@ const handleInventoryImpact = async (
   newStatus,
   userId
 ) => {
-  const impact = INVENTORY_IMPACT[newStatus];
+  const impact = INVENTORY_IMPACT[currentStatus][newStatus];
   if (!impact) return;
 
   for (const item of order.items) {

@@ -1,15 +1,20 @@
 import { Router } from "express";
-import { updateOrderStatus } from "../controllers/order/updateOrder.controller.js";
+import { updateOrderStatus } from "../controllers/order/updateOrderStatus.controller.js";
 import { getCompanyOrders } from "../controllers/order/getCompanyOrders.controller.js";
 import { getOrderById } from "../controllers/order/getOrderById.controller.js";
 import { createOrder } from "../controllers/order/createOrder.controller.js";
-import { validateOrderItems } from "../controllers/order/validateOrderItems.controller.js";
-import { returnOrder } from "../controllers/order/returnOrder.controller.js";
-import { processReturn } from "../controllers/order/processReturn.controller.js";
+import {
+  addOrderItem,
+  editOrderItem,
+  removeOrderItem,
+} from "../controllers/order/updateOrderItem.controller.js";
+
 import {
   createOrderValidator,
-  updateOrderValidator,
-  returnOrderValidator,
+  updateOrderStatusValidator,
+  addOrderItemValidator,
+  editOrderItemValidator,
+  removeOrderItemValidator,
 } from "../validators/order.validator.js";
 import { validate } from "../middlewares/validate.middleware.js";
 import { protectedRoute } from "../middlewares/auth.middleware.js";
@@ -43,30 +48,33 @@ router
   )
   .patch(
     allowedTo(roles.ADMIN, roles.MANAGER),
-    validate(updateOrderValidator()),
+    validate(updateOrderStatusValidator()),
     catchError(updateOrderStatus)
   );
 
-// Validate order items before approval or submission
+// Order item management routes
 router
-  .route("/:orderId/validate")
-  .get(
+  .route("/:orderId/edit/:itemId")
+  .patch(
     allowedTo(roles.ADMIN, roles.MANAGER, roles.STAFF),
-    catchError(validateOrderItems)
+    validate(editOrderItemValidator()),
+    catchError(editOrderItem)
   );
 
-// Return order functionality
-// router
-//   .route("/:orderId/return")
-//   .post(
-//     allowedTo(roles.ADMIN, roles.MANAGER),
-//     validate(returnOrderValidator()),
-//     catchError(returnOrder)
-//   );
+router
+  .route("/:orderId/remove/:itemId")
+  .delete(
+    allowedTo(roles.ADMIN, roles.MANAGER, roles.STAFF),
+    validate(removeOrderItemValidator()),
+    catchError(removeOrderItem)
+  );
 
-// Process return (supplier side)
-// router
-//   .route("/:orderId/process-return")
-//   .patch(allowedTo(roles.ADMIN, roles.MANAGER), catchError(processReturn));
+router
+  .route("/:orderId/add")
+  .post(
+    allowedTo(roles.ADMIN, roles.MANAGER, roles.STAFF),
+    validate(addOrderItemValidator()),
+    catchError(addOrderItem)
+  );
 
 export default router;

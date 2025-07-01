@@ -1,7 +1,7 @@
 import {
   VALID_ORDER_TRANSITIONS,
   ORDER_ROLE_PERMISSIONS,
-} from "../enums/orderStatus.enum.js";
+} from "../../enums/orderStatus.enum.js";
 
 // Helper function to check if transition is valid
 

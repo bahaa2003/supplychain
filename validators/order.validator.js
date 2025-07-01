@@ -31,7 +31,7 @@ export const createOrderValidator = () => [
     }),
 ];
 
-export const updateOrderValidator = () => [
+export const updateOrderStatusValidator = () => [
   body("status")
     .notEmpty()
     .withMessage("Status is required")
@@ -48,31 +48,32 @@ export const updateOrderValidator = () => [
     .withMessage("Confirmed delivery date must be a valid ISO date"),
 ];
 
-export const returnOrderValidator = () => [
-  body("returnItems")
-    .isArray({ min: 1 })
-    .withMessage("At least one item must be returned"),
-  body("returnItems.*.sku")
+export const addOrderItemValidator = () => [
+  param("orderId").isMongoId().withMessage("Invalid order ID"),
+
+  body("sku")
     .notEmpty()
-    .withMessage("Product sku is required for each return item"),
-  body("returnItems.*.quantity")
+    .withMessage("SKU is required")
+    .isLength({ min: 1, max: 50 })
+    .withMessage("SKU must be between 1 and 50 characters")
+    .trim(),
+
+  body("quantity")
     .isInt({ min: 1 })
-    .withMessage("Quantity must be at least 1 for each return item")
-    .toInt(),
-  body("returnItems.*.reason")
-    .optional()
-    .isString()
-    .isLength({ max: 200 })
-    .withMessage("Reason must be less than 200 characters"),
-  body("returnReason")
-    .notEmpty()
-    .withMessage("Return reason is required")
-    .isString()
-    .isLength({ max: 500 })
-    .withMessage("Return reason must be less than 500 characters"),
-  body("isPartialReturn")
-    .optional()
-    .isBoolean()
-    .withMessage("isPartialReturn must be boolean")
-    .toBoolean(),
+    .withMessage("Quantity must be a positive integer"),
+];
+
+export const editOrderItemValidator = () => [
+  param("orderId").isMongoId().withMessage("Invalid order ID"),
+
+  param("itemId").isMongoId().withMessage("Invalid item ID"),
+
+  body("quantity")
+    .isInt({ min: 1 })
+    .withMessage("Quantity must be a positive integer"),
+];
+
+export const removeOrderItemValidator = () => [
+  param("orderId").isMongoId().withMessage("Invalid order ID"),
+  param("itemId").isMongoId().withMessage("Invalid item ID"),
 ];
