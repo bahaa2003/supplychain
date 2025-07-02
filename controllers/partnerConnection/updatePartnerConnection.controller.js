@@ -1,32 +1,10 @@
 import PartnerConnection from "../../models/PartnerConnection.js";
 import { AppError } from "../../utils/AppError.js";
 import createNotification from "../../services/notification.service.js";
-
-// Valid status transitions
-const VALID_TRANSITIONS = {
-  Pending: ["Active", "Rejected", "Cancelled"],
-  Active: ["Inactive", "Completed", "Terminated", "Expired"],
-  Inactive: ["Active", "Terminated", "Expired"],
-  Rejected: [],
-  Completed: [],
-  Terminated: [],
-  Expired: [],
-  Cancelled: [],
-};
-
-// Role permissions
-const ROLE_PERMISSIONS = {
-  requester: {
-    Pending: ["Cancelled"],
-    Active: ["Inactive", "Completed", "Terminated"],
-    Inactive: ["Active", "Terminated"],
-  },
-  recipient: {
-    Pending: ["Active", "Rejected"],
-    Active: ["Inactive", "Completed", "Terminated"],
-    Inactive: ["Active", "Terminated"],
-  },
-};
+import {
+  VALID_TRANSITIONS,
+  ROLE_PERMISSIONS,
+} from "../../enums/partnerConnectionStatus.enum.js";
 
 /**
  * Get user role in the connection

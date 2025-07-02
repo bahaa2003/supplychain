@@ -1,6 +1,6 @@
-import { populate } from "dotenv";
 import PartnerConnection from "../../models/PartnerConnection.js";
 import { AppError } from "../../utils/AppError.js";
+import { partnerConnectionStatus } from "../../enums/partnerConnectionStatus.enum.js";
 
 export const getAllPartnerConnections = async (req, res, next) => {
   try {
@@ -18,13 +18,13 @@ export const getAllPartnerConnections = async (req, res, next) => {
                 { recipient: { $in: [companyId] } },
               ],
             },
-            { status: { $ne: "Cancelled" } },
+            { status: { $ne: partnerConnectionStatus.CANCELLED } },
           ],
         },
         // cancelled connections only from your side
         {
           requester: { $in: [companyId] },
-          status: "Cancelled",
+          status: partnerConnectionStatus.CANCELLED,
         },
       ],
     };
@@ -74,6 +74,8 @@ export const getAllPartnerConnections = async (req, res, next) => {
         .json({ status: "error", message: "No partner connections found" });
     }
   } catch (err) {
-    throw new AppError(err.message || "Failed to get partner connections", 500);
+    return next(
+      AppError(err.message || "Failed to get partner connections", 500)
+    );
   }
 };

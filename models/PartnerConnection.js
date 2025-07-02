@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import {
+  partnerConnectionStatus,
+  partnerConnectionStatusEnum,
+} from "../enums/partnerConnectionStatus.enum.js";
 const { Schema } = mongoose;
 
 const partnerConnectionSchema = new Schema(
@@ -15,29 +19,8 @@ const partnerConnectionSchema = new Schema(
     },
     status: {
       type: String,
-      enum: [
-        "Pending",
-        "Cancelled",
-        "Active",
-        "Rejected",
-        "Inactive",
-        "Completed",
-        "Expired",
-        "Terminated",
-      ],
-      default: "Pending",
-    },
-    partnershipType: {
-      type: String,
-      enum: [
-        "Supplier",
-        "Manufacturer",
-        "Logistics",
-        "Warehouse",
-        "Retailer",
-        "Other",
-      ],
-      // required: true,
+      enum: partnerConnectionStatusEnum,
+      default: partnerConnectionStatus.PENDING,
     },
     invitedBy: {
       type: Schema.Types.ObjectId,
@@ -53,7 +36,12 @@ const partnerConnectionSchema = new Schema(
     terminatedBy: { type: Schema.Types.ObjectId, ref: "User" },
     terminationType: {
       type: String,
-      enum: ["Terminated", "Completed", "Expired", "Cancelled"],
+      enum: [
+        partnerConnectionStatus.TERMINATED,
+        partnerConnectionStatus.COMPLETED,
+        partnerConnectionStatus.EXPIRED,
+        partnerConnectionStatus.CANCELLED,
+      ],
     },
     suspendedBy: { type: Schema.Types.ObjectId, ref: "User" },
     suspendedAt: { type: Date },
@@ -86,40 +74,10 @@ partnerConnectionSchema.pre("save", function (next) {
   if (this.requester.toString() === this.recipient.toString()) {
     next(new Error("A company cannot connect with itself"));
   }
-  next();
-});
-
-// Update lastInteractionAt on status change
-partnerConnectionSchema.pre("save", function (next) {
   if (this.isModified("status")) {
     this.lastInteractionAt = new Date();
   }
   next();
 });
-
-// Add method to terminate connection
-partnerConnectionSchema.methods.terminate = async function (userId, reason) {
-  this.status = "Terminated";
-  this.terminatedAt = new Date();
-  this.terminatedBy = userId;
-  this.terminationReason = reason;
-  return this.save();
-};
-
-// Add static method to find active connections
-partnerConnectionSchema.statics.findActiveConnections = function (companyId) {
-  return this.find({
-    $or: [{ requester: companyId }, { recipient: companyId }],
-    status: "Accepted",
-  }).populate("requester recipient");
-};
-
-// Add static method to find pending requests
-partnerConnectionSchema.statics.findPendingRequests = function (companyId) {
-  return this.find({
-    recipient: companyId,
-    status: "Pending",
-  }).populate("requester invitedBy");
-};
 
 export default mongoose.model("PartnerConnection", partnerConnectionSchema);
