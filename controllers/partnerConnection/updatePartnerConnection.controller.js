@@ -5,6 +5,8 @@ import {
   VALID_TRANSITIONS,
   ROLE_PERMISSIONS,
 } from "../../enums/partnerConnectionStatus.enum.js";
+import User from "../../models/User.js";
+import { roles } from "../../enums/role.enum.js";
 
 /**
  * Get user role in the connection
@@ -178,15 +180,29 @@ export const updatePartnerConnection = async (req, res, next) => {
       { path: "suspendedBy", select: "name email" },
       { path: "terminatedBy", select: "name email" },
     ]);
+
+    const reciveCompanyNotification =
+      companyId.toString() === connection.requester.toString()
+        ? companyId
+        : connection.recipient;
+    const recipientsNotification = await User.find({
+      company: reciveCompanyNotification,
+      role: {
+        $in: [roles.ADMIN, roles.MANAGER],
+      },
+    })
+      .select("_id")
+      .lean();
     // Send notification
     await createNotification(
-      "partnerRequestUpdate",
+      "partnerConnectionUpdate",
       {
         recipientCompany: connection.recipient.companyName,
         status,
         reason,
       },
-      connection.invitedBy
+      recipientsNotification
+      // connection.invitedBy
     );
 
     const statusMessages = {

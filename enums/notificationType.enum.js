@@ -9,5 +9,5 @@ export const notificationTypeEnum = [
   "DocumentUpdate", // Not implemented yet
   "TaskAssignment", // Not implemented yet
   "SystemAlert", // Not implemented yet
-  "partnerRequestUpdate",
+  "partnerConnectionUpdate", // Partner connection updated
 ];

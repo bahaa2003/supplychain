@@ -11,7 +11,7 @@ export default async function createNotification(type, data, recipients) {
     newOrder: "New Order Received",
     orderStatusChange: "Order Status Updated",
     partnerRequest: "New Partner Connection Request",
-    partnerRequestUpdate: "Partner Connection Request updated",
+    partnerConnectionUpdate: "Partner Connection updated",
     partnerVisibilityUpdated: "Partner Visibility Settings Updated",
     shipmentUpdate: "Shipment Update",
     systemAlert: "System Alert",
