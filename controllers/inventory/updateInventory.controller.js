@@ -1,11 +1,9 @@
 import Inventory from "../../models/Inventory.js";
 import InventoryHistory from "../../models/InventoryHistory.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
-import { inventoryChangeTypeEnum } from "../../enums/inventoryChangeType.enum.js";
 import { AppError } from "../../utils/AppError.js";
 
 // Update inventory item (only if it belongs to the user's company)
-
 export const updateInventory = async (req, res, next) => {
   try {
     const { inventryId } = req.params;
@@ -45,8 +43,10 @@ export const updateInventory = async (req, res, next) => {
         },
       });
     }
+    inventory.onHand = onHand;
+    inventory.reserved = reserved;
     inventory.save();
-    res
+    return res
       .status(200)
       .json({ status: "success", data: { inventory, inventoryHistory } });
   } catch (err) {

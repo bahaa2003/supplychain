@@ -50,15 +50,15 @@ export const ORDER_ROLE_PERMISSIONS = {
       orderStatus.SUBMITTED,
     ],
     [orderStatus.SUBMITTED]: [orderStatus.CANCELLED],
-    [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED],
+    [orderStatus.REJECTED]: [orderStatus.SUBMITTED, orderStatus.CANCELLED],
     [orderStatus.DELIVERED]: [orderStatus.RECEIVED],
     [orderStatus.RECEIVED]: [orderStatus.COMPLETED],
   },
   supplier: {
     [orderStatus.SUBMITTED]: [orderStatus.ACCEPTED, orderStatus.DECLINED],
     [orderStatus.ACCEPTED]: [orderStatus.PREPARING, orderStatus.CANCELLED],
-    [orderStatus.PREPARING]: [orderStatus.READY_TO_SHIP, orderStatus.CANCELLED],
-    [orderStatus.READY_TO_SHIP]: [orderStatus.SHIPPED, orderStatus.CANCELLED],
+    [orderStatus.PREPARING]: [orderStatus.READY_TO_SHIP],
+    [orderStatus.READY_TO_SHIP]: [orderStatus.SHIPPED],
     [orderStatus.SHIPPED]: [orderStatus.DELIVERED],
   },
 };
@@ -66,42 +66,32 @@ export const ORDER_ROLE_PERMISSIONS = {
 // Inventory impact points
 export const INVENTORY_IMPACT = {
   // when the supplier accepts the order - reserve the quantity
-  [orderStatus.CREATED]: {
-    [orderStatus.SUBMITTED]: {
-      supplier: { reserve: true },
-    },
+  [orderStatus.SUBMITTED]: {
+    supplier: { reserve: true },
   },
 
   // when the order is shipped - deduct from the inventory
-  [orderStatus.ACCEPTED]: {
-    [orderStatus.PREPARING]: {
-      supplier: { deduct: true, unreserve: true },
-    },
-  },
-
-  [orderStatus.REJECTED]: {
-    [orderStatus.PREPARING]: {
-      supplier: { deduct: true, unreserve: true },
-    },
+  [orderStatus.PREPARING]: {
+    supplier: { deduct: true, unreserve: true },
   },
 
   // when the order is received - add to the inventory
-  [orderStatus.DELIVERED]: {
-    [orderStatus.RECEIVED]: {
-      buyer: { add: true },
-    },
+  [orderStatus.RECEIVED]: {
+    buyer: { add: true },
+  },
+
+  // when the order is returned - deduct from the buyer's inventory
+  [orderStatus.RETURNED]: {
+    buyer: { deduct: true },
+  },
+
+  // when the return is processed - add to the supplier's inventory
+  [orderStatus.RETURN_PROCESSED]: {
+    supplier: { add: true },
   },
 
   // when the order is cancelled - cancel the reservation
-  [orderStatus.PREPARING]: {
-    [orderStatus.CANCELLED]: {
-      supplier: { unreserve: true },
-    },
-  },
-
-  [orderStatus.CREATED]: {
-    [orderStatus.CANCELLED]: {
-      supplier: { unreserve: true },
-    },
+  [orderStatus.CANCELLED]: {
+    supplier: { unreserve: true },
   },
 };

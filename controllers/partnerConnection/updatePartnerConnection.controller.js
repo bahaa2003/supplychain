@@ -183,8 +183,8 @@ export const updatePartnerConnection = async (req, res, next) => {
 
     const reciveCompanyNotification =
       companyId.toString() === connection.requester.toString()
-        ? companyId
-        : connection.recipient;
+        ? connection.recipient
+        : connection.requester;
     const recipientsNotification = await User.find({
       company: reciveCompanyNotification,
       role: {
