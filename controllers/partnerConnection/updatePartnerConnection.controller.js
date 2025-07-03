@@ -74,6 +74,7 @@ export const updatePartnerConnection = async (req, res, next) => {
       );
     }
 
+    // TODO - Check if the status is already set to the requested status
     // Check permissions
     if (!hasPermission(userRole, connection.status, status)) {
       return next(
