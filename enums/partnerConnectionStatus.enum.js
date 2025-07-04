@@ -9,6 +9,13 @@ export const partnerConnectionStatus = {
   TERMINATED: "Terminated",
 };
 
+export const terminationTypeEnum = [
+  partnerConnectionStatus.TERMINATED,
+  partnerConnectionStatus.COMPLETED,
+  partnerConnectionStatus.EXPIRED,
+  partnerConnectionStatus.CANCELLED,
+];
+
 export const partnerConnectionStatusEnum = Object.values(
   partnerConnectionStatus
 ); // Valid status transitions

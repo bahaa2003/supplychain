@@ -1,70 +1,46 @@
 import PartnerConnection from "../../models/PartnerConnection.js";
+import User from "../../models/User.js";
 import { AppError } from "../../utils/AppError.js";
 import createNotification from "../../services/notification.service.js";
 import {
   VALID_TRANSITIONS,
   ROLE_PERMISSIONS,
+  partnerConnectionStatus,
 } from "../../enums/partnerConnectionStatus.enum.js";
-import User from "../../models/User.js";
 import { roles } from "../../enums/role.enum.js";
 
-/**
- * Get user role in the connection
- */
 const getUserRole = (connection, companyId) => {
-  if (connection.requester.toString() === companyId.toString()) {
+  if (connection.requester.toString() === companyId.toString())
     return "requester";
-  }
-  if (connection.recipient.toString() === companyId.toString()) {
+  if (connection.recipient.toString() === companyId.toString())
     return "recipient";
-  }
   return null;
 };
 
-/**
- * Check if status transition is valid
- */
-const isValidTransition = (currentStatus, newStatus) => {
-  return VALID_TRANSITIONS[currentStatus]?.includes(newStatus) || false;
-};
+const isValidTransition = (currentStatus, newStatus) =>
+  VALID_TRANSITIONS[currentStatus]?.includes(newStatus) || false;
 
-/**
- * Check if user has permission to change status
- */
-const hasPermission = (userRole, currentStatus, newStatus) => {
-  return (
-    ROLE_PERMISSIONS[userRole]?.[currentStatus]?.includes(newStatus) || false
-  );
-};
+const hasPermission = (userRole, currentStatus, newStatus) =>
+  ROLE_PERMISSIONS[userRole]?.[currentStatus]?.includes(newStatus) || false;
 
-/**
- * Update partner connection status
- */
 export const updatePartnerConnection = async (req, res, next) => {
   try {
     const { status, reason } = req.body;
     const { connectionId } = req.params;
     const updatedBy = req.user._id;
-    const companyId = req.user.company?._id || req.user.company;
+    const userCompanyId = req.user.company?._id || req.user.company;
+
     const connection = await PartnerConnection.findById(connectionId);
 
-    // Validate required fields
-    if (!status) {
-      return next(new AppError("Status is required", 400));
-    }
-    if (!connection) {
-      return next(new AppError("Connection not found", 404));
-    }
+    // Validations
+    if (!status) return next(new AppError("Status is required", 400));
+    if (!connection) return next(new AppError("Connection not found", 404));
 
-    // Get user role
-    const userRole = getUserRole(connection, companyId);
-    if (!userRole) {
+    const userRole = getUserRole(connection, userCompanyId);
+    if (!userRole)
       return next(
         new AppError("You are not authorized to access this connection", 403)
       );
-    }
-
-    // Validate status transition
     if (!isValidTransition(connection.status, status)) {
       return next(
         new AppError(
@@ -73,9 +49,6 @@ export const updatePartnerConnection = async (req, res, next) => {
         )
       );
     }
-
-    // TODO - Check if the status is already set to the requested status
-    // Check permissions
     if (!hasPermission(userRole, connection.status, status)) {
       return next(
         new AppError(
@@ -87,81 +60,92 @@ export const updatePartnerConnection = async (req, res, next) => {
 
     // Validate required reasons
     const reasonValidations = {
-      Rejected: "Rejection reason is required",
-      Terminated: "Termination reason is required",
-      Inactive: "Suspension reason is required",
+      [partnerConnectionStatus.REJECTED]: "Rejection reason is required",
+      [partnerConnectionStatus.TERMINATED]: "Termination reason is required",
+      [partnerConnectionStatus.INACTIVE]: "Suspension reason is required",
     };
-
-    if (["Rejected", "Terminated", "Inactive"].includes(status) && !reason) {
+    if (reasonValidations[status] && !reason) {
       return next(new AppError(reasonValidations[status], 400));
     }
 
     // Prepare update data
-    const updateData = {
-      status,
-      lastInteractionAt: new Date(),
+    const updateData = { status, lastInteractionAt: new Date() };
+
+    // Clear all previous status fields
+    const clearFields = {
+      rejectionReason: undefined,
+      rejectedBy: undefined,
+      rejectedAt: undefined,
+      inactiveReason: undefined,
+      inactiveBy: undefined,
+      inactiveAt: undefined,
+      terminationReason: undefined,
+      terminatedBy: undefined,
+      terminatedAt: undefined,
+      terminationType: undefined,
     };
 
     // Update specific fields based on status
-    switch (status) {
-      case "Active":
-        updateData.acceptedBy = updatedBy;
-        updateData.acceptedAt = new Date();
-        break;
-
-      case "Rejected":
-        updateData.rejectionReason = reason.trim();
-        updateData.suspensionReason = "";
-        updateData.terminationReason = "";
-        updateData.rejectedBy = updatedBy;
-        updateData.rejectedAt = new Date();
-        break;
-
-      case "Inactive":
-        updateData.suspensionReason = reason.trim();
-        updateData.terminationReason = "";
-        updateData.rejectedBy = "";
-        updateData.suspendedBy = updatedBy;
-        updateData.suspendedAt = new Date();
-        break;
-
-      case "Terminated":
-        updateData.terminationReason = reason.trim();
-        updateData.rejectedBy = "";
-        updateData.suspendedBy = "";
-        updateData.terminatedBy = updatedBy;
-        updateData.terminatedAt = new Date();
-        updateData.terminationType = "Terminated";
-        break;
-
-      case "Completed":
-        updateData.terminatedBy = updatedBy;
-        updateData.terminatedAt = new Date();
-        updateData.terminationType = "Completed";
-        break;
-
-      case "Expired":
-        updateData.terminatedBy = updatedBy;
-        updateData.terminatedAt = new Date();
-        updateData.terminationType = "Expired";
-        break;
-
-      case "Cancelled":
-        updateData.terminatedBy = updatedBy;
-        updateData.terminatedAt = new Date();
-        updateData.terminationType = "Cancelled";
-        break;
+    if (status === partnerConnectionStatus.ACTIVE) {
+      const inactivecompany = await User.findById(connection.inactiveBy);
+      if (
+        inactivecompany &&
+        inactivecompany.company.toString() !== userCompanyId.toString()
+      ) {
+        return next(
+          new AppError(
+            "You are not authorized to activate this connection",
+            403
+          )
+        );
+      }
+      Object.assign(updateData, {
+        acceptedBy: updatedBy,
+        acceptedAt: new Date(),
+      });
+    } else if (status === partnerConnectionStatus.REJECTED) {
+      Object.assign(updateData, clearFields, {
+        rejectionReason: reason.trim(),
+        rejectedBy: updatedBy,
+        rejectedAt: new Date(),
+        terminationType: partnerConnectionStatus.REJECTED,
+      });
+    } else if (status === partnerConnectionStatus.INACTIVE) {
+      Object.assign(updateData, clearFields, {
+        inactiveReason: reason.trim(),
+        inactiveBy: updatedBy,
+        inactiveAt: new Date(),
+      });
+    } else if (status === partnerConnectionStatus.TERMINATED) {
+      Object.assign(updateData, clearFields, {
+        terminationReason: reason.trim(),
+        terminatedBy: updatedBy,
+        terminatedAt: new Date(),
+        terminationType: partnerConnectionStatus.TERMINATED,
+      });
+    } else if (
+      [
+        partnerConnectionStatus.COMPLETED,
+        partnerConnectionStatus.EXPIRED,
+        partnerConnectionStatus.CANCELLED,
+      ].includes(status)
+    ) {
+      Object.assign(updateData, clearFields, {
+        terminatedBy: updatedBy,
+        terminatedAt: new Date(),
+        terminationType: status,
+      });
     }
 
-    // Apply updates
+    // Apply updates and save
     Object.assign(connection, updateData);
-    console.log("save connection", connection);
     await connection.save();
+
     // Populate for response
     await connection.populate([
       {
         path: "requester",
-        select: "companyName logo industry",
+        select: "_id companyName logo industry",
         populate: {
           path: "location",
           select: "locationName country state city",
@@ -169,7 +153,7 @@ export const updatePartnerConnection = async (req, res, next) => {
       },
       {
         path: "recipient",
-        select: "companyName logo industry",
+        select: "_id companyName logo industry",
         populate: {
           path: "location",
           select: "locationName country state city",
@@ -178,42 +162,43 @@ export const updatePartnerConnection = async (req, res, next) => {
       { path: "invitedBy", select: "name email" },
       { path: "acceptedBy", select: "name email" },
       { path: "rejectedBy", select: "name email" },
-      { path: "suspendedBy", select: "name email" },
+      { path: "inactiveBy", select: "name email" },
       { path: "terminatedBy", select: "name email" },
     ]);
 
-    const reciveCompanyNotification =
-      companyId.toString() === connection.requester.toString()
+    // Send notification
+    const receiveCompanyNotification =
+      userCompanyId.toString() === connection.requester._id.toString()
         ? connection.recipient
         : connection.requester;
+
     const recipientsNotification = await User.find({
-      company: reciveCompanyNotification,
-      role: {
-        $in: [roles.ADMIN, roles.MANAGER],
-      },
+      company: receiveCompanyNotification._id,
+      role: { $in: [roles.ADMIN, roles.MANAGER] },
     })
       .select("_id")
       .lean();
-    // Send notification
+
     await createNotification(
-      "partnerConnectionUpdate",
+      notificationType.PARTNER_CONNECTION_UPDATE,
       {
-        recipientCompany: connection.recipient.companyName,
         status,
-        reason,
+        rejectionReason: connection.rejectionReason,
+        terminationReason: connection.terminationReason,
+        inactiveReason: connection.inactiveReason,
+        recipientCompany: receiveCompanyNotification.companyName,
       },
       recipientsNotification
-      // connection.invitedBy
     );
 
     const statusMessages = {
-      Active: "Partnership activated successfully",
-      Rejected: "Partnership request rejected",
-      Cancelled: "Partnership request cancelled",
-      Inactive: "Partnership suspended",
-      Completed: "Partnership completed successfully",
-      Terminated: "Partnership terminated",
-      Expired: "Partnership marked as expired",
+      [partnerConnectionStatus.ACTIVE]: "Partnership activated successfully",
+      [partnerConnectionStatus.REJECTED]: "Partnership request rejected",
+      [partnerConnectionStatus.CANCELLED]: "Partnership request cancelled",
+      [partnerConnectionStatus.INACTIVE]: "Partnership suspended",
+      [partnerConnectionStatus.COMPLETED]: "Partnership completed successfully",
+      [partnerConnectionStatus.TERMINATED]: "Partnership terminated",
+      [partnerConnectionStatus.EXPIRED]: "Partnership marked as expired",
     };
 
     res.status(200).json({

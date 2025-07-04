@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {
   partnerConnectionStatus,
   partnerConnectionStatusEnum,
+  terminationTypeEnum,
 } from "../enums/partnerConnectionStatus.enum.js";
 const { Schema } = mongoose;
 
@@ -22,46 +23,40 @@ const partnerConnectionSchema = new Schema(
       enum: partnerConnectionStatusEnum,
       default: partnerConnectionStatus.PENDING,
     },
+    lastInteractionAt: {
+      type: Date,
+      default: Date.now,
+    },
     invitedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     acceptedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    acceptedAt: { type: Date },
-    terminatedAt: { type: Date },
-    terminatedBy: { type: Schema.Types.ObjectId, ref: "User" },
-    terminationType: {
-      type: String,
-      enum: [
-        partnerConnectionStatus.TERMINATED,
-        partnerConnectionStatus.COMPLETED,
-        partnerConnectionStatus.EXPIRED,
-        partnerConnectionStatus.CANCELLED,
-      ],
-    },
-    suspendedBy: { type: Schema.Types.ObjectId, ref: "User" },
-    suspendedAt: { type: Date },
     rejectedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    inactiveBy: { type: Schema.Types.ObjectId, ref: "User" },
+    terminatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    acceptedAt: { type: Date },
     rejectedAt: { type: Date },
-    rejectionReason: {
-      type: String,
-      maxlength: 500,
-    },
+    terminatedAt: { type: Date },
+    inactiveAt: { type: Date },
     terminationReason: {
       type: String,
       maxlength: 500,
     },
-    suspensionReason: {
+    inactiveReason: {
       type: String,
       maxlength: 500,
     },
-    lastInteractionAt: {
-      type: Date,
-      default: Date.now,
+    rejectionReason: {
+      type: String,
+      maxlength: 500,
+    },
+    terminationType: {
+      type: String,
+      enum: terminationTypeEnum,
     },
   },
   {

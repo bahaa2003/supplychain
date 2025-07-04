@@ -1,7 +1,7 @@
 import Notification from "../../models/Notification.js";
 import { AppError } from "../../utils/AppError.js";
 
-export const getAllNotifications = async (req, res) => {
+export const getAllNotifications = async (req, res, next) => {
   const { isRead } = req.query;
   const page = req.query.page || 1;
   const limit = req.query.limit || 10;
@@ -15,6 +15,8 @@ export const getAllNotifications = async (req, res) => {
       .lean();
     res.status(200).json({ status: "success", data: result });
   } catch (err) {
-    throw new AppError(err.message || "Failed to get notifications", 500);
+    return next(
+      new AppError(err.message || "Failed to get notifications", 500)
+    );
   }
 };

@@ -7,6 +7,7 @@ import PartnerConnection from "../../models/PartnerConnection.js";
 import { AppError } from "../../utils/AppError.js";
 import { orderStatus } from "../../enums/orderStatus.enum.js";
 import Inventory from "../../models/Inventory.js";
+import { notificationType } from "../../enums/notificationType.enum.js";
 
 export const createOrder = async (req, res, next) => {
   const { supplierId } = req.params;
@@ -149,7 +150,7 @@ export const createOrder = async (req, res, next) => {
   }).select("_id");
   // create a notification for the admin compant
   await createNotification(
-    "createdOrder",
+    notificationType.CREATED_ORDER,
     {
       companyName: supplierCompany.companyName,
       totalAmount,

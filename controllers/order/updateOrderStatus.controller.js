@@ -10,6 +10,7 @@ import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
 import User from "../../models/User.js";
 import { roles } from "../../enums/role.enum.js";
+import { notificationType } from "../../enums/notificationType.enum.js";
 
 export const updateOrderStatus = async (req, res, next) => {
   const { orderId } = req.params;
@@ -66,45 +67,47 @@ export const updateOrderStatus = async (req, res, next) => {
     const recieveNotification = await User.find({
       company: order.supplier,
       role: { $in: [roles.ADMIN, roles.MANAGER] },
-    });
-    createNotification(
-      "newOrder",
+    }).select("_id");
+    await createNotification(
+      notificationType.NEW_ORDER,
       { orderNumber: order.orderNumber, totalAmount: order.totalAmount },
       recieveNotification
     );
-  } else if (newStatus === orderStatus.CANCELLED) {
+  } else if (
+    [orderStatus.RECEIVED, orderStatus.CANCELLED].includes(newStatus)
+  ) {
     const recieveNotification = await User.find({
       company: order.supplier,
       role: { $in: [roles.ADMIN, roles.MANAGER] },
-    });
-    createNotification(
-      "orderStatusChange",
+    }).select("_id");
+    await createNotification(
+      notificationType.ORDER_STATUS_CHANGE,
       { orderNumber: order.orderNumber, status: newStatus },
       recieveNotification
     );
-  } else if (newStatus === orderStatus.ACCEPTED) {
+  } else if (
+    [
+      orderStatus.ACCEPTED,
+      orderStatus.REJECTED,
+      orderStatus.PREPARING,
+      orderStatus.READY_TO_SHIP,
+      orderStatus.SHIPPED,
+      orderStatus.DELIVERED,
+    ].includes(newStatus)
+  ) {
     const recieveNotification = await User.find({
       company: order.buyer,
       role: { $in: [roles.ADMIN, roles.MANAGER] },
-    });
-    createNotification(
-      "orderStatusChange",
-      { orderNumber: order.orderNumber, status: newStatus },
-      recieveNotification
-    );
-  } else {
-    const recieveNotification = await User.find({
-      company: order.buyer,
-      role: { $in: [roles.ADMIN, roles.MANAGER] },
-    });
-    createNotification(
-      "orderStatusChange",
+    }).select("_id");
+    console.log("recieveNotification Id:", recieveNotification);
+    await createNotification(
+      notificationType.ORDER_STATUS_CHANGE,
       { orderNumber: order.orderNumber, status: newStatus },
       recieveNotification
     );
   }
 
-  res.json({
+  return res.json({
     status: "success",
     message: "Order updated successfully",
     data: { order },

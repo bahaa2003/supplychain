@@ -11,55 +11,51 @@ export const orderStatus = {
   RECEIVED: "Received", // received
   COMPLETED: "Completed", // completed
   CANCELLED: "Cancelled", // cancelled
-  FAILED: "Failed", // failed (order not completed due to an error)
 };
 
 export const orderStatusEnum = Object.values(orderStatus);
 
 // Valid status transitions
 export const VALID_ORDER_TRANSITIONS = {
-  [orderStatus.CREATED]: [
-    orderStatus.REJECTED,
-    orderStatus.CANCELLED,
-    orderStatus.SUBMITTED,
-  ],
-  [orderStatus.REJECTED]: [orderStatus.CREATED, orderStatus.CANCELLED], // re-adjustment
+  [orderStatus.CREATED]: [orderStatus.REJECTED, orderStatus.SUBMITTED],
+  [orderStatus.REJECTED]: [orderStatus.SUBMITTED],
   [orderStatus.SUBMITTED]: [
     orderStatus.ACCEPTED,
     orderStatus.DECLINED,
     orderStatus.CANCELLED,
   ],
-  [orderStatus.ACCEPTED]: [orderStatus.PREPARING, orderStatus.CANCELLED],
-  [orderStatus.DECLINED]: [orderStatus.CANCELLED],
-  [orderStatus.PREPARING]: [orderStatus.READY_TO_SHIP, orderStatus.CANCELLED],
-  [orderStatus.READY_TO_SHIP]: [orderStatus.SHIPPED, orderStatus.CANCELLED],
-  [orderStatus.SHIPPED]: [orderStatus.DELIVERED, orderStatus.FAILED],
-  [orderStatus.DELIVERED]: [orderStatus.RECEIVED, orderStatus.FAILED],
+  [orderStatus.ACCEPTED]: [
+    orderStatus.PREPARING,
+    orderStatus.CANCELLED,
+    orderStatus.DECLINED,
+  ],
+  [orderStatus.PREPARING]: [orderStatus.READY_TO_SHIP],
+  [orderStatus.READY_TO_SHIP]: [orderStatus.SHIPPED],
+  [orderStatus.SHIPPED]: [orderStatus.DELIVERED],
+  [orderStatus.DELIVERED]: [orderStatus.RECEIVED],
   [orderStatus.RECEIVED]: [orderStatus.COMPLETED],
+  [orderStatus.DECLINED]: [],
   [orderStatus.COMPLETED]: [],
   [orderStatus.CANCELLED]: [],
-  [orderStatus.FAILED]: [orderStatus.CANCELLED],
 };
 
 // Role permissions for status changes
 export const ORDER_ROLE_PERMISSIONS = {
   buyer: {
-    [orderStatus.CREATED]: [
-      orderStatus.REJECTED,
-      orderStatus.CANCELLED,
-      orderStatus.SUBMITTED,
-    ],
+    [orderStatus.CREATED]: [orderStatus.REJECTED, orderStatus.SUBMITTED],
     [orderStatus.SUBMITTED]: [orderStatus.CANCELLED],
-    [orderStatus.REJECTED]: [orderStatus.SUBMITTED, orderStatus.CANCELLED],
+    [orderStatus.ACCEPTED]: [orderStatus.CANCELLED],
+    [orderStatus.REJECTED]: [orderStatus.SUBMITTED],
     [orderStatus.DELIVERED]: [orderStatus.RECEIVED],
     [orderStatus.RECEIVED]: [orderStatus.COMPLETED],
   },
   supplier: {
     [orderStatus.SUBMITTED]: [orderStatus.ACCEPTED, orderStatus.DECLINED],
-    [orderStatus.ACCEPTED]: [orderStatus.PREPARING, orderStatus.CANCELLED],
+    [orderStatus.ACCEPTED]: [orderStatus.PREPARING, orderStatus.DECLINED],
     [orderStatus.PREPARING]: [orderStatus.READY_TO_SHIP],
     [orderStatus.READY_TO_SHIP]: [orderStatus.SHIPPED],
     [orderStatus.SHIPPED]: [orderStatus.DELIVERED],
+    // [orderStatus.RECEIVED]: [orderStatus.COMPLETED],
   },
 };
 
@@ -80,11 +76,6 @@ export const INVENTORY_IMPACT = {
     buyer: { add: true },
   },
 
-  // when the order is returned - deduct from the buyer's inventory
-  [orderStatus.RETURNED]: {
-    buyer: { deduct: true },
-  },
-
   // when the return is processed - add to the supplier's inventory
   [orderStatus.RETURN_PROCESSED]: {
     supplier: { add: true },
@@ -92,6 +83,11 @@ export const INVENTORY_IMPACT = {
 
   // when the order is cancelled - cancel the reservation
   [orderStatus.CANCELLED]: {
+    supplier: { unreserve: true },
+  },
+
+  // when the order is declined - cancel the reservation
+  [orderStatus.DECLINED]: {
     supplier: { unreserve: true },
   },
 };

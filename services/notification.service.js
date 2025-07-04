@@ -1,21 +1,23 @@
 import renderTemplate from "../utils/templateRenderer.js";
 import Notification from "../models/Notification.js";
 import { io, connectedUsers } from "../server.js";
+import { notificationType } from "../enums/notificationType.enum.js";
 
 export default async function createNotification(type, data, recipients) {
   const content = renderTemplate("notifications", type, data);
   const notificationTitles = {
-    documentUpdate: "Document Update Required",
-    inventoryAlert: "Inventory Alert",
-    createdOrder: "New Order Created",
-    newOrder: "New Order Received",
-    orderStatusChange: "Order Status Updated",
-    partnerRequest: "New Partner Connection Request",
-    partnerConnectionUpdate: "Partner Connection updated",
-    partnerVisibilityUpdated: "Partner Visibility Settings Updated",
-    shipmentUpdate: "Shipment Update",
-    systemAlert: "System Alert",
-    taskAssignment: "New Task Assigned",
+    [notificationType.DOCUMENT_UPDATE]: "Document Update Required",
+    [notificationType.INVENTORY_ALERT]: "Inventory Alert",
+    [notificationType.CREATED_ORDER]: "New Order Created",
+    [notificationType.NEW_ORDER]: "New Order Received",
+    [notificationType.ORDER_STATUS_CHANGE]: "Order Status Updated",
+    [notificationType.PARTNER_REQUEST]: "New Partner Connection Request",
+    [notificationType.PARTNER_CONNECTION_UPDATE]: "Partner Connection updated",
+    [notificationType.PARTNER_VISIBILITY_UPDATED]:
+      "Partner Visibility Settings Updated",
+    [notificationType.SHIPMENT_UPDATE]: "Shipment Update",
+    [notificationType.SYSTEM_ALERT]: "System Alert",
+    [notificationType.TASK_ASSIGNMENT]: "New Task Assigned",
   };
 
   const userList = Array.isArray(recipients) ? recipients : [recipients];
