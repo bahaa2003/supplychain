@@ -11,8 +11,21 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res, next) => {
-  const { name, email, password, companyName, industry, size, location } =
-    req.body;
+  const {
+    name,
+    email,
+    password,
+    companyName,
+    industry,
+    size,
+    locationName,
+    city,
+    state,
+    country,
+    zipCode,
+    latitude,
+    longitude,
+  } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new AppError("Email already registered", 400);
@@ -24,7 +37,7 @@ export const register = async (req, res, next) => {
     companyName,
     industry,
     size,
-    location,
+    // location,
     createdBy: null,
     isApproved: false,
   });
@@ -38,30 +51,30 @@ export const register = async (req, res, next) => {
     isEmailVerified: false,
   });
   company.createdBy = user._id;
-  await company.save();
 
-  await Location.create({
-    locationName: req.body.locationName,
+  const location = await Location.create({
+    locationName,
     type: "Company",
     company: company._id,
     address: {
       street: req.body.street,
-      city: req.body.city,
-      state: req.body.state,
-      country: req.body.country,
-      zipCode: req.body.zipCode,
+      city,
+      state,
+      country,
+      zipCode,
     },
     contactPerson: {
       name: user.name,
       email: user.email,
     },
     coordinates: {
-      latitude: req.body.latitude,
-      longitude: req.body.longitude,
+      latitude,
+      longitude,
     },
     isActive: true,
   });
-
+  company.location = location._id;
+  await company.save();
   await NotificationSettings.create({
     user: user._id,
     email: { enabled: true },
