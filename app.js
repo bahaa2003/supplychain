@@ -1,4 +1,5 @@
 import express from "express";
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import teamRoutes from "./routes/team.routes.js";
@@ -13,6 +14,8 @@ import invoiceRoutes from "./routes/invoice.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import analyticsRoutes from "./routes/analytics.route.js";
+import webhookRoutes from "./routes/webhook.routes.js";
+import subscriptionRoutes from "./routes/subscription.routes.js";
 import { securityMiddleware } from "./middlewares/security.middleware.js";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 import {
@@ -22,7 +25,7 @@ import {
 dotenv.config();
 
 const app = express();
-
+app.use("/api/webhook", webhookRoutes);
 app.use(express.json());
 
 // Security middlewares (helmet, cors, rate limiting, etc)
@@ -40,6 +43,7 @@ app.use("/api/team", teamRoutes);
 app.use("/api/company", protectedRoute, companyRoutes);
 app.use("/api/user/", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 app.use(
   "/api/partner-connection",
   protectedRoute,

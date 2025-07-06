@@ -11,7 +11,7 @@ export const getAllCompanies = async (req, res, next) => {
     const Companies = await Company.find({ isApproved }, { __v: false })
       // createdby and location
       .populate("createdBy", "name email")
-      .populate("location", "locationName city country")
+      // .populate("location", "locationName city country")
       .lean();
 
     if (!Companies) {

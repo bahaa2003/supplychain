@@ -2,23 +2,46 @@ import User from "../../models/User.js";
 import Location from "../../models/Location.js";
 import Company from "../../models/Company.js";
 import Attachment from "../../models/Attachment.js";
+import NotificationSettings from "../../models/NotificationSettings.js";
 import { AppError } from "../../utils/AppError.js";
 import sendEmail from "../../services/email.service.js";
-import NotificationSettings from "../../models/NotificationSettings.js";
-import { generateToken } from "../../utils/generateToken.js";
 import { uploadToImageKit } from "../../middlewares/upload.middleware.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+const addDays = (date, days) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
 export const register = async (req, res, next) => {
-  const { name, email, password, companyName, industry, size, location } =
-    req.body;
+  const {
+    name,
+    email,
+    password,
+    companyName,
+    industry,
+    size,
+    location,
+    locationName,
+    street,
+    city,
+    state,
+    country,
+    zipCode,
+    latitude,
+    longitude,
+  } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new AppError("Email already registered", 400);
 
-  const existingCompany = await Company.findOne({ name: companyName });
+  const existingCompany = await Company.findOne({ companyName });
   if (existingCompany) throw new AppError("Company name already taken", 400);
+
+  const now = new Date();
+  const endDate = addDays(now, 30);
 
   const company = await Company.create({
     companyName,
@@ -27,6 +50,12 @@ export const register = async (req, res, next) => {
     location,
     createdBy: null,
     isApproved: false,
+    subscription: {
+      plan: "Free",
+      status: "active",
+      startDate: now,
+      endDate,
+    },
   });
 
   const user = await User.create({
@@ -37,27 +66,28 @@ export const register = async (req, res, next) => {
     company: company._id,
     isEmailVerified: false,
   });
+
   company.createdBy = user._id;
   await company.save();
 
   await Location.create({
-    locationName: req.body.locationName,
+    locationName,
     type: "Company",
     company: company._id,
     address: {
-      street: req.body.street,
-      city: req.body.city,
-      state: req.body.state,
-      country: req.body.country,
-      zipCode: req.body.zipCode,
+      street,
+      city,
+      state,
+      country,
+      zipCode,
     },
     contactPerson: {
       name: user.name,
       email: user.email,
     },
     coordinates: {
-      latitude: req.body.latitude,
-      longitude: req.body.longitude,
+      latitude,
+      longitude,
     },
     isActive: true,
   });
@@ -72,6 +102,7 @@ export const register = async (req, res, next) => {
   const token = jwt.sign({ email }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
+
   sendEmail(
     "verifyEmail",
     {
@@ -99,6 +130,6 @@ export const register = async (req, res, next) => {
   res.status(201).json({
     status: "success",
     message:
-      "Registration successful! Please check your email to verify your account.",
+      "Registration successful! Free Trial activated. Please check your email to verify your account.",
   });
 };
