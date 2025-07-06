@@ -20,13 +20,13 @@ import { companyValidator } from "../validators/company.validator.js";
 import { userValidator } from "../validators/user.validator.js";
 import { validate } from "../middlewares/validate.middleware.js";
 
-import { upload } from "../middlewares/upload.middleware.js"; // 👈 تمت إضافتها
+import { upload } from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
 router.post(
   "/register",
-  upload.array("documents"), // 👈 رفع مستندات الشركة
+  upload.array("documents"), // upload company documents
   validate(userValidator()),
   validate(companyValidator()),
   catchError(register)
@@ -47,12 +47,7 @@ router.post(
   checkEmailVerified,
   catchError(verify2FA)
 );
-router.post(
-  "/confirm-2fa-login",
-  protectedRoute,
-  checkEmailVerified,
-  catchError(confirm2FALogin)
-);
+router.post("/confirm-2fa-login", catchError(confirm2FALogin));
 
 router.post("/forgot-password", catchError(forgotPassword));
 router.post("/reset-password", catchError(resetPassword));
