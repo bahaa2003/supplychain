@@ -1,4 +1,6 @@
 import Product from "../../models/Product.js";
+import Location from "../../models/Location.js";
+import Company from "../../models/Company.js";
 import { AppError } from "../../utils/AppError.js";
 import Inventory from "../../models/Inventory.js";
 import InventoryHistory from "../../models/InventoryHistory.js";
@@ -10,11 +12,11 @@ const generateSku = () => {
 
 export const createProduct = async (req, res, next) => {
   try {
-    const companyId = req.user.company?._id || req.user.company;
+    const userCompanyId = req.user.company?._id || req.user.company;
 
     const existingProduct = await Product.findOne({
       productName: req.body.productName,
-      company: companyId,
+      company: userCompanyId,
     }).lean();
 
     if (existingProduct) {
@@ -30,7 +32,7 @@ export const createProduct = async (req, res, next) => {
     } = req.body;
     console.log("Creating product with SKU:", sku);
     const product = await Product.create({
-      company: companyId,
+      company: userCompanyId,
       productName,
       sku,
       unitPrice,
@@ -39,12 +41,18 @@ export const createProduct = async (req, res, next) => {
       isActive,
     });
     console.log("Product created:", product);
-    const defaultLocation = req.body.location || user.company?.location;
+    const defaultLocation = await Location.findOne({
+      _id: req.body.location,
+      company: userCompanyId,
+    }).select("_id");
+    if (!defaultLocation) {
+      return next(new AppError("Location is required", 400));
+    }
 
     // After normal product creation, create inventory
     const inventory = await Inventory.create({
       product: product._id,
-      company: companyId,
+      company: userCompanyId,
       onHand: req.body.initialQuantity || 0,
       reserved: 0,
       minimumThreshold: req.body.minimumThreshold || 10,
@@ -54,7 +62,7 @@ export const createProduct = async (req, res, next) => {
     if (inventory.onHand || inventory.reserved) {
       await InventoryHistory.create({
         inventory: inventory._id,
-        company: companyId,
+        company: userCompanyId,
         before: {
           onHand: 0,
           reserved: 0,
