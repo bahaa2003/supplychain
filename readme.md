@@ -29,10 +29,11 @@ This is a comprehensive Supply Chain Management (SCM) system built with Node.js 
 
 ---
 
-## Domain Description
+## Table of Contents
 
 | Domain                                                               | Description                                                           |
 | -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [All Endpoints](#all-endpoints)                                      | Summary of all Endpoints                                              |
 | [Authentication & User Management](#authentication--user-management) | User registration, login, 2FA, password reset, and profile management |
 | [Company Management](#company-management)                            | Company registration, approval, and listing                           |
 | [Team Management](#team-management)                                  | Inviting and verifying team members                                   |
@@ -49,7 +50,7 @@ This is a comprehensive Supply Chain Management (SCM) system built with Node.js 
 
 ## All Endpoints
 
-### Authentication & User Management
+### - Authentication & User Management
 
 - POST `/api/auth/register`
 - POST `/api/auth/login`
@@ -66,24 +67,24 @@ This is a comprehensive Supply Chain Management (SCM) system built with Node.js 
 - PATCH `/api/user/avatar/:userId`
 - DELETE `/api/user/avatar/:userId`
 
-### Company Management
+### - Company Management
 
 - GET `/api/company/`
 - PATCH `/api/company/approve/:companyId`
 
-### Team Management
+### - Team Management
 
 - POST `/api/team/invite`
 - POST `/api/team/verify-invite`
 
-### Partner Connections
+### - Partner Connections
 
 - POST `/api/partner-connection/`
 - GET `/api/partner-connection/`
 - GET `/api/partner-connection/:connectionId`
 - PATCH `/api/partner-connection/:connectionId`
 
-### Product & Inventory
+### - Product & Inventory
 
 - GET `/api/product/`
 - POST `/api/product/`
@@ -94,7 +95,7 @@ This is a comprehensive Supply Chain Management (SCM) system built with Node.js 
 - GET `/api/inventory/:inventoryId`
 - PATCH `/api/inventory/:inventoryId`
 
-### Order Management
+### - Order Management
 
 - GET `/api/order/`
 - POST `/api/order/:supplierId`
@@ -104,7 +105,7 @@ This is a comprehensive Supply Chain Management (SCM) system built with Node.js 
 - DELETE `/api/order/:orderId/remove/:itemId`
 - POST `/api/order/:orderId/add`
 
-### Location Management
+### - Location Management
 
 - GET `/api/location/`
 - POST `/api/location/`
@@ -112,14 +113,14 @@ This is a comprehensive Supply Chain Management (SCM) system built with Node.js 
 - PATCH `/api/location/:locationId`
 - DELETE `/api/location/:locationId`
 
-### Invoice Management
+### - Invoice Management
 
 - POST `/api/invoice/from-order/:orderId`
 - GET `/api/invoice/`
 - GET `/api/invoice/:invoiceId`
 - GET `/api/invoice/download/:invoiceId`
 
-### Notifications
+### - Notifications
 
 - GET `/api/notification/`
 - PATCH `/api/notification/`
@@ -128,11 +129,11 @@ This is a comprehensive Supply Chain Management (SCM) system built with Node.js 
 - PATCH `/api/notification/:notificationId`
 - DELETE `/api/notification/:notificationId`
 
-### Analytics
+### - Analytics
 
 - GET `/api/analytics/kpis`
 
-### Subscription & Billing
+### - Subscription & Billing
 
 - POST `/api/subscription/checkout`
 
