@@ -1,19 +1,19 @@
-import Order from '../../models/Order.js';
-import Invoice from '../../models/Invoice.js';
-import { AppError } from '../../utils/AppError.js';
-import { v4 as uuidv4 } from 'uuid';
+import Order from "../../models/Order.schema.js";
+import Invoice from "../../models/Invoice.schema.js";
+import { AppError } from "../../utils/AppError.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const generateInvoiceFromOrder = async (req, res, next) => {
   const { orderId } = req.params;
 
   const order = await Order.findById(orderId)
-    .populate('buyer supplier createdBy items.product')
+    .populate("buyer supplier createdBy items.product")
     .exec();
 
-  if (!order) return next(new AppError('Order not found', 404));
+  if (!order) return next(new AppError("Order not found", 404));
 
   if (order.invoice) {
-    return next(new AppError('Invoice already exists for this order', 400));
+    return next(new AppError("Invoice already exists for this order", 400));
   }
 
   const items = order.items.map((item) => {
@@ -30,7 +30,10 @@ export const generateInvoiceFromOrder = async (req, res, next) => {
   });
 
   const totalSales = items.reduce((sum, i) => sum + i.total, 0);
-  const totalTax = items.reduce((sum, i) => sum + (i.total * i.taxRate) / 100, 0);
+  const totalTax = items.reduce(
+    (sum, i) => sum + (i.total * i.taxRate) / 100,
+    0
+  );
   const totalAmount = totalSales + totalTax;
 
   const invoice = await Invoice.create({
@@ -43,16 +46,16 @@ export const generateInvoiceFromOrder = async (req, res, next) => {
     totalSales,
     totalTax,
     totalAmount,
-    status: 'accepted',
+    status: "accepted",
     createdBy: req.user._id,
-    relatedOrder: order._id
+    relatedOrder: order._id,
   });
 
   order.invoice = invoice._id;
   await order.save();
 
   res.status(201).json({
-    message: 'Invoice generated from order successfully',
-    invoice
+    message: "Invoice generated from order successfully",
+    invoice,
   });
 };

@@ -1,4 +1,4 @@
-import Inventory from "../../models/Inventory.js";
+import Inventory from "../../models/Inventory.schema.js";
 
 // Get all inventory items for the authenticated user's company
 export const getAllInventory = async (req, res, next) => {

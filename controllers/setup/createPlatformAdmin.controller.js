@@ -1,4 +1,4 @@
-import User from "../../models/User.js";
+import User from "../../models/User.schema.js";
 import bcrypt from "bcrypt";
 
 export const createPlatformAdmin = async (req, res) => {

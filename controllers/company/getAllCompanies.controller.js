@@ -1,5 +1,5 @@
-import Company from "../../models/Company.js";
-import Attachment from "../../models/Attachment.js";
+import Company from "../../models/Company.schema.js";
+import Attachment from "../../models/Attachment.schema.js";
 
 export const getAllCompanies = async (req, res, next) => {
   try {

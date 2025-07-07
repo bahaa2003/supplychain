@@ -1,14 +1,14 @@
-import Order from "../../models/Order.js";
-import Inventory from "../../models/Inventory.js";
-import InventoryHistory from "../../models/InventoryHistory.js";
-import Product from "../../models/Product.js";
+import Order from "../../models/Order.schema.js";
+import Inventory from "../../models/Inventory.schema.js";
+import InventoryHistory from "../../models/InventoryHistory.schema.js";
+import Product from "../../models/Product.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { INVENTORY_IMPACT, orderStatus } from "../../enums/orderStatus.enum.js";
 import createNotification from "../../services/notification.service.js";
 import { checkOrderStatusTransition } from "../../utils/order/checkOrderStatusTransition.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
-import User from "../../models/User.js";
+import User from "../../models/User.schema.js";
 import { roles } from "../../enums/role.enum.js";
 import { notificationType } from "../../enums/notificationType.enum.js";
 

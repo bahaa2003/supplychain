@@ -1,4 +1,4 @@
-import Notification from "../../models/Notification.js";
+import Notification from "../../models/Notification.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const markNotificationAsReadController = async (req, res) => {

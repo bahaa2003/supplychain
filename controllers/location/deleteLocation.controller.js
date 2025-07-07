@@ -1,4 +1,4 @@
-import Location from "../../models/Location.js";
+import Location from "../../models/Location.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 // Delete location (only if it belongs to the user's company)

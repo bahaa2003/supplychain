@@ -1,5 +1,5 @@
-import User from "../../models/User.js";
-import Attachment from "../../models/Attachment.js";
+import User from "../../models/User.schema.js";
+import Attachment from "../../models/Attachment.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import {
   uploadToImageKit,

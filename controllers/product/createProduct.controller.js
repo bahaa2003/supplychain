@@ -1,9 +1,9 @@
-import Product from "../../models/Product.js";
-import Location from "../../models/Location.js";
-import Company from "../../models/Company.js";
+import Product from "../../models/Product.schema.js";
+import Location from "../../models/Location.schema.js";
+import Company from "../../models/Company.schema.js";
 import { AppError } from "../../utils/AppError.js";
-import Inventory from "../../models/Inventory.js";
-import InventoryHistory from "../../models/InventoryHistory.js";
+import Inventory from "../../models/Inventory.schema.js";
+import InventoryHistory from "../../models/InventoryHistory.schema.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 
 const generateSku = () => {

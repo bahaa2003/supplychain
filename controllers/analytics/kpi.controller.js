@@ -1,8 +1,8 @@
-import Product from "../../models/Product.js";
-import Inventory from "../../models/Inventory.js";
-import Order from "../../models/Order.js";
-import Company from "../../models/Company.js";
-import PartnerConnection from "../../models/PartnerConnection.js";
+import Product from "../../models/Product.schema.js";
+import Inventory from "../../models/Inventory.schema.js";
+import Order from "../../models/Order.schema.js";
+import Company from "../../models/Company.schema.js";
+import PartnerConnection from "../../models/PartnerConnection.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const getCompanyKPIs = async (req, res, next) => {
@@ -19,8 +19,8 @@ export const getCompanyKPIs = async (req, res, next) => {
     // Inventory + Inventory Value
     const inventories = await Inventory.find({ company: companyId });
     let inventoryValue = 0;
-    inventories.forEach(inv => {
-      const product = products.find(p => p._id.equals(inv.product));
+    inventories.forEach((inv) => {
+      const product = products.find((p) => p._id.equals(inv.product));
       if (product) {
         inventoryValue += inv.onHand * product.unitPrice;
       }
@@ -28,7 +28,10 @@ export const getCompanyKPIs = async (req, res, next) => {
 
     //  Orders + Ordered Value
     const orders = await Order.find({ buyer: companyId });
-    const orderedValue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
+    const orderedValue = orders.reduce(
+      (acc, order) => acc + order.totalAmount,
+      0
+    );
 
     //  Remaining Budget
     const remainingBudget = company.budget - orderedValue;
@@ -43,10 +46,7 @@ export const getCompanyKPIs = async (req, res, next) => {
         {
           $and: [
             {
-              $or: [
-                { requester: companyId },
-                { recipient: companyId },
-              ],
+              $or: [{ requester: companyId }, { recipient: companyId }],
             },
             { status: { $ne: "Terminated" } },
           ],
@@ -54,8 +54,8 @@ export const getCompanyKPIs = async (req, res, next) => {
         {
           requester: companyId,
           status: "Terminated",
-        }
-      ]
+        },
+      ],
     });
 
     return res.status(200).json({
@@ -66,10 +66,9 @@ export const getCompanyKPIs = async (req, res, next) => {
         remainingBudget,
         productCount,
         orderCount,
-        partnerCount
-      }
+        partnerCount,
+      },
     });
-
   } catch (err) {
     next(new AppError(err.message || "Failed to fetch company KPIs", 500));
   }

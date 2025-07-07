@@ -1,5 +1,5 @@
-import Inventory from "../../models/Inventory.js";
-import InventoryHistory from "../../models/InventoryHistory.js";
+import Inventory from "../../models/Inventory.schema.js";
+import InventoryHistory from "../../models/InventoryHistory.schema.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { AppError } from "../../utils/AppError.js";
 

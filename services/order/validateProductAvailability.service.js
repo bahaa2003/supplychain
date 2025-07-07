@@ -1,5 +1,5 @@
-import Inventory from "../../models/Inventory.js";
-import Product from "../../models/Product.js";
+import Inventory from "../../models/Inventory.schema.js";
+import Product from "../../models/Product.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 // Helper function to validate product availability

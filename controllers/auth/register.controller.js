@@ -1,8 +1,8 @@
-import User from "../../models/User.js";
-import Location from "../../models/Location.js";
-import Company from "../../models/Company.js";
-import Attachment from "../../models/Attachment.js";
-import NotificationSettings from "../../models/NotificationSettings.js";
+import User from "../../models/User.schema.js";
+import Location from "../../models/Location.schema.js";
+import Company from "../../models/Company.schema.js";
+import Attachment from "../../models/Attachment.schema.js";
+import NotificationSettings from "../../models/NotificationSettings.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import sendEmail from "../../services/email.service.js";
 import { uploadToImageKit } from "../../middlewares/upload.middleware.js";
@@ -21,79 +21,6 @@ export const register = async (req, res, next) => {
     name,
     email,
     password,
-<<<<<<< HEAD
-    companyName,
-    industry,
-    size,
-    location,
-    locationName,
-    street,
-    city,
-    state,
-    country,
-    zipCode,
-    latitude,
-    longitude,
-  } = req.body;
-
-  const existingUser = await User.findOne({ email });
-  if (existingUser) throw new AppError("Email already registered", 400);
-
-  const existingCompany = await Company.findOne({ companyName });
-  if (existingCompany) throw new AppError("Company name already taken", 400);
-
-  const now = new Date();
-  const endDate = addDays(now, 30);
-
-  const company = await Company.create({
-    companyName,
-    industry,
-    size,
-    location,
-    createdBy: null,
-    isApproved: false,
-    subscription: {
-      plan: "Free",
-      status: "active",
-      startDate: now,
-      endDate,
-    },
-  });
-
-  const user = await User.create({
-    name,
-    email,
-    password: bcrypt.hashSync(password, 12),
-    role: "admin",
-    company: company._id,
-    isEmailVerified: false,
-  });
-
-  company.createdBy = user._id;
-  await company.save();
-
-  await Location.create({
-    locationName,
-    type: "Company",
-    company: company._id,
-    address: {
-      street,
-      city,
-      state,
-      country,
-      zipCode,
-    },
-    contactPerson: {
-      name: user.name,
-      email: user.email,
-    },
-    coordinates: {
-      latitude,
-      longitude,
-    },
-    isActive: true,
-  });
-=======
     companyName,
     industry,
     size,
@@ -113,27 +40,12 @@ export const register = async (req, res, next) => {
   const existingCompany = await Company.findOne({ name: companyName });
   if (existingCompany)
     return next(new AppError("Company name already taken", 400));
->>>>>>> 7ee5753de0630aa63e3c9e4cdf747272b2501a17
 
   // Start the session and transaction
   const session = await mongoose.startSession();
 
-<<<<<<< HEAD
-  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
-
-  sendEmail(
-    "verifyEmail",
-    {
-      verifyLink: `http://localhost:${process.env.PORT}/api/auth/verify/${token}`,
-    },
-    [user]
-  );
-=======
   try {
     await session.startTransaction();
->>>>>>> 7ee5753de0630aa63e3c9e4cdf747272b2501a17
 
     // Create the company
     const [company] = await Company.create(
@@ -241,13 +153,6 @@ export const register = async (req, res, next) => {
       }
     }
 
-<<<<<<< HEAD
-  res.status(201).json({
-    status: "success",
-    message:
-      "Registration successful! Free Trial activated. Please check your email to verify your account.",
-  });
-=======
     // commit the transaction
     await session.commitTransaction();
 
@@ -299,5 +204,4 @@ export const register = async (req, res, next) => {
     // end the session
     await session.endSession();
   }
->>>>>>> 7ee5753de0630aa63e3c9e4cdf747272b2501a17
 };

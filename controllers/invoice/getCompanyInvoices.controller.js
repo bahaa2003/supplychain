@@ -1,17 +1,17 @@
-import Invoice from '../../models/Invoice.js';
+import Invoice from "../../models/Invoice.schema.js";
 
 export const getCompanyInvoices = async (req, res, next) => {
   const companyId = req.user.company;
 
   const invoices = await Invoice.find({
-    $or: [{ issuer: companyId }, { receiver: companyId }]
+    $or: [{ issuer: companyId }, { receiver: companyId }],
   })
-    .populate('issuer receiver createdBy relatedOrder')
+    .populate("issuer receiver createdBy relatedOrder")
     .sort({ issueDate: -1 });
 
   res.status(200).json({
-    message: 'Company invoices retrieved successfully',
+    message: "Company invoices retrieved successfully",
     count: invoices.length,
-    invoices
+    invoices,
   });
 };

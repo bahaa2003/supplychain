@@ -1,7 +1,7 @@
-import Order from "../../models/Order.js";
-import Product from "../../models/Product.js";
-import Inventory from "../../models/Inventory.js";
-import InventoryHistory from "../../models/InventoryHistory.js";
+import Order from "../../models/Order.schema.js";
+import Product from "../../models/Product.schema.js";
+import Inventory from "../../models/Inventory.schema.js";
+import InventoryHistory from "../../models/InventoryHistory.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { canEditOrder } from "../../utils/order/canEditOrder.js";
 import { validateProductAvailability } from "../../services/order/validateProductAvailability.service.js";

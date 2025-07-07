@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import Company from "../../models/Company.js";
+import Company from "../../models/Company.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -34,28 +34,27 @@ export const createCheckoutSession = async (req, res, next) => {
       await company.save();
     }
 
-   const session = await stripe.checkout.sessions.create({
-  mode: "subscription",
-  payment_method_types: ["card"],
-  customer: stripeCustomerId,
-  line_items: [
-    {
-      price: priceId,
-      quantity: 1,
-    },
-  ],
-  success_url: `${process.env.FRONTEND_URL}/subscription-success`,
-  cancel_url: `${process.env.FRONTEND_URL}/subscription-cancel`,
-  metadata: {
-    companyId: company._id.toString(),
-  },
-  subscription_data: {
-    metadata: {
-      companyId: company._id.toString(),
-    },
-  },
-});
-
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      customer: stripeCustomerId,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${process.env.FRONTEND_URL}/subscription-success`,
+      cancel_url: `${process.env.FRONTEND_URL}/subscription-cancel`,
+      metadata: {
+        companyId: company._id.toString(),
+      },
+      subscription_data: {
+        metadata: {
+          companyId: company._id.toString(),
+        },
+      },
+    });
 
     res.status(200).json({
       status: "success",

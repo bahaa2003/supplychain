@@ -1,12 +1,12 @@
-import User from "../../models/User.js";
-import Company from "../../models/Company.js";
-import Order from "../../models/Order.js";
+import User from "../../models/User.schema.js";
+import Company from "../../models/Company.schema.js";
+import Order from "../../models/Order.schema.js";
 import createNotification from "../../services/notification.service.js";
-import Product from "../../models/Product.js";
-import PartnerConnection from "../../models/PartnerConnection.js";
+import Product from "../../models/Product.schema.js";
+import PartnerConnection from "../../models/PartnerConnection.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { orderStatus } from "../../enums/orderStatus.enum.js";
-import Inventory from "../../models/Inventory.js";
+import Inventory from "../../models/Inventory.schema.js";
 import { notificationType } from "../../enums/notificationType.enum.js";
 
 export const createOrder = async (req, res, next) => {

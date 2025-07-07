@@ -1,7 +1,7 @@
-import Company from "../../models/Company.js";
-import User from "../../models/User.js";
+import Company from "../../models/Company.schema.js";
+import User from "../../models/User.schema.js";
 import sendEmail from "../../services/email.service.js";
-import Attachment from "../../models/Attachment.js";
+import Attachment from "../../models/Attachment.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const approveCompany = async (req, res, next) => {

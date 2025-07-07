@@ -1,4 +1,4 @@
-import User from "../../models/User.js";
+import User from "../../models/User.schema.js";
 import speakeasy from "speakeasy";
 import { AppError } from "../../utils/AppError.js";
 

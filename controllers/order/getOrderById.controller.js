@@ -1,4 +1,4 @@
-import Order from "../../models/Order.js";
+import Order from "../../models/Order.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { ORDER_ROLE_PERMISSIONS } from "../../enums/orderStatus.enum.js";
 export const getOrderById = async (req, res) => {

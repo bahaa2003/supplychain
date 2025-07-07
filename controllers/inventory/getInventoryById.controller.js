@@ -1,5 +1,5 @@
-import Inventory from "../../models/Inventory.js";
-import InventoryHistory from "../../models/InventoryHistory.js";
+import Inventory from "../../models/Inventory.schema.js";
+import InventoryHistory from "../../models/InventoryHistory.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 // Get inventory and History by ID (only if it belongs to the user's company)

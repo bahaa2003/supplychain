@@ -1,6 +1,6 @@
 import express from "express";
 import Stripe from "stripe";
-import Company from "../models/Company.js";
+import Company from "../models/Company.schema.js";
 
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -100,9 +100,9 @@ async function handleSubscriptionCreated(subscription) {
 
 function getPlanFromPriceId(priceId) {
   const PLANS = {
-    "price_1Rg5uVFJR5x13atRSa8RRwjg": "Basic",
-    "price_1Rg5wsFJR5x13atRhtxOCZ79": "Pro",
-    "price_1Rg5xXFJR5x13atR6Eo4IhQo": "Enterprise",
+    price_1Rg5uVFJR5x13atRSa8RRwjg: "Basic",
+    price_1Rg5wsFJR5x13atRhtxOCZ79: "Pro",
+    price_1Rg5xXFJR5x13atR6Eo4IhQo: "Enterprise",
   };
 
   return PLANS[priceId] || "Free";

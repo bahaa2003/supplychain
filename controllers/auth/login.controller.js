@@ -1,4 +1,4 @@
-import User from "../../models/User.js";
+import User from "../../models/User.schema.js";
 import bcrypt from "bcrypt";
 import { AppError } from "../../utils/AppError.js";
 

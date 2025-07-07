@@ -1,6 +1,6 @@
-import PartnerConnection from "../../models/PartnerConnection.js";
-import Company from "../../models/Company.js";
-import User from "../../models/User.js";
+import PartnerConnection from "../../models/PartnerConnection.schema.js";
+import Company from "../../models/Company.schema.js";
+import User from "../../models/User.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import createNotification from "../../services/notification.service.js";
 import { roles } from "../../enums/role.enum.js";

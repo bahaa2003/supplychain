@@ -1,5 +1,5 @@
 import renderTemplate from "../utils/templateRenderer.js";
-import Notification from "../models/Notification.js";
+import Notification from "../models/Notification.schema.js";
 import { io, connectedUsers } from "../server.js";
 import { notificationType } from "../enums/notificationType.enum.js";
 

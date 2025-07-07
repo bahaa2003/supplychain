@@ -1,4 +1,4 @@
-import Inventory from "../../models/Inventory.js";
+import Inventory from "../../models/Inventory.schema.js";
 import { AppError } from "../../utils/AppError.js";
 // Delete inventory item (only if it belongs to the user's company)
 

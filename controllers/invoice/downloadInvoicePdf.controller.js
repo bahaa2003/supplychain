@@ -1,4 +1,4 @@
-import Invoice from "../../models/Invoice.js";
+import Invoice from "../../models/Invoice.schema.js";
 import createInvoicePdf from "../../services/invoice.service.js";
 import { AppError } from "../../utils/AppError.js";
 

@@ -1,5 +1,5 @@
-import User from "../../models/User.js";
-import Company from "../../models/Company.js";
+import User from "../../models/User.schema.js";
+import Company from "../../models/Company.schema.js";
 import jwt from "jsonwebtoken";
 
 export const verifyEmail = async (req, res, next) => {

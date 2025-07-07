@@ -1,4 +1,4 @@
-import User from "../../models/User.js";
+import User from "../../models/User.schema.js";
 import jwt from "jsonwebtoken";
 import { AppError } from "../../utils/AppError.js";
 import { roleEnum } from "../../enums/role.enum.js";

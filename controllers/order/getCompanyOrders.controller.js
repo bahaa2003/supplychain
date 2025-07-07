@@ -1,4 +1,4 @@
-import Order from "../../models/Order.js";
+import Order from "../../models/Order.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { orderStatus } from "../../enums/orderStatus.enum.js";
 

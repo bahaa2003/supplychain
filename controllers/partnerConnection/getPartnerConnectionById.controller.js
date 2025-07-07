@@ -1,5 +1,5 @@
 import { AppError } from "../../utils/AppError.js";
-import PartnerConnection from "../../models/PartnerConnection.js";
+import PartnerConnection from "../../models/PartnerConnection.schema.js";
 export const getPartnerConnectionById = async (req, res) => {
   try {
     const { connectionId } = req.params;

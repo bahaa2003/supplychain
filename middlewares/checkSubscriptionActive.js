@@ -1,4 +1,4 @@
-import Company from "../models/Company.js";
+import Company from "../models/Company.schema.js";
 import { AppError } from "../utils/AppError.js";
 
 export const checkSubscriptionActive = async (req, res, next) => {

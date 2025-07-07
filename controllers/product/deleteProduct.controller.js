@@ -1,4 +1,4 @@
-import Product from "../../models/Product.js";
+import Product from "../../models/Product.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const deleteProduct = async (req, res, next) => {

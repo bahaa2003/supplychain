@@ -1,4 +1,4 @@
-import User from "../../models/User.js";
+import User from "../../models/User.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import sendEmail from "../../services/email.service.js";
 import jwt from "jsonwebtoken";

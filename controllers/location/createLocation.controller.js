@@ -1,4 +1,4 @@
-import Location from "../../models/Location.js";
+import Location from "../../models/Location.schema.js";
 
 export const createLocation = async (req, res, next) => {
   try {

@@ -47,14 +47,7 @@ router.post(
   checkEmailVerified,
   catchError(verify2FA)
 );
-<<<<<<< HEAD
-router.post(
-  "/confirm-2fa-login",
-  catchError(confirm2FALogin)
-);
-=======
 router.post("/confirm-2fa-login", catchError(confirm2FALogin));
->>>>>>> 7ee5753de0630aa63e3c9e4cdf747272b2501a17
 
 router.post("/forgot-password", catchError(forgotPassword));
 router.post("/reset-password", catchError(resetPassword));

@@ -1,4 +1,4 @@
-import PartnerConnection from "../../models/PartnerConnection.js";
+import PartnerConnection from "../../models/PartnerConnection.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { partnerConnectionStatus } from "../../enums/partnerConnectionStatus.enum.js";
 

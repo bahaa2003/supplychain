@@ -1,5 +1,5 @@
 import { AppError } from "../../utils/AppError.js";
-import Notification from "../../models/Notification.js";
+import Notification from "../../models/Notification.schema.js";
 
 export const getNotificationById = async (req, res) => {
   try {
