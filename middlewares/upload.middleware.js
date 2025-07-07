@@ -24,9 +24,9 @@ export const upload = multer({
 });
 
 const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+  publicKey: "public_ctII80wB+boJTchAokYWvBZywhw=",
+  privateKey: "private_ySU3Xlapkk6ynAs6gioPveREA+M=",
+  urlEndpoint: "https://ik.imagekit.io/bba6fwtkfo",
 });
 
 export const uploadToImageKit = async (file, folder = "company_documents") => {
