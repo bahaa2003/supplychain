@@ -520,7 +520,7 @@ Returns image file (binary data)
 
 ### PATCH `/api/company/approve/:companyId`
 
-**Purpose:** Approve or reject a company (admin only).
+**Purpose:** Approve or reject a company (platform admin only).
 
 **Parameters:**
 
