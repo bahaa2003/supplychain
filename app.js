@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import teamRoutes from "./routes/team.routes.js";
 import companyRoutes from "./routes/company.routes.js";
@@ -25,6 +26,11 @@ import {
 dotenv.config();
 
 const app = express();
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true,
+}));
 app.use("/api/webhook", webhookRoutes);
 app.use(express.json());
 
