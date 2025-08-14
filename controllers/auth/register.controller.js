@@ -168,7 +168,7 @@ export const register = async (req, res, next) => {
           verifyLink:
             process.env.NODE_ENV === "development"
               ? `http://localhost:${process.env.PORT}/api/auth/verify/${token}`
-              : `https://${BACKEND_URL}/api/auth/verify/${token}`,
+              : `${process.env.BACKEND_URL}/api/auth/verify/${token}`,
         },
         [user]
       );
