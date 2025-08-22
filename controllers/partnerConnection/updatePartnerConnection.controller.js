@@ -1,6 +1,7 @@
 import PartnerConnection from "../../models/PartnerConnection.schema.js";
 import User from "../../models/User.schema.js";
 import { AppError } from "../../utils/AppError.js";
+import { notificationType } from "../../enums/notificationType.enum.js";
 import createNotification from "../../services/notification.service.js";
 import {
   VALID_TRANSITIONS,

@@ -4,11 +4,15 @@ import Attachment from "../../models/Attachment.schema.js";
 export const getAllCompanies = async (req, res, next) => {
   try {
     const { status } = req.query;
+    const companyId = req.user.company?._id || req.user.company;
     let isApproved = true;
     if (status === "pending") {
       isApproved = false;
     }
-    const Companies = await Company.find({ isApproved }, { __v: false })
+    const Companies = await Company.find(
+      { isApproved, _id: { $ne: companyId } },
+      { __v: false }
+    )
       // createdby and location
       .populate("createdBy", "name email")
       // .populate("location", "locationName city country")
