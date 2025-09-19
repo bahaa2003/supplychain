@@ -5,19 +5,21 @@ export const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
     const companyId = req.user.company?._id || req.user.company;
-    const { productName, ...updateData } = req.body;
+    const { productName, sku, ...updateData } = req.body;
 
     const product = await Product.findOne({ _id: id, company: companyId });
     if (!product) return next(new AppError("Product not found", 404));
 
-    if (productName) {
-      const duplicate = await Product.findOne({
-        productName,
+    if (productName || sku) {
+      const isDuplicate = await Product.findOne({
+        $or: [{ productName }, { sku }],
         company: companyId,
         _id: { $ne: id },
       });
-      if (duplicate)
+      if (isDuplicate && isDuplicate.productName === productName)
         return next(new AppError("Product with this name already exists", 400));
+      if (isDuplicate && isDuplicate.sku === sku)
+        return next(new AppError("Product with this SKU already exists", 400));
       updateData.productName = productName;
     }
 

@@ -826,7 +826,7 @@ Returns image file (binary data)
 - `category` (string, body): Product category
 - `isActive` (boolean, body): Product active status
 - `location` (string, body): Default location ID
-- `initialQuantity` (number, body, optional): Initial inventory quantity
+- `quantity` (number, body, optional): Initial inventory quantity
 - `minimumThreshold` (number, body, optional): Minimum stock threshold
 
 **Success Example:**

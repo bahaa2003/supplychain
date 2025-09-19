@@ -64,14 +64,14 @@ export const createProduct = async (req, res, next) => {
     console.log("Product created:", product[0]);
 
     // check if the location exists
-    const defaultLocation = await Location.findOne({
+    const location = await Location.findOne({
       _id: req.body.location,
       company: userCompanyId,
     })
       .select("_id")
       .session(session);
 
-    if (!defaultLocation) {
+    if (!location) {
       return next(new AppError("Location is required", 400));
     }
 
@@ -81,11 +81,11 @@ export const createProduct = async (req, res, next) => {
         {
           product: product[0]._id,
           company: userCompanyId,
-          onHand: req.body.initialQuantity || 0,
+          onHand: req.body.quantity || 0,
           reserved: 0,
           minimumThreshold: req.body.minimumThreshold || 10,
           lastUpdated: new Date(),
-          location: defaultLocation,
+          location,
         },
       ],
       { session }
@@ -107,7 +107,7 @@ export const createProduct = async (req, res, next) => {
               reserved: inventory[0].reserved,
             },
             product: product[0]._id,
-            quantity: req.body.initialQuantity || 0,
+            quantity: req.body.quantity || 0,
             changeType: inventoryChangeType.INITIAL_STOCK,
             performedBy: req.user._id,
           },
