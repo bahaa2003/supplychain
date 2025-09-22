@@ -9,14 +9,30 @@ export const getAllInventory = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const [inventory, total] = await Promise.all([
-      Inventory.find({ company: companyId })
-        .populate("product company location")
+      Inventory.find(
+        { company: companyId },
+        { __v: false, supplierInfo: false }
+      )
+        .populate([
+          {
+            path: "product",
+            select: "productName sku unitPrice unit category isActive _id ",
+          },
+          {
+            path: "company",
+            select: "companyName _id",
+          },
+          {
+            path: "location",
+            select: "locationName",
+          },
+        ])
         .skip(skip)
         .limit(limit),
       Inventory.countDocuments({ company: companyId }),
     ]);
 
-    res.status(200).json({
+    return res.status(200).json({
       status: "success",
       results: inventory.length,
       page,
