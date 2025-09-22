@@ -75,6 +75,6 @@ inventorySchema.pre("save", function (next) {
   }
   next();
 });
-productSchema.set("toJSON", { virtuals: true });
-productSchema.set("toObject", { virtuals: true });
+inventorySchema.set("toJSON", { virtuals: true });
+inventorySchema.set("toObject", { virtuals: true });
 export default mongoose.model("Inventory", inventorySchema);
