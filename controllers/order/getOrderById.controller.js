@@ -1,4 +1,5 @@
 import Order from "../../models/Order.schema.js";
+import OrderStatusHistory from "../../models/OrderStatusHistory.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { ORDER_ROLE_PERMISSIONS } from "../../enums/orderStatus.enum.js";
 export const getOrderById = async (req, res) => {
@@ -40,14 +41,6 @@ export const getOrderById = async (req, res) => {
         path: "deliveryLocation",
         select: "locationName city state country",
       },
-      //   {
-      //     path: "shipments",
-      //     select: "trackingNumber status estimatedDelivery actualDelivery",
-      //   },
-      //   { path: "invoice", select: "invoiceNumber status totalAmount dueDate" },
-      //   { path: "history.updatedBy", select: "name email" },
-      //   { path: "returnInfo.returnedBy", select: "name email" },
-      //   { path: "returnProcessing.processedBy", select: "name email" },
     ])
     .lean();
 
@@ -61,14 +54,17 @@ export const getOrderById = async (req, res) => {
       ? "buyer"
       : "supplier";
 
-  // Add user role to the order object
-  order.userRole = userRole;
+  const orderStatusHistory = await OrderStatusHistory.find({
+    order: orderId,
+  }).populate("updatedBy", "name email");
 
   return res.status(200).json({
     status: "success",
     data: {
       order,
+      userRole,
       acceptAction: ORDER_ROLE_PERMISSIONS[userRole][order.status],
+      orderStatusHistory,
     },
   });
 };
