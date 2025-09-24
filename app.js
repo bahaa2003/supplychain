@@ -26,17 +26,11 @@ dotenv.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "*",
-    credentials: true,
-  })
-);
-app.use("/api/webhook", webhookRoutes);
-app.use(express.json());
-
+app.use(cors());
 // Security middlewares (helmet, cors, rate limiting, etc)
 // securityMiddleware(app);
+app.use(express.json());
+app.use("/api/webhook", webhookRoutes);
 
 // Routes
 app.get("/", (req, res) => {
