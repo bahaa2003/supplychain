@@ -11,6 +11,7 @@ import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
 import User from "../../models/User.schema.js";
 import { roles } from "../../enums/role.enum.js";
+import orderStatusHistory from "../../models/OrderStatusHistory.schema.js";
 
 export const updateOrderStatus = async (req, res, next) => {
   const { orderId } = req.params;
@@ -50,7 +51,8 @@ export const updateOrderStatus = async (req, res, next) => {
   }
 
   // Add to history
-  order.history.push({
+  await orderStatusHistory.create({
+    order: order._id,
     status: newStatus,
     updatedBy: userId,
     notes: notes || `Status changed from ${currentStatus} to ${newStatus}`,

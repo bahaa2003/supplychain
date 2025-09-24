@@ -28,22 +28,6 @@ const orderItemSchema = new Schema({
   },
 });
 
-const orderStatusHistorySchema = new Schema(
-  {
-    status: {
-      type: String,
-      enum: orderStatusEnum,
-      required: true,
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    notes: String,
-  },
-  { timestamps: true }
-);
-
 const orderSchema = new Schema(
   {
     orderNumber: {
@@ -94,7 +78,6 @@ const orderSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Invoice",
     },
-    history: [orderStatusHistorySchema],
   },
   {
     timestamps: true,

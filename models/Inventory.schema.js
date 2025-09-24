@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { inventoryStatusEnum } from "../enums/inventoryStatus.enum.js";
+import { inventoryStatus } from "../enums/inventoryStatus.enum.js";
 import { AppError } from "../utils/AppError.js";
 
 const { Schema } = mongoose;
@@ -46,6 +46,8 @@ const inventorySchema = new Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
@@ -57,13 +59,14 @@ inventorySchema.virtual("available").get(function () {
 // Virtual for inventory status
 inventorySchema.virtual("status").get(function () {
   const available = this.onHand - this.reserved;
+  console.log("VIRTUAL DEBUG:", inventoryStatus);
   if (available <= 0) {
-    return inventoryStatusEnum.OUT_OF_STOCK;
+    return inventoryStatus.OUT_OF_STOCK;
   }
   if (available < this.minimumThreshold) {
-    return inventoryStatusEnum.LOW_STOCK;
+    return inventoryStatus.LOW_STOCK;
   }
-  return inventoryStatusEnum.IN_STOCK;
+  return inventoryStatus.IN_STOCK;
 });
 
 // Ensure reserved quantity does not exceed onHand quantity
@@ -75,6 +78,4 @@ inventorySchema.pre("save", function (next) {
   }
   next();
 });
-inventorySchema.set("toJSON", { virtuals: true });
-inventorySchema.set("toObject", { virtuals: true });
 export default mongoose.model("Inventory", inventorySchema);

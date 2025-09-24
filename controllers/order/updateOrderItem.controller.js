@@ -7,6 +7,7 @@ import { canEditOrder } from "../../utils/order/canEditOrder.js";
 import { validateProductAvailability } from "../../services/order/validateProductAvailability.service.js";
 import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
+import orderStatusHistory from "../../models/OrderStatusHistory.schema.js";
 
 // Edit item quantity
 export const editOrderItem = async (req, res, next) => {
@@ -95,12 +96,12 @@ export const editOrderItem = async (req, res, next) => {
   order.totalAmount = order.items.reduce((sum, item) => sum + item.subtotal, 0);
 
   // Add to history
-  order.history.push({
+  await orderStatusHistory.create({
+    order: order._id,
     status: order.status,
     updatedBy: userId,
     notes: `Item ${item.sku} quantity changed from ${oldQuantity} to ${quantity}`,
   });
-
   await order.save();
   await order.populate([
     { path: "buyer", select: "companyName" },
@@ -196,7 +197,8 @@ export const removeOrderItem = async (req, res, next) => {
   order.totalAmount = order.items.reduce((sum, item) => sum + item.subtotal, 0);
 
   // Add to history
-  order.history.push({
+  await orderStatusHistory.create({
+    order: order._id,
     status: order.status,
     updatedBy: userId,
     notes: `Removed item ${removedItem.sku} (${removedItem.quantity} units)`,
@@ -314,7 +316,8 @@ export const addOrderItem = async (req, res, next) => {
   order.totalAmount = order.items.reduce((sum, item) => sum + item.subtotal, 0);
 
   // Add to history
-  order.history.push({
+  await orderStatusHistory.create({
+    order: order._id,
     status: order.status,
     updatedBy: userId,
     notes: `Added item ${sku} (${quantity} units)`,
