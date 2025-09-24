@@ -1,5 +1,4 @@
 import { body } from "express-validator";
-import mongoose from "mongoose";
 import { unitEnum } from "../enums/unit.enum.js";
 import { isValidObjectId } from "../utils/mongoose.js";
 

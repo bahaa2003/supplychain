@@ -27,7 +27,7 @@ router
   );
 
 router
-  .route("/:id") //TODO: convert :id to :productId
+  .route("/:productId")
   .get(allowedTo("admin", "manager", "staff"), catchError(getProductById))
   .delete(protectedRoute, allowedTo("admin"), catchError(deleteProduct))
   .patch(

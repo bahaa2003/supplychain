@@ -3,11 +3,11 @@ import { AppError } from "../../utils/AppError.js";
 
 export const getProductById = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { id: productId } = req.params;
     const companyId = req.user.company?._id || req.user.company;
 
     const product = await Product.findOne({
-      _id: id,
+      _id: productId,
       company: companyId,
     }).lean();
     if (!product) return next(new AppError("Product not found", 404));
