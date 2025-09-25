@@ -59,10 +59,10 @@ export const updateOrderStatus = async (req, res, next) => {
   });
 
   await order.save();
+
   await order.populate([
     { path: "buyer", select: "companyName" },
     { path: "supplier", select: "companyName" },
-    { path: "history.updatedBy", select: "name" },
   ]);
 
   if (newStatus === orderStatus.SUBMITTED) {
@@ -108,13 +108,18 @@ export const updateOrderStatus = async (req, res, next) => {
       recieveNotification
     );
   }
-
+  const history = orderStatusHistory.find({ order: order._id });
   return res.json({
     status: "success",
     message: "Order updated successfully",
-    data: { order },
+    data: { ...order, history },
   });
 };
+
+/*******************************************************************************
+ *******************************************************************************
+ *******************************************************************************
+ */
 
 // Helper functions
 const handleInventoryImpact = async (
