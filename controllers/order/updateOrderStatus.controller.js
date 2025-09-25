@@ -109,10 +109,11 @@ export const updateOrderStatus = async (req, res, next) => {
     );
   }
   const history = orderStatusHistory.find({ order: order._id });
+  order.history = history;
   return res.json({
     status: "success",
     message: "Order updated successfully",
-    data: { ...order, history },
+    data: { order },
   });
 };
 
