@@ -56,10 +56,6 @@ const orderSchema = new Schema(
       required: true,
     },
     items: [orderItemSchema],
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
     deliveryLocation: {
       type: Schema.Types.ObjectId,
       ref: "Location",
@@ -81,15 +77,16 @@ const orderSchema = new Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-// Auto-calculate totalAmount before saving
-orderSchema.pre("save", function (next) {
-  if (this.isModified("items")) {
-    this.totalAmount = this.items.reduce((acc, item) => acc + item.subtotal, 0);
-  }
-  next();
+orderSchema.virtual("totalQuantity").get(function () {
+  return this.items.reduce((acc, item) => acc + item.quantity, 0);
+});
+orderSchema.virtual("totalAmount").get(function () {
+  this.totalAmount = this.items.reduce((acc, item) => acc + item.subtotal, 0);
 });
 
 export default mongoose.model("Order", orderSchema);

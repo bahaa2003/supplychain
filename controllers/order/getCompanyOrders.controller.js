@@ -67,23 +67,15 @@ export const getCompanyOrders = async (req, res) => {
     Order.find(filter)
       .select({
         __v: false,
-        items: false,
         createdBy: false,
         confirmedDeliveryDate: false,
         requestedDeliveryDate: false,
         notes: false,
-        totalAmount: false,
         orderNumber: false,
-        history: false,
-        issues: false,
         invoice: false,
         shipments: false,
-        returnInfo: false,
-        returnProcessing: false,
       })
-      .populate([
-        { path: "deliveryLocation", select: "locationName city state country" },
-      ])
+      .populate([{ path: "deliveryLocation", select: "locationName address" }])
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit)),
