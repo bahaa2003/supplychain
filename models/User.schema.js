@@ -39,11 +39,6 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Attachment",
     },
-    // expiresAt: {
-    //   type: Date,
-    //   default: () => new Date(Date.now() + 1 * 5 * 60 * 1000),
-    //   // index: { expireAfterSeconds: 0 },
-    // },
   },
   { timestamps: true }
 );

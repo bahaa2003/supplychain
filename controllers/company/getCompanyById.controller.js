@@ -25,27 +25,34 @@ export const getCompanyById = async (req, res, next) => {
     if (userRole == roles.PLATFORM_ADMIN) {
       return res.status(200).json({
         status: "success",
-        data: requiredCompany.populate("location createdBy"),
+        data: await requiredCompany.populate([
+          {
+            path: "createdBy",
+            select: "name email avatar",
+          },
+          {
+            path: "location",
+            select:
+              "locationName address type isActive contactPerson coordinates",
+          },
+        ]),
       });
     } else {
+      requiredCompany.budget = undefined;
+      requiredCompany.subscription = undefined;
+      requiredCompany.status = undefined;
       return res.status(200).json({
         status: "success",
-        data: requiredCompany
-          .select({
-            budget: false,
-            subscription: false,
-            status: false,
-          })
-          .populate([
-            {
-              path: "createdBy",
-              select: "name email",
-            },
-            {
-              path: "location",
-              select: "locationName address",
-            },
-          ]),
+        data: await requiredCompany.populate([
+          {
+            path: "createdBy",
+            select: "name email",
+          },
+          {
+            path: "location",
+            select: "locationName address",
+          },
+        ]),
       });
     }
   } catch (err) {

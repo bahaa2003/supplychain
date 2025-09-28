@@ -22,7 +22,7 @@ router.patch(
 );
 
 router.get(
-  "/:comapyId",
+  "/:companyId",
   allowedTo(roles.ADMIN, roles.MANAGER, roles.PLATFORM_ADMIN),
   catchError(getCompanyById)
 );
