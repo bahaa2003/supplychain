@@ -1,6 +1,7 @@
 import express from "express";
 import { getAllEmployee } from "../controllers/users/users.controller.js";
 import { catchError } from "../utils/catchError.js";
+import { roles } from "../enums/role.enum.js";
 import {
   protectedRoute,
   allowedTo,
@@ -17,24 +18,28 @@ import { upload } from "../middlewares/upload.middleware.js";
 const router = express.Router();
 router.use(protectedRoute);
 
-router.get("/get-all-employee", allowedTo("admin"), catchError(getAllEmployee));
+router.get(
+  "/get-all-employee",
+  allowedTo(roles.ADMIN),
+  catchError(getAllEmployee)
+);
 
-router.get("/:id/avatar", protectedRoute, catchError(getUserAvatar));
+router.get("/:employeeId/avatar", protectedRoute, catchError(getUserAvatar));
 
 router.patch(
-  "/:id/avatar",
+  "/:employeeId/avatar",
   protectedRoute,
   checkEmailVerified,
-  allowedTo("admin"),
+  allowedTo(roles.ADMIN),
   upload.single("avatar"),
   catchError(updateUserAvatar)
 );
 
 router.delete(
-  "/:id/avatar",
+  "/:employeeId/avatar",
   protectedRoute,
   checkEmailVerified,
-  allowedTo("admin"),
+  allowedTo(roles.ADMIN),
   catchError(deleteUserAvatar)
 );
 

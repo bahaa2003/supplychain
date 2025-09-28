@@ -8,6 +8,7 @@ import {
   editOrderItem,
   removeOrderItem,
 } from "../controllers/order/updateOrderItem.controller.js";
+import { getAllowedStatus } from "../controllers/order/getAllowedStatus.controller.js";
 
 import {
   createOrderValidator,
@@ -51,6 +52,8 @@ router
     validate(updateOrderStatusValidator()),
     catchError(updateOrderStatus)
   );
+
+router.route("/:orderId/allowedStatus").get(getAllowedStatus);
 
 // Order item management routes
 router

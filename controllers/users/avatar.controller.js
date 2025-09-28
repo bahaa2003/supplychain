@@ -7,9 +7,9 @@ import {
 } from "../../middlewares/upload.middleware.js";
 
 export const getUserAvatar = async (req, res, next) => {
-  const { id } = req.params;
+  const { employeeId } = req.params;
 
-  const user = await User.findById(id);
+  const user = await User.findById(employeeId);
   if (!user) return next(new AppError("User not found", 404));
 
   const avatar = await Attachment.findById(user.avatar);
@@ -19,14 +19,14 @@ export const getUserAvatar = async (req, res, next) => {
 };
 
 export const updateUserAvatar = async (req, res, next) => {
-  const { id } = req.params;
+  const { employeeId } = req.params;
   const file = req.file;
 
   if (!file) return next(new AppError("No file uploaded", 400));
   if (!file.mimetype.startsWith("image"))
     return next(new AppError("Only image files are allowed", 400));
 
-  const user = await User.findById(id);
+  const user = await User.findById(employeeId);
 
   if (!user) return next(new AppError("User not found", 404));
 
@@ -65,9 +65,9 @@ export const updateUserAvatar = async (req, res, next) => {
 };
 
 export const deleteUserAvatar = async (req, res, next) => {
-  const { id } = req.params;
+  const { employeeId } = req.params;
 
-  const user = await User.findById(id);
+  const user = await User.findById(employeeId);
   if (!user) return next(new AppError("User not found", 404));
 
   if (

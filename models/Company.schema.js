@@ -6,7 +6,7 @@ const companySchema = new Schema(
     companyName: { type: String, required: true, unique: true },
     industry: { type: String },
     size: { type: String },
-    location: { type: mongoose.Schema.Types.ObjectId, ref: "Location" },
+    location: { type: Schema.Types.ObjectId, ref: "Location" },
 
     isApproved: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
