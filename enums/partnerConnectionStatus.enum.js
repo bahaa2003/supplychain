@@ -18,7 +18,9 @@ export const terminationTypeEnum = [
 
 export const partnerConnectionStatusEnum = Object.values(
   partnerConnectionStatus
-); // Valid status transitions
+);
+
+// Valid status transitions
 export const VALID_TRANSITIONS = {
   Pending: [
     partnerConnectionStatus.ACTIVE,

@@ -3,19 +3,19 @@ import Attachment from "../../models/Attachment.schema.js";
 
 export const getAllCompanies = async (req, res, next) => {
   try {
-    const { status } = req.query;
+    const { status, search, size, indusrty } = req.query;
     const companyId = req.user.company?._id || req.user.company;
-    let isApproved = true;
-    if (status === "pending") {
-      isApproved = false;
-    }
-    const Companies = await Company.find(
-      { isApproved, _id: { $ne: companyId } },
-      { __v: false }
-    )
-      // createdby and location
+
+    const filter = {
+      isApproved: status !== "pending",
+      _id: { $ne: companyId },
+      companyName: { $regex: search || "", $options: "i" },
+      ...(size && { size }),
+      ...(indusrty && { indusrty }),
+    };
+
+    const Companies = await Company.find(filter, { __v: false })
       .populate("createdBy", "name email")
-      // .populate("location", "locationName city country")
       .lean();
 
     if (!Companies) {
@@ -49,7 +49,7 @@ export const getAllCompanies = async (req, res, next) => {
       data: Companies,
     });
   } catch (err) {
-    console.error("❌ Error in get Companies:", err.message);
+    console.error("Error in get Companies:", err.message);
     res.status(500).json({
       status: "fail",
       message: "Server error while fetching companies.",

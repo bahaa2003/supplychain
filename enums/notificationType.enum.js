@@ -28,3 +28,5 @@ export const notificationTitles = {
 };
 
 export const notificationTypeEnum = Object.values(notificationType);
+
+export const notificationTitlesEnum = Object.values(notificationTitles);

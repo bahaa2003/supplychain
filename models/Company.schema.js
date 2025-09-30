@@ -1,11 +1,22 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-
+import {
+  companyIndustries,
+  companyIndustriesEnum,
+  companySizes,
+  companySizesEnum,
+  companySizesNumber,
+  companySizesNumberEnum,
+  subscriptionPlans,
+  subscriptionPlansEnum,
+  subscriptionStatuses,
+  subscriptionStatusesEnum,
+} from "../enums/company.enum.js";
 const companySchema = new Schema(
   {
     companyName: { type: String, required: true, unique: true },
-    industry: { type: String },
-    size: { type: String },
+    industry: { type: String, enum: companyIndustriesEnum },
+    size: { type: String, enum: companySizesEnum, default: companySizes.SMALL },
     location: { type: Schema.Types.ObjectId, ref: "Location" },
 
     isApproved: { type: Boolean, default: false },
@@ -16,13 +27,13 @@ const companySchema = new Schema(
     subscription: {
       plan: {
         type: String,
-        enum: ["Free", "Basic", "Pro", "Enterprise"],
-        default: "Free",
+        enum: subscriptionPlansEnum,
+        default: subscriptionPlans.FREE,
       },
       status: {
         type: String,
-        enum: ["active", "inactive", "expired"],
-        default: "active",
+        enum: subscriptionStatusesEnum,
+        default: subscriptionStatuses.ACTIVE,
       },
       startDate: { type: Date, default: Date.now },
       endDate: { type: Date },

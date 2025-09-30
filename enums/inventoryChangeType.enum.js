@@ -1,4 +1,4 @@
-export const inventoryChangeType = Object.freeze({
+export const inventoryChangeType = {
   INITIAL_STOCK: "Initial Stock", // initial stock when product is created
   INCOMING: "Incoming", // receive inventory
   OUTGOING: "Outgoing", // send inventory
@@ -9,6 +9,6 @@ export const inventoryChangeType = Object.freeze({
   EXPIRED: "Expired", // expired
   RETURNED: "Returned", // return
   TRANSFER: "Transfer", // transfer between locations
-});
+};
 
 export const inventoryChangeTypeEnum = Object.values(inventoryChangeType);

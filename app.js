@@ -16,6 +16,7 @@ import notificationRoutes from "./routes/notification.routes.js";
 import analyticsRoutes from "./routes/analytics.route.js";
 import webhookRoutes from "./routes/webhook.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
+import getEnumRoutes from "./routes/common.route.js";
 import { securityMiddleware } from "./middlewares/security.middleware.js";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 import {
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
     message: "Welcome to API",
   });
 });
+app.use("/api/common", protectedRoute, getEnumRoutes);
 app.use("/api/setup", setupRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);

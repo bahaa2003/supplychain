@@ -32,3 +32,7 @@ export const inventoryReferenceTypeDescriptions = {
   [inventoryReferenceType.SYSTEM]: "System generated change",
   [inventoryReferenceType.MANUAL]: "Manual change without specific reference",
 };
+
+export const inventoryReferenceTypeDescriptionsEnum = Object.values(
+  inventoryReferenceTypeDescriptions
+);
