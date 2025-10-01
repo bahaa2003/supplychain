@@ -1,11 +1,13 @@
 import Company from "../../models/Company.schema.js";
 import Attachment from "../../models/Attachment.schema.js";
 import { roles } from "../../enums/role.enum.js";
+import PartnerConnection from "../../models/PartnerConnection.schema.js";
 
 export const getCompanyById = async (req, res, next) => {
   try {
     const { companyId } = req.params;
     const userRole = req.user.role;
+    const userCompanyId = req.user.company?._id || req.user.company;
 
     const requiredCompany = await Company.findById(companyId, { __v: false });
 
@@ -19,6 +21,17 @@ export const getCompanyById = async (req, res, next) => {
       ownerCompany: requiredCompany._id,
       type: "company_document",
     }).lean();
+
+    const connection = await PartnerConnection.findOne({
+      $or: [
+        { requester: userCompanyId, recipient: companyId },
+        { requester: companyId, recipient: userCompanyId },
+      ],
+    }).lean();
+
+    console.log("connection:===>\n", connection);
+
+    requiredCompany.partnerStatus = connection?.status || null;
 
     requiredCompany.documents = documents;
 
