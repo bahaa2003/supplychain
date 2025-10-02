@@ -26,11 +26,15 @@ const router = express.Router();
 
 router.post(
   "/register",
-  upload.array("documents"), // upload company documents
+  upload.fields([
+    { name: "logo", maxCount: 1 },
+    { name: "documents", maxCount: 3 },
+  ]),
   validate(userValidator()),
   validate(companyValidator()),
   catchError(register)
 );
+
 
 router.post("/login", catchError(login));
 router.post("/logout", protectedRoute, catchError(logout));

@@ -9,6 +9,7 @@ const attachmentSchema = new Schema(
       required: true,
       enum: [
         "company_document",
+        "company_logo",   
         "product_image",
         "user_identity",
         "shipment_proof",

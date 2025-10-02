@@ -3,6 +3,7 @@ dotenv.config();
 
 import multer from "multer";
 import ImageKit from "imagekit";
+import crypto from "crypto";
 import { AppError } from "../utils/AppError.js";
 
 const storage = multer.memoryStorage();
@@ -29,13 +30,20 @@ const imagekit = new ImageKit({
   urlEndpoint: "https://ik.imagekit.io/bba6fwtkfo",
 });
 
-export const uploadToImageKit = async (file, folder = "company_documents") => {
-  try {
+export const uploadToImageKit = async (file, folder = "company_documents", companyName = "company") => {
+try {
+    const randomNum = Math.floor(1000 + Math.random() * 9000); 
+    const timestamp = Date.now();
+    const safeCompanyName = companyName.replace(/\s+/g, "_").toLowerCase();
+    const ext = file.originalname.split(".").pop();
+    const customFileName = `${safeCompanyName}_${timestamp}_${randomNum}.${ext}`;
+
     const result = await imagekit.upload({
       file: file.buffer,
-      fileName: file.originalname,
+      fileName: customFileName,
       folder,
     });
+
     return {
       url: result.url,
       fileId: result.fileId,

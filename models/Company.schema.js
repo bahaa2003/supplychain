@@ -24,6 +24,12 @@ const companySchema = new Schema(
 
     budget: { type: Number, default: 0 },
 
+    logo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attachment",
+      default: null,
+    },
+
     subscription: {
       plan: {
         type: String,

@@ -3,6 +3,8 @@ import { getAllCompanies } from "../controllers/company/getAllCompanies.controll
 import { approveCompany } from "../controllers/company/approveCompany.controller.js";
 import { getCompanyById } from "../controllers/company/getCompanyById.controller.js";
 import { getMyCompany } from "../controllers/company/getMyCompany.controller.js";
+import { updateCompanyLogo } from "../controllers/company/updateCompanyLogo.controller.js";
+import { upload } from "../middlewares/upload.middleware.js";
 import { roles } from "../enums/role.enum.js";
 import { allowedTo } from "../middlewares/auth.middleware.js";
 
@@ -32,5 +34,13 @@ router.get(
   allowedTo(roles.ADMIN, roles.MANAGER),
   catchError(getMyCompany)
 );
+
+router.patch(
+  "/:companyId/logo",
+  allowedTo(roles.ADMIN, roles.PLATFORM_ADMIN),
+  upload.single("logo"),
+  catchError(updateCompanyLogo)
+);
+
 
 export default router;

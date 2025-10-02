@@ -37,7 +37,7 @@ export const register = async (req, res, next) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) return next(new AppError("Email already registered", 400));
 
-  const existingCompany = await Company.findOne({ name: companyName });
+  const existingCompany = await Company.findOne({ companyName });
   if (existingCompany)
     return next(new AppError("Company name already taken", 400));
 
@@ -122,10 +122,41 @@ export const register = async (req, res, next) => {
       { session }
     );
 
-    // upload files if they exist
+    // Upload company logo if exists
+    let logoAttachment = null;
+    if (req.files && req.files.logo && req.files.logo[0]) {
+      try {
+        const result = await uploadToImageKit(req.files.logo[0], "company_logos", company.companyName);
+
+
+        [logoAttachment] = await Attachment.create(
+          [
+            {
+              type: "company_logo",
+              fileUrl: result.url,
+              fileId: result.fileId,
+              ownerCompany: company._id,
+              uploadedBy: user._id,
+              relatedTo: "Company",
+              status: "approved", // or "pending" if you want review
+              description: "Company main logo",
+            },
+          ],
+          { session }
+        );
+
+        // link the logo to the company
+        company.logo = logoAttachment._id;
+        await company.save({ session });
+      } catch (uploadError) {
+        throw new AppError("Failed to upload company logo. Please try again.", 500);
+      }
+    }
+
+    // Upload company documents if exist
     const attachments = [];
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
+    if (req.files && req.files.documents) {
+      for (const file of req.files.documents) {
         try {
           const result = await uploadToImageKit(file, "company_documents");
 
@@ -146,9 +177,7 @@ export const register = async (req, res, next) => {
 
           attachments.push(attachment);
         } catch (uploadError) {
-          console.error("Error uploading file:", uploadError);
-          // You can either cancel the transaction or log the error and continue with the registration
-          throw new AppError("Failed to upload files. Please try again.", 500);
+          throw new AppError("Failed to upload company documents. Please try again.", 500);
         }
       }
     }
@@ -174,8 +203,7 @@ export const register = async (req, res, next) => {
       );
     } catch (emailError) {
       console.error("Error sending verification email:", emailError);
-      // We do not cancel your registration if the email fails to be sent.
-      // The user can request to resend the email later
+      // We do not cancel registration if the email fails.
     }
 
     res.status(201).json({
@@ -186,6 +214,7 @@ export const register = async (req, res, next) => {
         userId: user._id,
         companyId: company._id,
         locationId: location._id,
+        logo: logoAttachment ? logoAttachment.fileUrl : null,
         attachmentsCount: attachments.length,
       },
     });
@@ -193,17 +222,11 @@ export const register = async (req, res, next) => {
     // abort the transaction in case of an error
     await session.abortTransaction();
 
-    // delete the files if they exist
-    if (req.files && req.files.length > 0) {
-      // you can add code to delete the files from ImageKit here if needed
-      console.log("Transaction failed - files may need cleanup");
-    }
-
+    // cleanup if needed
     console.error("Registration transaction failed:", error);
 
     next(new AppError(error.message, 500));
   } finally {
-    console.log("finally");
     // end the session
     await session.endSession();
   }
