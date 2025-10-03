@@ -4,32 +4,15 @@ import PartnerConnection from "../../models/PartnerConnection.schema.js";
 
 export const getAllCompanies = async (req, res, next) => {
   try {
-    const { status, search, size, indusrty } = req.query;
+    const { search, isApproved, size, indusrty, partnerStatus } = req.query;
     const companyId = req.user.company?._id || req.user.company;
 
-    const filter = {
-      isApproved: status !== "pending",
-      _id: { $ne: companyId },
-      companyName: { $regex: search || "", $options: "i" },
-      ...(size && { size }),
-      ...(indusrty && { indusrty }),
-    };
-
-    const Companies = await Company.find(filter, { __v: false })
-      .populate("createdBy", "name email")
-      .lean();
-
-    if (!Companies) {
-      return res.status(404).json({
-        status: "fail",
-        message: "No companies found.",
-      });
-    }
-
-    // add connection status to each company
+    // get all partner connections for the current company
     const connections = companyId
       ? await PartnerConnection.find({
           $or: [{ requester: companyId }, { recipient: companyId }],
+          ...(partnerStatus &&
+            partnerStatus !== "all" && { status: partnerStatus }),
         }).lean()
       : [];
 
@@ -42,24 +25,37 @@ export const getAllCompanies = async (req, res, next) => {
       ])
     );
 
-    // ✅ add connection and documents to each company
+    // company filter
+    const filter = {
+      _id: { $ne: companyId },
+      companyName: { $regex: search || "", $options: "i" },
+      ...((isApproved || companyId) && { isApproved }),
+      ...(size && { size }),
+      ...(indusrty && { indusrty }),
+      ...(partnerStatus && {
+        _id: { $in: Array.from(connectionMap.keys()), $ne: companyId },
+      }),
+    };
+
+    const Companies = await Company.find(filter, { __v: false })
+      .populate("createdBy", "name email")
+      .lean();
+
+    if (!Companies.length) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No companies found.",
+      });
+    }
+
+    // add partnerStatus and documents to each company
     for (const company of Companies) {
       company.partnerStatus = connectionMap.get(company._id.toString()) || null;
-      const documents = await Attachment.find(
-        {
-          ownerCompany: company._id,
-          type: "company_document",
-        },
-        {
-          fileUrl: 1,
-          fileId: 1,
-          status: 1,
-          createdAt: 1,
-          _id: 0,
-        }
-      ).lean();
-
-      company.documents = documents;
+      if (req.user.role === "PLATFORM_ADMIN")
+        company.documents = await Attachment.find(
+          { ownerCompany: company._id, type: "company_document" },
+          { fileUrl: 1, fileId: 1, status: 1, createdAt: 1, _id: 0 }
+        ).lean();
     }
 
     res.status(200).json({
