@@ -12,7 +12,9 @@ export const getAllCompanies = async (req, res, next) => {
       ? await PartnerConnection.find({
           $or: [{ requester: companyId }, { recipient: companyId }],
           ...(partnerStatus &&
-            partnerStatus !== "all" && { status: partnerStatus }),
+            (partnerStatus !== "All" || partnerStatus === "None") && {
+              status: partnerStatus,
+            }),
         }).lean()
       : [];
 
@@ -29,13 +31,18 @@ export const getAllCompanies = async (req, res, next) => {
     const filter = {
       _id: { $ne: companyId },
       companyName: { $regex: search || "", $options: "i" },
-      ...((isApproved || companyId) && { isApproved }),
+      ...((isApproved || companyId) && { isApproved: isApproved === "true" }),
       ...(size && { size }),
       ...(indusrty && { indusrty }),
-      ...(partnerStatus && {
-        _id: { $in: Array.from(connectionMap.keys()), $ne: companyId },
-      }),
     };
+
+    if (companyId) filter.isApproved = true;
+
+    if (partnerStatus && partnerStatus === "None") {
+      filter._id = { $nin: Array.from(connectionMap.keys()), $ne: companyId };
+    } else if (partnerStatus) {
+      filter._id = { $in: Array.from(connectionMap.keys()), $ne: companyId };
+    }
 
     const Companies = await Company.find(filter, { __v: false })
       .populate("createdBy", "name email")
@@ -50,7 +57,8 @@ export const getAllCompanies = async (req, res, next) => {
 
     // add partnerStatus and documents to each company
     for (const company of Companies) {
-      company.partnerStatus = connectionMap.get(company._id.toString()) || null;
+      company.partnerStatus =
+        connectionMap.get(company._id.toString()) || "None";
       if (req.user.role === "PLATFORM_ADMIN")
         company.documents = await Attachment.find(
           { ownerCompany: company._id, type: "company_document" },
