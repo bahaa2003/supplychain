@@ -35,6 +35,7 @@ const partnerConnectionSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    chatRoom: { type: Schema.Types.ObjectId, ref: "ChatRoom" },
     rejectedBy: { type: Schema.Types.ObjectId, ref: "User" },
     inactiveBy: { type: Schema.Types.ObjectId, ref: "User" },
     terminatedBy: { type: Schema.Types.ObjectId, ref: "User" },

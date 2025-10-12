@@ -20,5 +20,5 @@ export const confirm2FALogin = async (req, res, next) => {
   if (!verified) return next(new AppError("Invalid 2FA code", 401));
 
   const authToken = generateToken(user);
-  res.status(200).json({ token: authToken });
+  res.status(200).json({ token: authToken, role: user.role });
 };

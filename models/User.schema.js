@@ -1,13 +1,15 @@
-import mongoose from "mongoose";
 import { roleEnum } from "../enums/role.enum.js";
-import { userStatusEnum } from "../enums/userStatus.enum.js";
+import { userStatus, userStatusEnum } from "../enums/userStatus.enum.js";
+import { roles } from "../enums/role.enum.js";
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: function () {
-        return this.status !== "invited";
+        return this.status !== userStatus.INVITED;
       },
     },
     email: { type: String, required: true, unique: true },
@@ -18,25 +20,29 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: roleEnum,
-      default: "staff",
+      default: roles.STAFF,
     },
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
       required: function () {
-        return this.role !== "platform_admin";
+        return this.role !== roles.PLATFORM_ADMIN;
       },
+    },
+    chatRoom: {
+      type: Schema.Types.ObjectId,
+      ref: "ChatRoom",
     },
     isEmailVerified: { type: Boolean, default: false },
     twoFactorEnabled: { type: Boolean, default: false },
-    twoFactorSecret: { type: String },
-    status: { type: String, enum: userStatusEnum, default: "active" },
-    inviteToken: { type: String },
-    passwordResetToken: { type: String },
-    passwordResetExpires: { type: Date },
-    passwordChangeAt: { type: Date },
+    twoFactorSecret: String,
+    status: { type: String, enum: userStatusEnum, default: userStatus.ACTIVE },
+    inviteToken: String,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+    passwordChangeAt: Date,
     avatar: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Attachment",
     },
   },

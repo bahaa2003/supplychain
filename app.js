@@ -17,6 +17,7 @@ import analyticsRoutes from "./routes/analytics.route.js";
 import webhookRoutes from "./routes/webhook.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import getEnumRoutes from "./routes/common.route.js";
+import messageRoutes from "./routes/messages.route.js";
 import { securityMiddleware } from "./middlewares/security.middleware.js";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 import {
@@ -58,6 +59,7 @@ app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
 app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);
 app.use("/api/invoice", protectedRoute, invoiceRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/api/messages", protectedRoute, checkEmailVerified, messageRoutes);
 app.use("/api/order", protectedRoute, checkEmailVerified, orderRoutes);
 
 // Global error handler

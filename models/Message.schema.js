@@ -8,9 +8,9 @@ const messageSchema = new Schema(
       ref: "User",
       required: true,
     },
-    receiver: {
+    chatRoom: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "chatRoom",
       required: true,
     },
     content: { type: String, required: true },
