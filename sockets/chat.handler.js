@@ -10,15 +10,12 @@ import jwt from "jsonwebtoken";
 
 export const handleChatEvents = (io, socket) => {
   // register and join rooms when connecting
-  socket.on("joinRooms", async ({ token }) => {
+  socket.on("join-rooms", async ({ token }) => {
+    console.log("join-rooms event received");
     try {
       // verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.id;
-
-      if (!userId || userId !== socket.userId) {
-        return socket.emit("error", "Unauthorized");
-      }
 
       // get user data with company
       const user = await User.findById(userId).populate("company");
@@ -42,7 +39,7 @@ export const handleChatEvents = (io, socket) => {
 
       // 3. platform_admin rooms
       if (user.role === roles.PLATFORM_ADMIN) {
-        // الانضمام لجميع غرف الشركات
+        // join all company rooms
         const companies = await Company.find({ chatRoom: { $exists: true } });
         for (const company of companies) {
           if (company.chatRoom) {
@@ -96,15 +93,19 @@ export const handleChatEvents = (io, socket) => {
   });
 
   // send message
-  socket.on("sendMessage", async ({ token, roomId, content }) => {
+  socket.on("send-message", async ({ token, roomId, content }) => {
     try {
+      console.log(
+        "send-message event received for room:",
+        roomId,
+        "content:",
+        content,
+        "from user:",
+        jwt.verify(token, process.env.JWT_SECRET).id
+      );
       // verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.id;
-
-      if (!userId || userId !== socket.userId) {
-        return socket.emit("error", "Unauthorized");
-      }
 
       if (!content?.trim()) {
         return socket.emit("error", "Message content is required");
@@ -118,6 +119,7 @@ export const handleChatEvents = (io, socket) => {
         return socket.emit("error", "User or room not found");
       }
 
+      console.log(`User ${userId} sending message to room ${roomId}`);
       // check send permission in the room
       const canSend = await checkSendPermission(user, chatRoom);
       if (!canSend) {
@@ -126,7 +128,7 @@ export const handleChatEvents = (io, socket) => {
           "You don't have permission to send messages in this room"
         );
       }
-
+      console.log(`User ${userId} has permission to send in room ${roomId}`);
       // create message
       const message = await Message.create({
         chatRoom: roomId,
@@ -141,7 +143,7 @@ export const handleChatEvents = (io, socket) => {
         .populate("chatRoom");
 
       // send message to all connected users in the room
-      io.to(roomId).emit("newMessage", {
+      io.to(roomId).emit("new-message", {
         _id: populatedMessage._id,
         content: populatedMessage.content,
         sender: populatedMessage.sender,
@@ -160,7 +162,7 @@ export const handleChatEvents = (io, socket) => {
   });
 
   // update message status (delivered/read)
-  socket.on("updateMessageStatus", async ({ token, messageId, status }) => {
+  socket.on("update-message-status", async ({ token, messageId, status }) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.id;
@@ -282,53 +284,6 @@ async function checkSendPermission(user, chatRoom) {
     }
   } catch (err) {
     console.error("Error checking send permission:", err);
-    return false;
-  }
-}
-
-// function to check access permission to the room
-async function checkRoomAccess(user, chatRoom) {
-  try {
-    switch (chatRoom.type) {
-      case "platform_to_company":
-        if (user.role === roles.PLATFORM_ADMIN) return true;
-        if (user.role === roles.ADMIN) {
-          const company = await Company.findOne({
-            _id: user.company,
-            chatRoom: chatRoom._id,
-          });
-          return !!company;
-        }
-        return false;
-
-      case "company_to_company":
-        if (user.role === roles.ADMIN || user.role === roles.MANAGER) {
-          const connection = await PartnerConnection.findOne({
-            chatRoom: chatRoom._id,
-            status: partnerConnectionStatus.ACTIVE,
-            $or: [{ requester: user.company }, { recipient: user.company }],
-          });
-          return !!connection;
-        }
-        return false;
-
-      case "in_company":
-        if (user.chatRoom?.toString() === chatRoom._id.toString()) return true;
-        if (user.role === roles.ADMIN || user.role === roles.MANAGER) {
-          const staffUser = await User.findOne({
-            chatRoom: chatRoom._id,
-            company: user.company,
-            role: roles.STAFF,
-          });
-          return !!staffUser;
-        }
-        return false;
-
-      default:
-        return false;
-    }
-  } catch (err) {
-    console.error("Error checking room access:", err);
     return false;
   }
 }

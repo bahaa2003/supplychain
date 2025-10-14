@@ -40,6 +40,7 @@ export const getAllPartnerConnections = async (req, res, next) => {
         status: 1,
         notes: 1,
         createdAt: 1,
+        chatRoom: 1,
       })
       .populate([
         {

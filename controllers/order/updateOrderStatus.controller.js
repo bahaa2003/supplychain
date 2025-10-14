@@ -73,7 +73,7 @@ export const updateOrderStatus = async (req, res, next) => {
     await createNotification(
       notificationType.NEW_ORDER,
       { orderNumber: order.orderNumber, totalAmount: order.totalAmount },
-      recieveNotification
+      recieveNotification.map((user) => user._id)
     );
   } else if (
     [orderStatus.RECEIVED, orderStatus.CANCELLED].includes(newStatus)
@@ -85,7 +85,7 @@ export const updateOrderStatus = async (req, res, next) => {
     await createNotification(
       notificationType.ORDER_STATUS_CHANGE,
       { orderNumber: order.orderNumber, status: newStatus },
-      recieveNotification
+      recieveNotification.map((user) => user._id)
     );
   } else if (
     [
@@ -105,7 +105,7 @@ export const updateOrderStatus = async (req, res, next) => {
     await createNotification(
       notificationType.ORDER_STATUS_CHANGE,
       { orderNumber: order.orderNumber, status: newStatus },
-      recieveNotification
+      recieveNotification.map((user) => user._id)
     );
   }
   const history = orderStatusHistory.find({ order: order._id });

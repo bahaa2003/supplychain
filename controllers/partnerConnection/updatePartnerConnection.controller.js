@@ -189,7 +189,7 @@ export const updatePartnerConnection = async (req, res, next) => {
         inactiveReason: connection.inactiveReason,
         recipientCompany: receiveCompanyNotification.companyName,
       },
-      recipientsNotification
+      recipientsNotification.map((user) => user._id)
     );
 
     const statusMessages = {

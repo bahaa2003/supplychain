@@ -144,7 +144,7 @@ export const createOrder = async (req, res, next) => {
     { path: "createdBy", select: "name email" },
     { path: "deliveryLocation", select: "locationName city state country" },
   ]);
-  const adminOfBuyerCompanyId = await User.findOne({
+  const adminOfBuyerCompanyId = await User.find({
     role: "admin",
     company: buyerCompanyId,
   }).select("_id");
@@ -155,7 +155,7 @@ export const createOrder = async (req, res, next) => {
       companyName: supplierCompany.companyName,
       totalAmount,
     },
-    adminOfBuyerCompanyId
+    adminOfBuyerCompanyId.map((user) => user._id)
   );
 
   return res.status(201).json({

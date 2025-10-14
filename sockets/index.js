@@ -3,10 +3,9 @@ import { Server } from "socket.io";
 import { handleChatEvents } from "./chat.handler.js";
 import { handleNotificationEvents } from "./notification.handler.js";
 
-const connectedUsers = new Map();
-
+let io;
 export const initRealtime = (server) => {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: { origin: process.env.FRONTEND_URL || "*" },
   });
 
@@ -17,9 +16,12 @@ export const initRealtime = (server) => {
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.id;
+        const notificationRoom = `notification-${userId}`;
+        socket.join(notificationRoom);
         socket.userId = userId;
-        connectedUsers.set(userId, socket.id);
-        console.log(`Registered user ${userId} on socket ${socket.id}`);
+        console.log(
+          `Registered user ${userId} on notification room socket ${notificationRoom}`
+        );
       } catch (err) {
         console.error("Invalid token on socket register");
         socket.disconnect();
@@ -30,16 +32,9 @@ export const initRealtime = (server) => {
     handleNotificationEvents(io, socket);
 
     socket.on("disconnect", () => {
-      for (const [userId, socketId] of connectedUsers.entries()) {
-        if (socketId === socket.id) {
-          connectedUsers.delete(userId);
-          console.log(`User ${userId} disconnected`);
-          break;
-        }
-      }
+      console.log(`User ${socket.userId} disconnected`);
     });
   });
 };
 
 export const getIO = () => io;
-export const getConnectedUsers = () => connectedUsers;
