@@ -9,6 +9,7 @@ import { uploadToImageKit } from "../../middlewares/upload.middleware.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import ChatRoom from "../../models/chatRoom.schema.js";
 
 const addDays = (date, days) => {
   const result = new Date(date);
@@ -47,10 +48,21 @@ export const register = async (req, res, next) => {
   try {
     await session.startTransaction();
 
+    // Create the chat room for platform to company communication
+    const [chatRoom] = await ChatRoom.create(
+      [
+        {
+          type: "platform_to_company",
+        },
+      ],
+      { session }
+    );
+
     // Create the company
     const [company] = await Company.create(
       [
         {
+          chatRoom: chatRoom._id,
           companyName,
           industry,
           size,
@@ -126,8 +138,11 @@ export const register = async (req, res, next) => {
     let logoAttachment = null;
     if (req.files && req.files.logo && req.files.logo[0]) {
       try {
-        const result = await uploadToImageKit(req.files.logo[0], "company_logos", company.companyName);
-
+        const result = await uploadToImageKit(
+          req.files.logo[0],
+          "company_logos",
+          company.companyName
+        );
 
         [logoAttachment] = await Attachment.create(
           [
@@ -149,7 +164,10 @@ export const register = async (req, res, next) => {
         company.logo = logoAttachment._id;
         await company.save({ session });
       } catch (uploadError) {
-        throw new AppError("Failed to upload company logo. Please try again.", 500);
+        throw new AppError(
+          "Failed to upload company logo. Please try again.",
+          500
+        );
       }
     }
 
@@ -177,7 +195,10 @@ export const register = async (req, res, next) => {
 
           attachments.push(attachment);
         } catch (uploadError) {
-          throw new AppError("Failed to upload company documents. Please try again.", 500);
+          throw new AppError(
+            "Failed to upload company documents. Please try again.",
+            500
+          );
         }
       }
     }

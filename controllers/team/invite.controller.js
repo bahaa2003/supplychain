@@ -1,9 +1,12 @@
 import User from "../../models/User.schema.js";
+import ChatRoom from "../../models/chatRoom.schema.js";
 import jwt from "jsonwebtoken";
 import { AppError } from "../../utils/AppError.js";
 import { roleEnum } from "../../enums/role.enum.js";
 import bcrypt from "bcrypt";
 import sendEmail from "../../services/email.service.js";
+import mongoose from "mongoose";
+
 export const inviteUser = async (req, res, next) => {
   const { email, role, name } = req.body;
   const admin = req.user;
@@ -33,27 +36,56 @@ export const inviteUser = async (req, res, next) => {
   );
 
   const password = Math.random().toString(36).substring(2, 15);
-  await User.create({
-    name,
-    email,
-    role,
-    password: bcrypt.hashSync(password, 12),
-    company: admin.company._id,
-    status: "invited",
-    inviteToken: token,
-  });
+  const session = await mongoose.startSession();
 
-  const inviteLink = `${process.env.BACKEND_URL}/api/team/verify-invite/${token}`;
+  try {
+    await session.startTransaction();
+    let chatRoom = undefined;
+    if (role != "admin") {
+      [chatRoom] = await ChatRoom.create(
+        [
+          {
+            type: "in_company",
+            company: admin.company._id,
+          },
+        ],
+        { session }
+      );
+    }
 
-  await sendEmail(
-    "teamInvite",
-    {
-      inviteLink,
-      password,
-      invitedBy: admin.name,
-    },
-    [email]
-  );
+    await User.create(
+      [
+        {
+          ...(chatRoom && { chatRoom: chatRoom._id }),
+          name,
+          email,
+          role,
+          password: bcrypt.hashSync(password, 12),
+          company: admin.company._id,
+          status: "invited",
+          inviteToken: token,
+        },
+      ],
+      { session }
+    );
+    const inviteLink = `${process.env.BACKEND_URL}/api/team/verify-invite/${token}`;
+
+    await sendEmail(
+      "teamInvite",
+      {
+        inviteLink,
+        password,
+        invitedBy: admin.name,
+      },
+      [email]
+    );
+    await session.commitTransaction();
+  } catch (err) {
+    await session.abortTransaction();
+    return next(new AppError("Failed to invite user", 500));
+  } finally {
+    session.endSession();
+  }
 
   res.status(201).json({
     message: "User invited successfully.",

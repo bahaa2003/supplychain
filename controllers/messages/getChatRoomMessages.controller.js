@@ -7,13 +7,13 @@ export const getChatRoomMessages = async (req, res, next) => {
   try {
     const userCompanyId = req.user.company?._id || req.user.company;
     const { chatRoomId } = req.params;
-    const { before, limit = 20 } = req.query;
+    const { before, sort = -1, limit = 20 } = req.query;
 
     const filter = { chatRoom: chatRoomId };
     if (before) filter.createdAt = { $lt: new Date(before) };
 
     const messages = await Message.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: sort })
       .limit(limit);
 
     res.status(200).json({

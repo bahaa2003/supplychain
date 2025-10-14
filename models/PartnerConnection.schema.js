@@ -4,6 +4,7 @@ import {
   partnerConnectionStatusEnum,
   terminationTypeEnum,
 } from "../enums/partnerConnectionStatus.enum.js";
+import ChatRoom from "./chatRoom.schema.js";
 const { Schema } = mongoose;
 
 const partnerConnectionSchema = new Schema(
@@ -66,14 +67,25 @@ const partnerConnectionSchema = new Schema(
 );
 
 // Prevent self-connection
-partnerConnectionSchema.pre("save", function (next) {
-  if (this.requester.toString() === this.recipient.toString()) {
-    next(new Error("A company cannot connect with itself"));
+partnerConnectionSchema.pre("save", async function (next) {
+  try {
+    if (this.requester.toString() === this.recipient.toString()) {
+      next(new Error("A company cannot connect with itself"));
+    }
+    if (this.isModified("status")) {
+      this.lastInteractionAt = new Date();
+    }
+
+    if (!this.chatRoom) {
+      const chatRoom = await ChatRoom.create({
+        type: "company_to_company",
+      });
+      this.chatRoom = chatRoom._id;
+    }
+    next();
+  } catch (err) {
+    next(err);
   }
-  if (this.isModified("status")) {
-    this.lastInteractionAt = new Date();
-  }
-  next();
 });
 
 export default mongoose.model("PartnerConnection", partnerConnectionSchema);

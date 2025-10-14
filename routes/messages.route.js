@@ -5,6 +5,6 @@ import { getChatRoomMessages } from "../controllers/messages/getChatRoomMessages
 const router = express.Router();
 
 router.route("/chatRoom/:chatRoomId").get(getChatRoomMessages);
-router.route("/chatRoom").post(createChatRoom);
+// router.route("/chatRoom").post(createChatRoom);
 
 export default router;

@@ -14,9 +14,7 @@ const messageSchema = new Schema(
       required: true,
     },
     content: { type: String, required: true },
-    isCreate: { type: Boolean, default: false },
-    isDeliver: { type: Boolean, default: false },
-    isRead: { type: Boolean, default: false },
+    notRead: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );
