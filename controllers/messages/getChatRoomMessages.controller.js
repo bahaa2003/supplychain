@@ -16,9 +16,17 @@ export const getChatRoomMessages = async (req, res, next) => {
       .sort({ createdAt: sort })
       .limit(limit);
 
+    const notReadCount = await Message.countDocuments({
+      chatRoom: chatRoomId,
+      notRead: userCompanyId,
+    });
+
     res.status(200).json({
       status: "success",
-      data: messages,
+      data: {
+        messages,
+        notReadCount,
+      },
     });
   } catch (err) {
     next(

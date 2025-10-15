@@ -182,22 +182,12 @@ export const handleChatEvents = (io, socket) => {
       }
 
       // update the status
-      if (status === "delivered" && !message.isDeliver) {
-        message.isDeliver = true;
-        await message.save();
-
-        // notify the sender that the message is delivered
-        io.to(message.chatRoom.toString()).emit("messageDelivered", {
-          messageId: message._id,
-          deliveredTo: userId,
-        });
-      } else if (status === "read" && !message.isRead) {
-        message.isDeliver = true;
+      if (status === "read" && !message.isRead) {
         message.isRead = true;
         await message.save();
 
         // notify the sender that the message is read
-        io.to(message.chatRoom.toString()).emit("messageRead", {
+        io.to(message.chatRoom.toString()).emit("message-read", {
           messageId: message._id,
           readBy: userId,
         });
@@ -209,7 +199,7 @@ export const handleChatEvents = (io, socket) => {
   });
 
   // real-time typing
-  socket.on("typing", async ({ token, roomId, isTyping }) => {
+  socket.on("is-typing", async ({ token, roomId, isTyping }) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.id;
@@ -221,7 +211,7 @@ export const handleChatEvents = (io, socket) => {
       const user = await User.findById(userId);
 
       // send typing status to other users in the room
-      socket.to(roomId).emit("userTyping", {
+      socket.to(roomId).emit("typing", {
         userId,
         userName: user.name,
         roomId,

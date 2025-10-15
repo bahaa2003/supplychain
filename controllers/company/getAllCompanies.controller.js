@@ -12,7 +12,8 @@ export const getAllCompanies = async (req, res, next) => {
       ? await PartnerConnection.find({
           $or: [{ requester: companyId }, { recipient: companyId }],
           ...(partnerStatus &&
-            (partnerStatus !== "All" || partnerStatus === "None") && {
+            partnerStatus !== "All" &&
+            partnerStatus !== "None" && {
               status: partnerStatus,
             }),
         }).lean()
@@ -23,7 +24,7 @@ export const getAllCompanies = async (req, res, next) => {
         conn.requester.toString() === companyId?.toString()
           ? conn.recipient.toString()
           : conn.requester.toString(),
-        conn.status,
+        { status: conn.status, chatRoom: conn.chatRoom },
       ])
     );
 
@@ -36,6 +37,7 @@ export const getAllCompanies = async (req, res, next) => {
       ...(indusrty && { indusrty }),
     };
 
+    // always true if user not platform admin
     if (companyId) filter.isApproved = true;
 
     if (partnerStatus && partnerStatus === "None") {
@@ -57,8 +59,9 @@ export const getAllCompanies = async (req, res, next) => {
 
     // add partnerStatus and documents to each company
     for (const company of Companies) {
-      company.partnerStatus =
-        connectionMap.get(company._id.toString()) || "None";
+      const conn = connectionMap.get(company._id.toString());
+      company.partnerStatus = conn?.status || "None";
+      company.chatRoom = conn?.chatRoom || null;
       if (req.user.role === "PLATFORM_ADMIN")
         company.documents = await Attachment.find(
           { ownerCompany: company._id, type: "company_document" },
