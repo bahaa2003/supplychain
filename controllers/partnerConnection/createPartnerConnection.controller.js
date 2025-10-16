@@ -1,5 +1,6 @@
 import PartnerConnection from "../../models/PartnerConnection.schema.js";
 import Company from "../../models/Company.schema.js";
+import ChatRoom from "../../models/chatRoom.schema.js";
 import User from "../../models/User.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { notificationType } from "../../enums/notificationType.enum.js";
@@ -7,10 +8,10 @@ import createNotification from "../../services/notification.service.js";
 import { roles } from "../../enums/role.enum.js";
 import { partnerConnectionStatus } from "../../enums/partnerConnectionStatus.enum.js";
 
-/**
- * Create a new partner connection request
- */
 export const createPartnerConnection = async (req, res, next) => {
+  let createdChatRoom = null;
+  let createdConnection = null;
+
   try {
     const { recipientId } = req.params;
     const { partnershipType, notes } = req.body;
@@ -29,7 +30,6 @@ export const createPartnerConnection = async (req, res, next) => {
     if (!recipientCompany) {
       return next(new AppError("Recipient company not found", 404));
     }
-
     if (recipientCompany.status === partnerConnectionStatus.INACTIVE) {
       return next(new AppError("Recipient company is inactive", 400));
     }
@@ -81,6 +81,15 @@ export const createPartnerConnection = async (req, res, next) => {
       }
     }
 
+    // Create chat room first
+    try {
+      createdChatRoom = await ChatRoom.create({
+        type: "company_to_company",
+      });
+    } catch (error) {
+      throw new AppError("Failed to create chat room", 500);
+    }
+
     // Create new connection
     const connectionData = {
       requester,
@@ -88,10 +97,19 @@ export const createPartnerConnection = async (req, res, next) => {
       partnershipType,
       notes: notes?.trim(),
       invitedBy,
-      status: partnerConnectionStatus.PENDING, // Default status for new requests
+      chatRoom: createdChatRoom._id,
+      status: partnerConnectionStatus.PENDING,
     };
 
-    const connection = await PartnerConnection.create(connectionData);
+    try {
+      createdConnection = await PartnerConnection.create(connectionData);
+    } catch (error) {
+      // If connection creation fails, delete the chat room
+      if (createdChatRoom) {
+        await ChatRoom.findByIdAndDelete(createdChatRoom._id);
+      }
+      throw new AppError("Failed to create partner connection", 500);
+    }
 
     // Get recipient company owner for notification
     const recipientOwner = await User.find(
@@ -100,19 +118,24 @@ export const createPartnerConnection = async (req, res, next) => {
     );
 
     // Create notification for recipient
-    if (recipientOwner) {
-      await createNotification(
-        notificationType.PARTNER_REQUEST,
-        {
-          requesterCompany: requesterCompany.companyName,
-          partnershipType,
-        },
-        recipientOwner.map((user) => user._id)
-      );
+    if (recipientOwner && recipientOwner.length > 0) {
+      try {
+        await createNotification(
+          notificationType.PARTNER_REQUEST,
+          {
+            requesterCompany: requesterCompany.companyName,
+            partnershipType,
+          },
+          recipientOwner.map((user) => user._id)
+        );
+      } catch (error) {
+        // Notification failure shouldn't break the flow
+        console.error("Failed to create notification:", error);
+      }
     }
 
     // Populate connection for response
-    await connection.populate([
+    await createdConnection.populate([
       {
         path: "requester",
         select: "companyName industry size location logo",
@@ -135,9 +158,22 @@ export const createPartnerConnection = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Partnership request sent successfully",
-      data: connection,
+      data: createdConnection,
     });
   } catch (error) {
+    // Rollback: Clean up created resources if any error occurs
+    if (createdConnection) {
+      await PartnerConnection.findByIdAndDelete(createdConnection._id).catch(
+        (err) =>
+          console.error("Failed to delete connection during rollback:", err)
+      );
+    }
+    if (createdChatRoom) {
+      await ChatRoom.findByIdAndDelete(createdChatRoom._id).catch((err) =>
+        console.error("Failed to delete chat room during rollback:", err)
+      );
+    }
+
     next(error);
   }
 };

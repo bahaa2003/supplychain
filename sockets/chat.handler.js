@@ -103,6 +103,7 @@ export const handleChatEvents = (io, socket) => {
         "from user:",
         jwt.verify(token, process.env.JWT_SECRET).id
       );
+
       // verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.id;
@@ -120,6 +121,7 @@ export const handleChatEvents = (io, socket) => {
       }
 
       console.log(`User ${userId} sending message to room ${roomId}`);
+
       // check send permission in the room
       const canSend = await checkSendPermission(user, chatRoom);
       if (!canSend) {
@@ -128,13 +130,21 @@ export const handleChatEvents = (io, socket) => {
           "You don't have permission to send messages in this room"
         );
       }
+
       console.log(`User ${userId} has permission to send in room ${roomId}`);
+
+      // get all participants in the room
+      const allParticipants = await getRoomParticipants(chatRoom);
+
+      // exclude sender from notRead list
+      const notReadUsers = allParticipants.filter((pId) => pId !== userId);
+
       // create message
       const message = await Message.create({
         chatRoom: roomId,
         sender: userId,
         content: content.trim(),
-        isCreate: true,
+        notRead: notReadUsers,
       });
 
       // get message with sender data
@@ -143,15 +153,24 @@ export const handleChatEvents = (io, socket) => {
         .populate("chatRoom");
 
       // send message to all connected users in the room
-      io.to(roomId).emit("new-message", {
+      socket.broadcast.to(roomId).emit("new-message", {
         _id: populatedMessage._id,
         content: populatedMessage.content,
         sender: populatedMessage.sender,
         chatRoom: roomId,
         createdAt: populatedMessage.createdAt,
-        isCreate: populatedMessage.isCreate,
-        isDeliver: false,
-        isRead: false,
+        notRead: populatedMessage.notRead,
+        isRead: notReadUsers.length === 0, // if no one to read, mark as read
+      });
+
+      // send confirmation to sender only
+      socket.emit("message-sent", {
+        _id: populatedMessage._id,
+        content: populatedMessage.content,
+        sender: populatedMessage.sender,
+        chatRoom: roomId,
+        createdAt: populatedMessage.createdAt,
+        status: "sent",
       });
 
       console.log(`Message sent in room ${roomId} by user ${userId}`);
@@ -161,8 +180,8 @@ export const handleChatEvents = (io, socket) => {
     }
   });
 
-  // update message status (delivered/read)
-  socket.on("update-message-status", async ({ token, messageId, status }) => {
+  // mark message as read
+  socket.on("mark-message-read", async ({ token, messageId }) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const userId = decoded.id;
@@ -181,20 +200,92 @@ export const handleChatEvents = (io, socket) => {
         return; // the sender does not update the message status
       }
 
-      // update the status
-      if (status === "read" && !message.isRead) {
-        message.isRead = true;
+      // check if the user is in the notRead list
+      const userIndex = message.notRead.findIndex(
+        (id) => id.toString() === userId
+      );
+
+      if (userIndex !== -1) {
+        // remove user from notRead list
+        message.notRead.splice(userIndex, 1);
         await message.save();
 
-        // notify the sender that the message is read
-        io.to(message.chatRoom.toString()).emit("message-read", {
+        // notify all users in the room about the read status
+        socket.broadcast.to(message.chatRoom.toString()).emit("message-read", {
           messageId: message._id,
           readBy: userId,
+          notReadCount: message.notRead.length,
+          isFullyRead: message.notRead.length === 0,
         });
+
+        console.log(
+          `Message ${messageId} marked as read by user ${userId}. Remaining unread: ${message.notRead.length}`
+        );
       }
     } catch (err) {
-      console.error("Error updating message status:", err);
-      socket.emit("error", "Failed to update message status");
+      console.error("Error marking message as read:", err);
+      socket.emit("error", "Failed to mark message as read");
+    }
+  });
+
+  // mark multiple messages as read (e.g., when opening the chat)
+  socket.on("mark-messages-read", async ({ token, roomId }) => {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.id;
+
+      if (!userId || userId !== socket.userId) {
+        return socket.emit("error", "Unauthorized");
+      }
+
+      // update all messages in the room that are not read by the user
+      const result = await Message.updateMany(
+        {
+          chatRoom: roomId,
+          notRead: userId,
+          sender: { $ne: userId }, // exclude messages sent by the user
+        },
+        {
+          $pull: { notRead: userId },
+        }
+      );
+
+      if (result.modifiedCount > 0) {
+        // send notification to all users in the room
+        socket.broadcast.to(roomId).emit("messages-read", {
+          roomId: roomId,
+          readBy: userId,
+          count: result.modifiedCount,
+        });
+
+        console.log(
+          `User ${userId} marked ${result.modifiedCount} messages as read in room ${roomId}`
+        );
+      }
+    } catch (err) {
+      console.error("Error marking messages as read:", err);
+      socket.emit("error", "Failed to mark messages as read");
+    }
+  });
+
+  // get unread count for a room
+  socket.on("get-unread-count", async ({ token, roomId }) => {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.id;
+
+      const unreadCount = await Message.countDocuments({
+        chatRoom: roomId,
+        notRead: userId,
+      });
+
+      socket.emit("unread-count", {
+        roomId: roomId,
+        count: unreadCount,
+      });
+    } catch (err) {
+      console.error("Error getting unread count:", err);
+      socket.emit("error", "Failed to get unread count");
     }
   });
 
@@ -222,6 +313,52 @@ export const handleChatEvents = (io, socket) => {
     }
   });
 };
+
+async function getRoomParticipants(chatRoom) {
+  const participants = [];
+
+  if (chatRoom.type === "company_to_company") {
+    const connection = await PartnerConnection.findOne({
+      chatRoom: chatRoom._id,
+    });
+
+    if (connection) {
+      const users = await User.find({
+        company: { $in: [connection.recipient, connection.requester] },
+        role: { $in: [roles.COMPANY_ADMIN, roles.COMPANY_MANAGER] },
+      });
+
+      participants.push(...users);
+    }
+  } else if (chatRoom.type === "platform_to_company") {
+    const platformAdmins = await User.find({
+      role: roles.PLATFORM_ADMIN,
+    });
+
+    const company = await Company.findOne({ chatRoom: chatRoom._id });
+
+    if (company) {
+      const companyUsers = await User.find({
+        company: company._id,
+        role: { $in: [roles.COMPANY_ADMIN, roles.COMPANY_MANAGER] },
+      });
+
+      participants.push(...platformAdmins, ...companyUsers);
+    }
+  } else if (chatRoom.type === "in_company") {
+    const staff = await User.findOne({
+      chatRoom: chatRoom._id,
+    });
+    const users = await User.find({
+      company: staff.company,
+      role: { $in: [roles.COMPANY_ADMIN, roles.COMPANY_MANAGER] },
+    });
+
+    participants.push(...users, staff);
+  }
+
+  return participants.map((u) => u._id.toString());
+}
 
 // function to check send permission
 async function checkSendPermission(user, chatRoom) {
