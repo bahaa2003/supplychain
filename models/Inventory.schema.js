@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { inventoryStatus } from "../enums/inventoryStatus.enum.js";
+import { unitEnum } from "../enums/unit.enum.js";
 import { AppError } from "../utils/AppError.js";
 
 const { Schema } = mongoose;
@@ -7,10 +8,31 @@ const { Schema } = mongoose;
 // Inventory model for managing product stock levels across different locations
 const inventorySchema = new Schema(
   {
-    product: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
+    productName: {
+      type: String,
       required: true,
+      trim: true,
+    },
+    sku: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
+    unitPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    unit: {
+      type: String,
+      enum: unitEnum,
+      default: "piece",
+    },
+    category: String,
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     company: {
       type: Schema.Types.ObjectId,
@@ -20,7 +42,7 @@ const inventorySchema = new Schema(
     location: {
       type: Schema.Types.ObjectId,
       ref: "Location",
-      required: true,
+      // required: true,
     },
     onHand: {
       type: Number,
@@ -39,10 +61,8 @@ const inventorySchema = new Schema(
     },
     lastUpdated: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
-    // Used to link to an original supplier's product if this is a reseller's product
-    supplierInfo: [{ type: Schema.Types.ObjectId, ref: "Company" }],
   },
   {
     timestamps: true,
@@ -59,7 +79,6 @@ inventorySchema.virtual("available").get(function () {
 // Virtual for inventory status
 inventorySchema.virtual("status").get(function () {
   const available = this.onHand - this.reserved;
-  console.log("VIRTUAL DEBUG:", inventoryStatus);
   if (available <= 0) {
     return inventoryStatus.OUT_OF_STOCK;
   }
@@ -69,6 +88,14 @@ inventorySchema.virtual("status").get(function () {
   return inventoryStatus.IN_STOCK;
 });
 
+inventorySchema.index({ company: 1, productName: 1 }, { unique: true });
+
+inventorySchema.index({ company: 1, sku: 1 }, { unique: true });
+
+inventorySchema.index({ location: 1 });
+
+inventorySchema.index({ company: 1, location: 1, isActive: 1 });
+
 // Ensure reserved quantity does not exceed onHand quantity
 inventorySchema.pre("save", function (next) {
   if (this.reserved > this.onHand) {
@@ -76,6 +103,23 @@ inventorySchema.pre("save", function (next) {
       new AppError("Reserved quantity cannot exceed on-hand quantity.", 400)
     );
   }
+  this.lastUpdated = new Date();
   next();
 });
+
+// handle duplicated entry
+inventorySchema.post("save", function (error, doc, next) {
+  if (error.code === 11000) {
+    if (error.keyPattern?.sku) {
+      next(new AppError("Product SKU already exists for this company", 400));
+    } else if (error.keyPattern?.productName) {
+      next(new AppError("Product name already exists for this company", 400));
+    } else {
+      next(new AppError("Duplicate entry", 400));
+    }
+  } else {
+    next();
+  }
+});
+
 export default mongoose.model("Inventory", inventorySchema);

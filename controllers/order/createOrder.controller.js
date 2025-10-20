@@ -3,11 +3,10 @@ import Company from "../../models/Company.schema.js";
 import Order from "../../models/Order.schema.js";
 import { notificationType } from "../../enums/notificationType.enum.js";
 import createNotification from "../../services/notification.service.js";
-import Product from "../../models/Product.schema.js";
+import Inventory from "../../models/Inventory.schema.js";
 import PartnerConnection from "../../models/PartnerConnection.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { orderStatus } from "../../enums/orderStatus.enum.js";
-import Inventory from "../../models/Inventory.schema.js";
 
 export const createOrder = async (req, res, next) => {
   const { supplierId } = req.params;
@@ -51,7 +50,7 @@ export const createOrder = async (req, res, next) => {
   for (const item of items) {
     const { quantity } = item;
     // Check if buyer has this product
-    const buyerProduct = await Product.findOne({
+    const buyerProduct = await Inventory.findOne({
       sku: item.sku,
       company: buyerCompanyId,
       isActive: true,
@@ -76,7 +75,7 @@ export const createOrder = async (req, res, next) => {
     }
 
     // Check supplier product
-    const supplierProduct = await Product.findOne({
+    const supplierProduct = await Inventory.findOne({
       sku: item.sku,
       company: supplierId,
       isActive: true,

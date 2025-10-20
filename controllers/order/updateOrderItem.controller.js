@@ -1,5 +1,4 @@
 import Order from "../../models/Order.schema.js";
-import Product from "../../models/Product.schema.js";
 import Inventory from "../../models/Inventory.schema.js";
 import InventoryHistory from "../../models/InventoryHistory.schema.js";
 import { AppError } from "../../utils/AppError.js";
@@ -9,7 +8,6 @@ import { inventoryChangeType } from "../../enums/inventoryChangeType.enum.js";
 import { inventoryReferenceType } from "../../enums/inventoryReferenceType.enum.js";
 import orderStatusHistory from "../../models/OrderStatusHistory.schema.js";
 
-// Edit item quantity
 export const editOrderItem = async (req, res, next) => {
   const { orderId, itemId } = req.params;
   const { quantity } = req.body;
@@ -38,16 +36,10 @@ export const editOrderItem = async (req, res, next) => {
   if (order.status === "Submitted") {
     await validateProductAvailability(item.sku, order.supplier, quantity);
 
-    // Update inventory reservation
-    const supplierProduct = await Product.findOne({
+    const supplierInventory = await Inventory.findOne({
       sku: item.sku,
       company: order.supplier,
       isActive: true,
-    });
-
-    const supplierInventory = await Inventory.findOne({
-      product: supplierProduct._id,
-      company: order.supplier,
     });
 
     if (supplierInventory) {
@@ -63,7 +55,6 @@ export const editOrderItem = async (req, res, next) => {
       await InventoryHistory.create({
         inventory: supplierInventory._id,
         company: order.supplier,
-        product: supplierProduct._id,
         changeType:
           quantityDifference > 0
             ? inventoryChangeType.RESERVED
@@ -92,7 +83,6 @@ export const editOrderItem = async (req, res, next) => {
   const oldQuantity = item.quantity;
   order.items[itemIndex].quantity = quantity;
   order.items[itemIndex].subtotal = quantity * item.unitPrice;
-
   order.totalAmount = order.items.reduce((sum, item) => sum + item.subtotal, 0);
 
   // Add to history
@@ -102,6 +92,7 @@ export const editOrderItem = async (req, res, next) => {
     updatedBy: userId,
     notes: `Item ${item.sku} quantity changed from ${oldQuantity} to ${quantity}`,
   });
+
   await order.save();
   await order.populate([
     { path: "buyer", select: "companyName" },
@@ -145,49 +136,41 @@ export const removeOrderItem = async (req, res, next) => {
 
   // If order is SUBMITTED, release the reserved inventory
   if (order.status === "Submitted") {
-    const supplierProduct = await Product.findOne({
+    const supplierInventory = await Inventory.findOne({
       sku: removedItem.sku,
       company: order.supplier,
       isActive: true,
     });
 
-    if (supplierProduct) {
-      const supplierInventory = await Inventory.findOne({
-        product: supplierProduct._id,
+    if (supplierInventory) {
+      const beforeReserved = supplierInventory.reserved;
+      const beforeOnHand = supplierInventory.onHand;
+
+      supplierInventory.reserved -= removedItem.quantity;
+      await supplierInventory.save();
+
+      // Log inventory history
+      await InventoryHistory.create({
+        inventory: supplierInventory._id,
         company: order.supplier,
+        changeType: inventoryChangeType.UNRESERVED,
+        quantityChange: {
+          onHand: 0,
+          reserved: -removedItem.quantity,
+        },
+        before: {
+          onHand: beforeOnHand,
+          reserved: beforeReserved,
+        },
+        after: {
+          onHand: supplierInventory.onHand,
+          reserved: supplierInventory.reserved,
+        },
+        reason: `Order item ${removedItem.sku} removed from order`,
+        referenceType: inventoryReferenceType.ORDER,
+        referenceId: order._id,
+        performedBy: userId,
       });
-
-      if (supplierInventory) {
-        const beforeReserved = supplierInventory.reserved;
-        const beforeOnHand = supplierInventory.onHand;
-
-        supplierInventory.reserved -= removedItem.quantity;
-        await supplierInventory.save();
-
-        // Log inventory history
-        await InventoryHistory.create({
-          inventory: supplierInventory._id,
-          company: order.supplier,
-          product: supplierProduct._id,
-          changeType: inventoryChangeType.UNRESERVED,
-          quantityChange: {
-            onHand: 0,
-            reserved: -removedItem.quantity,
-          },
-          before: {
-            onHand: beforeOnHand,
-            reserved: beforeReserved,
-          },
-          after: {
-            onHand: supplierInventory.onHand,
-            reserved: supplierInventory.reserved,
-          },
-          reason: `Order item ${removedItem.sku} removed from order`,
-          referenceType: inventoryReferenceType.ORDER,
-          referenceId: order._id,
-          performedBy: userId,
-        });
-      }
     }
   }
 
@@ -238,25 +221,21 @@ export const addOrderItem = async (req, res, next) => {
     return next(new AppError("Item already exists in order", 400));
   }
 
-  // Validate buyer has this product
-  const buyerProduct = await Product.findOne({
+  const buyerInventory = await Inventory.findOne({
     sku,
     company: userCompanyId,
     isActive: true,
   });
-
-  if (!buyerProduct) {
+  if (!buyerInventory) {
     return next(new AppError(`Product ${sku} not found in your catalog`, 400));
   }
 
-  // Get supplier product
-  const supplierProduct = await Product.findOne({
+  const supplierInventory = await Inventory.findOne({
     sku,
     company: order.supplier,
     isActive: true,
   });
-
-  if (!supplierProduct) {
+  if (!supplierInventory) {
     return next(new AppError(`Product ${sku} not found at supplier`, 400));
   }
 
@@ -265,51 +244,42 @@ export const addOrderItem = async (req, res, next) => {
     await validateProductAvailability(sku, order.supplier, quantity);
 
     // Reserve inventory
-    const supplierInventory = await Inventory.findOne({
-      product: supplierProduct._id,
+    const beforeReserved = supplierInventory.reserved;
+    const beforeOnHand = supplierInventory.onHand;
+
+    supplierInventory.reserved += quantity;
+    await supplierInventory.save();
+
+    // Log inventory history
+    await InventoryHistory.create({
+      inventory: supplierInventory._id,
       company: order.supplier,
+      changeType: inventoryChangeType.RESERVED,
+      quantityChange: {
+        onHand: 0,
+        reserved: quantity,
+      },
+      before: {
+        onHand: beforeOnHand,
+        reserved: beforeReserved,
+      },
+      after: {
+        onHand: supplierInventory.onHand,
+        reserved: supplierInventory.reserved,
+      },
+      reason: `Order item ${sku} added to order`,
+      referenceType: inventoryReferenceType.ORDER,
+      referenceId: order._id,
+      performedBy: userId,
     });
-
-    if (supplierInventory) {
-      const beforeReserved = supplierInventory.reserved;
-      const beforeOnHand = supplierInventory.onHand;
-
-      supplierInventory.reserved += quantity;
-      await supplierInventory.save();
-
-      // Log inventory history
-      await InventoryHistory.create({
-        inventory: supplierInventory._id,
-        company: order.supplier,
-        product: supplierProduct._id,
-        changeType: inventoryChangeType.RESERVED,
-        quantityChange: {
-          onHand: 0,
-          reserved: quantity,
-        },
-        before: {
-          onHand: beforeOnHand,
-          reserved: beforeReserved,
-        },
-        after: {
-          onHand: supplierInventory.onHand,
-          reserved: supplierInventory.reserved,
-        },
-        reason: `Order item ${sku} added to order`,
-        referenceType: inventoryReferenceType.ORDER,
-        referenceId: order._id,
-        performedBy: userId,
-      });
-    }
   }
 
-  // Add new item
   const newItem = {
-    sku: supplierProduct.sku,
-    productName: supplierProduct.productName,
+    sku: supplierInventory.sku,
+    productName: supplierInventory.productName,
     quantity,
-    unitPrice: supplierProduct.unitPrice,
-    subtotal: quantity * supplierProduct.unitPrice,
+    unitPrice: supplierInventory.unitPrice,
+    subtotal: quantity * supplierInventory.unitPrice,
   };
 
   order.items.push(newItem);

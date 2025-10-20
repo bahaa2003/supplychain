@@ -6,15 +6,36 @@ import { AppError } from "../../utils/AppError.js";
 // Update inventory item (only if it belongs to the user's company)
 export const updateInventory = async (req, res, next) => {
   try {
-    const { inventryId } = req.params;
-    const { location, minimumThreshold, onHand, reserved, changeReason } =
-      req.body;
+    const { inventoryId } = req.params;
+    const {
+      location,
+      minimumThreshold,
+      onHand,
+      reserved,
+      changeReason,
+      productName,
+      sku,
+      ...updateData
+    } = req.body;
     const userCompanyId = req.user.company?._id || req.user.company;
     const inventory = await Inventory.findOne({
-      _id: inventryId,
+      _id: inventoryId,
       company: userCompanyId,
     });
     if (!inventory) return next(new AppError("Inventory not found", 404));
+
+    if (productName || sku) {
+      const isDuplicate = await inventory.findOne({
+        $or: [{ productName }, { sku }],
+        company: companyId,
+        _id: { $ne: inventoryId },
+      });
+      if (isDuplicate && isDuplicate.productName === productName)
+        return next(new AppError("Product with this name already exists", 400));
+      if (isDuplicate && isDuplicate.sku === sku)
+        return next(new AppError("Product with this SKU already exists", 400));
+      updateData.productName = productName;
+    }
     if (location) inventory.location = location;
     if (minimumThreshold) inventory.minimumThreshold = minimumThreshold;
     let inventoryHistory;
@@ -25,8 +46,7 @@ export const updateInventory = async (req, res, next) => {
       inventoryHistory = await InventoryHistory.create({
         performedBy: req.user._id,
         company: userCompanyId,
-        inventory: inventryId,
-        product: inventory.product,
+        inventory: inventoryId,
         changeType: inventoryChangeType.ADJUSTMENT,
         changeReason: changeReason || "Manual adjustment quantity",
         quantityChange: {
@@ -45,7 +65,8 @@ export const updateInventory = async (req, res, next) => {
     }
     inventory.onHand = onHand;
     inventory.reserved = reserved;
-    inventory.save();
+    inventory.set(updateData);
+    await inventory.save();
     return res
       .status(200)
       .json({ status: "success", data: { inventory, inventoryHistory } });

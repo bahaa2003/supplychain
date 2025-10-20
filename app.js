@@ -9,7 +9,6 @@ import userRoutes from "./routes/users.routes.js";
 import partnerConnectionRoutes from "./routes/partnerConnection.routes.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
 import locationRoutes from "./routes/location.routes.js";
-import productRoutes from "./routes/product.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
@@ -56,7 +55,6 @@ app.use(
 );
 app.use("/api/inventory", protectedRoute, checkEmailVerified, inventoryRoutes);
 app.use("/api/location", protectedRoute, checkEmailVerified, locationRoutes);
-app.use("/api/product", protectedRoute, checkEmailVerified, productRoutes);
 app.use("/api/invoice", protectedRoute, invoiceRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/messages", protectedRoute, checkEmailVerified, messageRoutes);

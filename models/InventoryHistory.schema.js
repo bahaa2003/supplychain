@@ -18,10 +18,6 @@ const inventoryHistorySchema = new Schema(
       ref: "Company",
       required: true,
     },
-    product: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-    },
     changeType: {
       type: String,
       enum: inventoryChangeTypeEnum,

@@ -1,7 +1,6 @@
 import Order from "../../models/Order.schema.js";
 import Inventory from "../../models/Inventory.schema.js";
 import InventoryHistory from "../../models/InventoryHistory.schema.js";
-import Product from "../../models/Product.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { INVENTORY_IMPACT, orderStatus } from "../../enums/orderStatus.enum.js";
 import { notificationType } from "../../enums/notificationType.enum.js";
@@ -135,46 +134,27 @@ const handleInventoryImpact = async (
   for (const item of order.items) {
     // Supplier inventory impact
     if (impact.supplier) {
-      const supplierProduct = await Product.findOne({
+      const supplierInventory = await Inventory.findOne({
         sku: item.sku,
         company: order.supplier,
       });
 
-      if (supplierProduct) {
-        const supplierInventory = await Inventory.findOne({
-          product: supplierProduct._id, // Fixed: use product ID instead of SKU
-          company: order.supplier,
-        });
-
-        if (supplierInventory) {
-          await updateInventory(
-            supplierInventory,
-            item,
-            impact.supplier,
-            userId,
-            order,
-            `Order ${newStatus.toLowerCase()}`
-          );
-        }
+      if (supplierInventory) {
+        await updateInventory(
+          supplierInventory,
+          item,
+          impact.supplier,
+          userId,
+          order,
+          `Order ${newStatus.toLowerCase()}`
+        );
       }
     }
 
     // Buyer inventory impact
     if (impact.buyer) {
-      const buyerProduct = await Product.findOne({
-        sku: item.sku,
-        company: order.buyer,
-      });
-
-      if (!buyerProduct) {
-        throw new AppError(
-          `Product ${item.sku} not found in buyer catalog`,
-          404
-        );
-      }
-
       const buyerInventory = await Inventory.findOne({
-        product: buyerProduct._id,
+        sku: item.sku,
         company: order.buyer,
       });
 
@@ -207,11 +187,6 @@ const updateInventory = async (
 ) => {
   if (!inventory) {
     throw new AppError(`Inventory not found for SKU ${item.sku}`, 404);
-  }
-
-  const product = await Product.findById(inventory.product);
-  if (!product) {
-    throw new AppError(`Product not found for SKU ${item.sku}`, 404);
   }
 
   const before = {
@@ -253,7 +228,6 @@ const updateInventory = async (
   await InventoryHistory.create({
     inventory: inventory._id,
     company: inventory.company,
-    product: product._id,
     changeType: getChangeType(impact),
     quantityChange,
     before,

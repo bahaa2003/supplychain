@@ -14,11 +14,8 @@ export const getInventoryById = async (req, res, next) => {
     })
       .select({
         __v: false,
-        company: false,
-        location: false,
-        product: false,
       })
-      .populate("product company location");
+      .populate("company location");
     if (!inventory) return next(new AppError("Inventory not found", 404));
 
     const inventoryHistory = await InventoryHistory.find({

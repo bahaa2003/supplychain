@@ -1,23 +1,22 @@
 import Inventory from "../../models/Inventory.schema.js";
+import { AppError } from "../../utils/AppError.js";
 
 // Get all inventory items for the authenticated user's company
 export const getAllInventory = async (req, res, next) => {
   try {
-    const companyId = req.user.company?._id || req.user.company;
+    const companyId =
+      req.query.companyId || req.user.company?._id || req.user.company;
+    const { locationId } = req.query;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
-
+    const filter = { company: companyId };
+    if (locationId) {
+      filter.location = locationId;
+    }
     const [inventory, total] = await Promise.all([
-      Inventory.find(
-        { company: companyId },
-        { __v: false, supplierInfo: false }
-      )
+      Inventory.find(filter, { __v: false })
         .populate([
-          {
-            path: "product",
-            select: "productName sku unitPrice unit category isActive _id ",
-          },
           {
             path: "company",
             select: "companyName _id",
@@ -29,7 +28,7 @@ export const getAllInventory = async (req, res, next) => {
         ])
         .skip(skip)
         .limit(limit),
-      Inventory.countDocuments({ company: companyId }),
+      Inventory.countDocuments(filter),
     ]);
 
     return res.status(200).json({

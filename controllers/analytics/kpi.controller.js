@@ -1,4 +1,3 @@
-import Product from "../../models/Product.schema.js";
 import Inventory from "../../models/Inventory.schema.js";
 import Order from "../../models/Order.schema.js";
 import Company from "../../models/Company.schema.js";
@@ -13,17 +12,11 @@ export const getCompanyKPIs = async (req, res, next) => {
     const company = await Company.findById(companyId);
     if (!company) return next(new AppError("Company not found", 404));
 
-    // Products
-    const products = await Product.find({ company: companyId });
-
     // Inventory + Inventory Value
     const inventories = await Inventory.find({ company: companyId });
     let inventoryValue = 0;
     inventories.forEach((inv) => {
-      const product = products.find((p) => p._id.equals(inv.product));
-      if (product) {
-        inventoryValue += inv.onHand * product.unitPrice;
-      }
+      inventoryValue += inv.onHand * product.unitPrice;
     });
 
     //  Orders + Ordered Value
@@ -37,7 +30,7 @@ export const getCompanyKPIs = async (req, res, next) => {
     const remainingBudget = company.budget - orderedValue;
 
     //  Count Stats
-    const productCount = products.length;
+    const productCount = inventories.length;
     const orderCount = orders.length;
 
     //  Partner Count

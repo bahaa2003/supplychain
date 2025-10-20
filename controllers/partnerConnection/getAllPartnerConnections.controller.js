@@ -68,7 +68,27 @@ export const getAllPartnerConnections = async (req, res, next) => {
 
     console.log("Connections:", connections);
     if (connections && connections.length > 0) {
-      return res.status(200).json({ status: "success", data: connections });
+      return res.status(200).json({
+        status: "success",
+        data: connections.map((connection) => {
+          const connectionObj = connection.toObject();
+          const { requester, recipient, ...restOfConnection } = connectionObj;
+
+          if (requester._id.toString() === companyId.toString()) {
+            return {
+              ...restOfConnection,
+              requesterRole: "requester",
+              partner: recipient,
+            };
+          } else {
+            return {
+              ...restOfConnection,
+              requesterRole: "recipient",
+              partner: requester,
+            };
+          }
+        }),
+      });
     } else {
       return res
         .status(404)
