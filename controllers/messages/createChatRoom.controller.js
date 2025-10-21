@@ -1,5 +1,5 @@
 import Message from "../../models/Message.schema.js";
-import ChatRoom from "../../models/chatRoom.schema.js";
+import ChatRoom from "../../models/ChatRoom.schema.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const createChatRoom = async (req, res, next) => {

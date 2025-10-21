@@ -14,7 +14,6 @@ const messageSchema = new Schema(
       required: true,
     },
     content: { type: String, required: true },
-    notRead: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

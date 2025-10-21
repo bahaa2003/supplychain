@@ -4,7 +4,7 @@ import {
   partnerConnectionStatusEnum,
   terminationTypeEnum,
 } from "../enums/partnerConnectionStatus.enum.js";
-import ChatRoom from "./chatRoom.schema.js";
+import ChatRoom from "./ChatRoom.schema.js";
 const { Schema } = mongoose;
 
 const partnerConnectionSchema = new Schema(

@@ -8,7 +8,6 @@ const chatRoomSchema = new Schema(
       enum: ["company_to_company", "platform_to_company", "in_company"],
       required: true,
     },
-    participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

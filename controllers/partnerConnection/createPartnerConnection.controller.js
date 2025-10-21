@@ -1,6 +1,6 @@
 import PartnerConnection from "../../models/PartnerConnection.schema.js";
 import Company from "../../models/Company.schema.js";
-import ChatRoom from "../../models/chatRoom.schema.js";
+import ChatRoom from "../../models/ChatRoom.schema.js";
 import User from "../../models/User.schema.js";
 import { AppError } from "../../utils/AppError.js";
 import { notificationType } from "../../enums/notificationType.enum.js";

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import ChatRoom from "../models/chatRoom.schema.js";
+import ChatRoom from "../models/ChatRoom.schema.js";
 import Company from "../models/Company.schema.js";
 import User from "../models/User.schema.js";
 import PartnerConnection from "../models/PartnerConnection.schema.js";

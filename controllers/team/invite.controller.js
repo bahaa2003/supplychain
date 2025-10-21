@@ -1,5 +1,5 @@
 import User from "../../models/User.schema.js";
-import ChatRoom from "../../models/chatRoom.schema.js";
+import ChatRoom from "../../models/ChatRoom.schema.js";
 import jwt from "jsonwebtoken";
 import { AppError } from "../../utils/AppError.js";
 import { roleEnum } from "../../enums/role.enum.js";
