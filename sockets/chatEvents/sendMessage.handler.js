@@ -9,7 +9,7 @@ import { partnerConnectionStatus } from "../../enums/partnerConnectionStatus.enu
 import jwt from "jsonwebtoken";
 
 export default function sendMessageHandler(io, socket) {
-  return async ({ token, roomId, content }) => {
+  return async ({ token, messageId, roomId, content }) => {
     try {
       console.log(
         "send-message event received for room:",
@@ -25,7 +25,7 @@ export default function sendMessageHandler(io, socket) {
       const userId = decoded.id;
 
       if (!content?.trim()) {
-        return socket.emit("error", "Message content is required");
+        return socket.emit("error", messageId, "Message content is required");
       }
 
       // get user data and room data
@@ -33,7 +33,7 @@ export default function sendMessageHandler(io, socket) {
       const chatRoom = await ChatRoom.findById(roomId);
 
       if (!user || !chatRoom) {
-        return socket.emit("error", "User or room not found");
+        return socket.emit("error", messageId, "User or room not found");
       }
 
       console.log(`User ${userId} sending message to room ${roomId}`);
@@ -43,6 +43,7 @@ export default function sendMessageHandler(io, socket) {
       if (!canSend) {
         return socket.emit(
           "error",
+          messageId,
           "You don't have permission to send messages in this room"
         );
       }
@@ -87,7 +88,7 @@ export default function sendMessageHandler(io, socket) {
       socket.emit("message-sent", {
         _id: populatedMessage._id,
         content: populatedMessage.content,
-        sender: populatedMessage.sender,
+        messageId,
         chatRoom: roomId,
         createdAt: populatedMessage.createdAt,
         status: "sent",

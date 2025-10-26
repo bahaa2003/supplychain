@@ -1,6 +1,7 @@
 import { body } from "express-validator";
 import mongoose from "mongoose";
 import { roleEnum } from "../enums/role.enum.js";
+import { isValidObjectId } from "../utils/mongoose.js";
 
 export const userValidator = () => [
   body("name")
@@ -24,13 +25,12 @@ export const userValidator = () => [
     .withMessage(
       "Password must be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol"
     ),
-  body("role").optional().isIn(roleEnum).withMessage("Invalid role"),
+  body("role")
+    .optional()
+    .isIn(roleEnum)
+    .withMessage(`Role must be one of: ${roleEnum.join(", ")}`),
   body("company")
     .optional()
-    .custom((value) => {
-      if (value && !mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Company must be a valid MongoDB ObjectId");
-      }
-      return true;
-    }),
+    .custom(isValidObjectId)
+    .withMessage("Company must be a valid MongoDB ObjectId"),
 ];

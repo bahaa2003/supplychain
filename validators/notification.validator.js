@@ -1,8 +1,8 @@
 import { body } from "express-validator";
-import mongoose from "mongoose";
 import { notificationTypeEnum } from "../enums/notificationType.enum.js";
 import { notificationRelatedEnum } from "../enums/notificationRelated.enum.js";
 import { notificationPriorityEnum } from "../enums/notificationPriority.enum.js";
+import { isValidObjectId } from "../utils/mongoose.js";
 
 export const notificationValidator = () => [
   body("type")
@@ -18,12 +18,8 @@ export const notificationValidator = () => [
   body("recipient")
     .notEmpty()
     .withMessage("Recipient is required")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Recipient must be a valid MongoDB ObjectId");
-      }
-      return true;
-    }),
+    .custom(isValidObjectId)
+    .withMessage("Recipient must be a valid MongoDB ObjectId"),
   body("title")
     .notEmpty()
     .withMessage("Title is required")
@@ -42,12 +38,8 @@ export const notificationValidator = () => [
     ),
   body("relatedId")
     .optional()
-    .custom((value) => {
-      if (value && !mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("relatedId must be a valid MongoDB ObjectId");
-      }
-      return true;
-    }),
+    .custom(isValidObjectId)
+    .withMessage("relatedId must be a valid MongoDB ObjectId"),
   body("priority")
     .optional()
     .isIn(notificationPriorityEnum)
@@ -93,7 +85,7 @@ export const bulkNotificationValidator = () => [
     .isArray()
     .withMessage("Recipients must be an array")
     .custom((value) => {
-      if (!value.every((id) => mongoose.Types.ObjectId.isValid(id))) {
+      if (!value.every((id) => isValidObjectId(id))) {
         throw new Error("All recipients must be valid MongoDB ObjectIds");
       }
       return true;

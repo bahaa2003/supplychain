@@ -1,9 +1,5 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import multer from "multer";
 import ImageKit from "imagekit";
-import crypto from "crypto";
 import { AppError } from "../utils/AppError.js";
 
 const storage = multer.memoryStorage();
@@ -12,7 +8,7 @@ export const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    console.log('File being filtered:', file);
+    console.log("File being filtered:", file);
     if (
       file.mimetype.startsWith("image") ||
       file.mimetype === "application/pdf"
@@ -25,14 +21,18 @@ export const upload = multer({
 });
 
 const imagekit = new ImageKit({
-  publicKey: "public_ctII80wB+boJTchAokYWvBZywhw=",
-  privateKey: "private_ySU3Xlapkk6ynAs6gioPveREA+M=",
-  urlEndpoint: "https://ik.imagekit.io/bba6fwtkfo",
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-export const uploadToImageKit = async (file, folder = "company_documents", companyName = "company") => {
-try {
-    const randomNum = Math.floor(1000 + Math.random() * 9000); 
+export const uploadToImageKit = async (
+  file,
+  folder = "company_documents",
+  companyName = "company"
+) => {
+  try {
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
     const timestamp = Date.now();
     const safeCompanyName = companyName.replace(/\s+/g, "_").toLowerCase();
     const ext = file.originalname.split(".").pop();

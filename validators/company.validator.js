@@ -1,5 +1,9 @@
 import { body } from "express-validator";
-import mongoose from "mongoose";
+import {
+  companyIndustriesEnum,
+  companySizesEnum,
+} from "../enums/company.enum.js";
+import { isValidObjectId } from "../utils/mongoose.js";
 
 export const companyValidator = () => [
   body("companyName")
@@ -11,30 +15,18 @@ export const companyValidator = () => [
     .withMessage("Company name must be between 2 and 50 characters"),
   body("industry")
     .optional()
-    .isString()
-    .withMessage("Industry must be a string")
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Industry must be between 2 and 50 characters"),
+    .isIn(companyIndustriesEnum)
+    .withMessage(
+      `Industry must be one of: ${companyIndustriesEnum.join(", ")}`
+    ),
   body("size")
     .optional()
-    .isString()
-    .withMessage("Size must be a string")
-    .isLength({ min: 1, max: 20 })
-    .withMessage("Size must be between 1 and 20 characters"),
+    .isIn(companySizesEnum)
+    .withMessage(`Size must be one of: ${companySizesEnum.join(", ")}`),
   body("location")
     .optional()
-    .isString()
-    .withMessage("Location must be a string")
-    .isLength({ min: 2, max: 100 })
-    .withMessage("Location must be between 2 and 100 characters"),
-  body("createdBy")
-    .optional()
-    .custom((value) => {
-      if (value && !mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("createdBy must be a valid user ID");
-      }
-      return true;
-    }),
+    .custom(isValidObjectId)
+    .withMessage("Location must be a valid MongoDB ObjectId"),
   body("isApproved")
     .optional()
     .isBoolean()

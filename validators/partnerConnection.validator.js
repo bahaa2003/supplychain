@@ -1,33 +1,13 @@
 import { body, param } from "express-validator";
-import mongoose from "mongoose";
-
-const partnershipTypes = [
-  "Supplier",
-  "Manufacturer",
-  "Logistics",
-  "Warehouse",
-  "Retailer",
-  "Other",
-];
+import { isValidObjectId } from "../utils/mongoose.js";
+import { partnerConnectionStatusEnum } from "../enums/partnerConnectionStatus.enum.js";
 
 export const createPartnerConnectionValidator = () => [
   param("recipientId")
     .notEmpty()
     .withMessage("Recipient company ID is required")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Invalid recipient company ID");
-      }
-      return true;
-    }),
-  body("partnershipType")
-    .optional()
-    .notEmpty()
-    .withMessage("Partnership type is required")
-    .isIn(partnershipTypes)
-    .withMessage(
-      `Partnership type must be one of: ${partnershipTypes.join(", ")}`
-    ),
+    .custom(isValidObjectId)
+    .withMessage("Invalid recipient company ID"),
   body("notes")
     .optional()
     .isString()
@@ -40,18 +20,9 @@ export const updatePartnerConnectionStatusValidator = () => [
   body("status")
     .notEmpty()
     .withMessage("Status is required")
-    .isIn([
-      "Pending",
-      "Cancelled",
-      "Active",
-      "Rejected",
-      "Inactive",
-      "Completed",
-      "Expired",
-      "Terminated",
-    ])
+    .isIn(partnerConnectionStatusEnum)
     .withMessage(
-      "Status must be one of: Pending, Cancelled, Active, Rejected, Inactive, Completed, Expired, Terminated"
+      `Status must be one of: ${partnerConnectionStatusEnum.join(", ")}`
     ),
   body("rejectionReason")
     .optional()

@@ -1,5 +1,4 @@
 import { body } from "express-validator";
-import mongoose from "mongoose";
 import { locationTypeEnum } from "../enums/locationType.enum.js";
 
 export const locationValidator = () => [
@@ -14,7 +13,9 @@ export const locationValidator = () => [
     .notEmpty()
     .withMessage("Location type is required")
     .isIn(locationTypeEnum)
-    .withMessage("Invalid location type"),
+    .withMessage(
+      `Location type must be one of: ${locationTypeEnum.join(", ")}`
+    ),
   body("address.street")
     .optional()
     .isString()

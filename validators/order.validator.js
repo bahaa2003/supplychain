@@ -1,20 +1,22 @@
 import { body, param } from "express-validator";
 import { orderStatusEnum } from "../enums/orderStatus.enum.js";
+import { isValidObjectId } from "../utils/mongoose.js";
 
 export const createOrderValidator = () => [
   param("supplierId")
     .notEmpty()
     .withMessage("Supplier ID is required")
-    .isMongoId()
+    .custom(isValidObjectId)
     .withMessage("Supplier ID must be a valid MongoDB ObjectId"),
   body("items")
     .isArray({ min: 1 })
     .withMessage("At least one item is required"),
   body("items.*.sku").notEmpty().withMessage("Product sku is required"),
   body("items.*.quantity")
-    .isInt({ min: 1 })
-    .withMessage("Quantity must be at least 1")
-    .toInt(),
+    .notEmpty()
+    .withMessage("Quantity is required")
+    .isNumeric({ gt: 0 })
+    .withMessage("Quantity must be greater than 0"),
   body("notes")
     .optional()
     .isString()
@@ -59,21 +61,25 @@ export const addOrderItemValidator = () => [
     .trim(),
 
   body("quantity")
-    .isInt({ min: 1 })
-    .withMessage("Quantity must be a positive integer"),
+    .notEmpty()
+    .withMessage("Quantity is required")
+    .isNumeric({ gt: 0 })
+    .withMessage("Quantity must be greater than 0"),
 ];
 
 export const editOrderItemValidator = () => [
-  param("orderId").isMongoId().withMessage("Invalid order ID"),
+  param("orderId").custom(isValidObjectId).withMessage("Invalid order ID"),
 
-  param("itemId").isMongoId().withMessage("Invalid item ID"),
+  param("itemId").custom(isValidObjectId).withMessage("Invalid item ID"),
 
   body("quantity")
-    .isInt({ min: 1 })
-    .withMessage("Quantity must be a positive integer"),
+    .notEmpty()
+    .withMessage("Quantity is required")
+    .isNumeric({ gt: 0 })
+    .withMessage("Quantity must be greater than 0"),
 ];
 
 export const removeOrderItemValidator = () => [
-  param("orderId").isMongoId().withMessage("Invalid order ID"),
-  param("itemId").isMongoId().withMessage("Invalid item ID"),
+  param("orderId").custom(isValidObjectId).withMessage("Invalid order ID"),
+  param("itemId").custom(isValidObjectId).withMessage("Invalid item ID"),
 ];

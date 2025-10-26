@@ -5,19 +5,42 @@ import { roles } from "../../enums/role.enum.js";
 import { partnerConnectionStatus } from "../../enums/partnerConnectionStatus.enum.js";
 import jwt from "jsonwebtoken";
 
-export default function joinRoomsHandler(io, socket) {
+export default function joinChatAndNotificationRoomsHandler(io, socket) {
   return async ({ token }) => {
-    console.log("join-rooms event received");
+    console.log("join-chat-and-notification-rooms event received");
     try {
       // verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (!token) {
+        socket.emit("error", "Token is required");
+        socket.disconnect();
+        return;
+      }
+      let decoded;
+      try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+      } catch (err) {
+        console.error("Invalid token" + err.message);
+        socket.emit("error", "Invalid token: " + err.message);
+        socket.disconnect();
+        return;
+      }
       const userId = decoded.id;
 
       // get user data with company
       const user = await User.findById(userId).populate("company");
       if (!user) {
-        return socket.emit("error", "User not found");
+        socket.emit("error", "User not found");
+        socket.disconnect();
+        return;
       }
+
+      // join notification room
+      const notificationRoom = `notification-${userId}`;
+      socket.join(notificationRoom);
+      socket.userId = userId;
+      console.log(
+        `Registered user ${userId} on notification room socket ${notificationRoom}`
+      );
 
       const roomsToJoin = [];
 
@@ -83,8 +106,10 @@ export default function joinRoomsHandler(io, socket) {
       console.log(`User ${userId} joined rooms:`, roomsToJoin);
       socket.emit("roomsJoined", { rooms: roomsToJoin });
     } catch (err) {
-      console.error("Error joining rooms:", err);
+      console.error("Error joining rooms: " + err.message);
       socket.emit("error", "Failed to join rooms");
+      socket.disconnect();
+      return;
     }
   };
 }

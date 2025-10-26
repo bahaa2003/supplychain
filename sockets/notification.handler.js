@@ -28,7 +28,3 @@ export const createAndEmitNotification = async (type, data, recipients) => {
     }
   }
 };
-
-export const handleNotificationEvents = (io, socket) => {
-  // event handlers for notifications e.g., mark as read, fetch notifications, etc.
-};

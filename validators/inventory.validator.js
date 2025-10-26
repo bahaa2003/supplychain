@@ -1,18 +1,38 @@
 import { body } from "express-validator";
 import mongoose from "mongoose";
 import { unitEnum } from "../enums/unit.enum.js";
-
+import { isValidObjectId } from "../utils/mongoose.js";
 export const createinventoryValidator = () => [
   body("productName")
-    .isString()
     .notEmpty()
-    .withMessage("Product name is required."),
-  body("sku").isString().notEmpty().withMessage("SKU is required."),
+    .withMessage("Product name is required.")
+    .isString()
+    .withMessage("Product name must be a string")
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Product name must be between 2 and 50 characters"),
+  body("sku")
+    .notEmpty()
+    .withMessage("SKU is required.")
+    .isString()
+    .withMessage("SKU must be a string")
+    .isLength({ min: 2, max: 50 })
+    .withMessage("SKU must be between 2 and 50 characters"),
   body("unitPrice")
+    .notEmpty()
+    .withMessage("Unit price is required.")
     .isFloat({ gte: 0 })
     .withMessage("Unit price must be a non-negative number."),
-  body("unit").isIn(unitEnum).withMessage("Invalid unit."),
-  body("category").optional().isString(),
+  body("unit")
+    .notEmpty()
+    .withMessage("Unit is required.")
+    .isIn(unitEnum)
+    .withMessage(`Unit must be one of: ${unitEnum.join(", ")}`),
+  body("category")
+    .optional()
+    .isString()
+    .withMessage("Category must be a string")
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Category must be between 2 and 50 characters"),
   body("onHand")
     .optional()
     .isNumeric()
@@ -23,7 +43,7 @@ export const createinventoryValidator = () => [
     .withMessage("Minimum threshold must be a number"),
   body("location")
     .optional()
-    .custom((value) => mongoose.isValidObjectId(value))
+    .custom(isValidObjectId)
     .withMessage("Invalid product ID in items."),
 ];
 
@@ -31,18 +51,29 @@ export const updateInventoryValidator = () => [
   body("productName")
     .optional()
     .isString()
-    .notEmpty()
-    .withMessage("Product name is required."),
+    .withMessage("Product name must be a string"),
   body("sku").optional().isString().withMessage("SKU must be string."),
   body("unitPrice")
     .optional()
     .isFloat({ gte: 0 })
     .withMessage("Unit price must be a non-negative number."),
-  body("unit").optional().isIn(unitEnum).withMessage("Invalid unit."),
-  body("description").optional().isString(),
-  body("category").optional().isString(),
-  body("isActive").optional().isBoolean(),
-  body(["quantity"])
+  body("unit")
+    .optional()
+    .isIn(unitEnum)
+    .withMessage(`Unit must be one of: ${unitEnum.join(", ")}`),
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Description must be a string"),
+  body("category")
+    .optional()
+    .isString()
+    .withMessage("Category must be a string"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be boolean"),
+  body("quantity")
     .not()
     .exists()
     .withMessage(
@@ -50,9 +81,7 @@ export const updateInventoryValidator = () => [
     ),
   body("location")
     .optional()
-    .isMongoId()
-    .withMessage("Location must be a valid ObjectId")
-    .custom((value) => isValidObjectId(value))
+    .custom(isValidObjectId)
     .withMessage("Invalid product ID in items."),
   body("minimumThreshold")
     .optional()
