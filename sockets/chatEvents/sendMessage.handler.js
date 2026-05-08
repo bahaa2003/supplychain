@@ -1,5 +1,5 @@
 import Message from "../../models/Message.schema.js";
-import ChatRoom from "../../models/ChatRoom.schema.js";
+import ChatRoom from "../../models/chatRoom.schema.js";
 import ChatRoomStatus from "../../models/ChatRoomStatus.schema.js";
 import User from "../../models/User.schema.js";
 import Company from "../../models/Company.schema.js";

@@ -9,7 +9,7 @@ import { uploadToImageKit } from "../../middlewares/upload.middleware.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import ChatRoom from "../../models/ChatRoomStatus.schema.js";
+import ChatRoom from "../../models/chatRoom.schema.js";
 
 const addDays = (date, days) => {
   const result = new Date(date);
